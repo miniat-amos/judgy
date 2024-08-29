@@ -1,0 +1,53 @@
+##########################################################
+#                                                        #
+# Gitignore for the Judgy Programming Competition Web    #
+# Application                                            #
+#                                                        #  
+# *We decided on a white listing apporach for this file* #
+##########################################################
+
+########################################
+#                                      #
+#          Root of file path           #
+#                                      #
+########################################
+
+# Include the root of the project file 
+!/
+
+# Exclude everything inside of project
+/*
+
+########################################
+#                                      #
+#               Judgy App              #
+#                                      #
+########################################
+!judgy/
+
+########################################
+#                                      #
+#   Main Django files and directories  #
+#                                      #
+########################################
+!progcomp/
+!manage.py
+
+########################################
+#                                      #
+#                 Misc.                #
+#                                      #
+########################################
+
+# Requirements files
+!requirements.in
+!requirements.txt
+
+# Docker files
+!Dockerfile
+!docker-compose.yml
+
+**/__pycache__
+**/migrations
+!README.md
+!.gitignore
