@@ -2,7 +2,7 @@
 #                                                        #
 # Gitignore for the Judgy Programming Competition Web    #
 # Application                                            #
-#                                                        #  
+#                                                        #
 # *We decided on a white listing apporach for this file* #
 ##########################################################
 
@@ -12,7 +12,7 @@
 #                                      #
 ########################################
 
-# Include the root of the project file 
+# Include the root of the project file
 !/
 
 # Exclude everything inside of project
@@ -51,3 +51,4 @@
 **/migrations
 !README.md
 !.gitignore
+!.env-example

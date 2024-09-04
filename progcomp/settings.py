@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': config('MYSQL_DATABASE'),
         'USER': config('MYSQL_USER'),
         'PASSWORD': config('MYSQL_PASSWORD'),
-        'HOST': '127.0.0.1',  # Use 'db' as default from .env
+        'HOST': config('MYSQL_URL'),  
         'PORT': '3306', 
     }
 }
