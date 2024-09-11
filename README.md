@@ -28,15 +28,23 @@
 
 ---
 
+## Django Basic Commands
+
+### `python3 manage.py runsever`
+
+- Starts the development server.
+
+---
+
 ## Django Database Migrations Commands
 
 ### `python3 manage.py makemigrations`
 
-- Use this after you make changes to your models. This creates migrations files which are human readable formats of the changes you are making.
+- Generates new database migration files based on model changes.
 
 ### `python3 manage.py migrate`
 
-- Use this after running makemigrations to actually apply the changes
+- Applies database migrations to synchronize the database schema.
 
 ---
 
