@@ -51,4 +51,4 @@
 **/migrations
 !README.md
 !.gitignore
-!.env-example
+!.env.example
