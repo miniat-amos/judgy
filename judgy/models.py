@@ -1,5 +1,18 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+from .managers import UserManager
 
-class TestTable(models.Model):
-    test_id = models.BigAutoField(primary_key=True)
-    test_name = models.CharField(max_length=200, default='Test')
+class User(AbstractUser):
+    '''
+    User model where email is the unique identifier for authentication instead of username.
+    '''
+    username = None
+    email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
