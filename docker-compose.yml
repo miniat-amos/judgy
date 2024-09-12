@@ -4,7 +4,7 @@ services:
     container_name: judgy_mysql
     restart: always
     volumes:
-      - judgy_data:/var/lib/mysql
+      - data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
