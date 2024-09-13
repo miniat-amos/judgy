@@ -30,7 +30,7 @@
 
 ## Django Basic Commands
 
-### `python3 manage.py runsever`
+### `python3 manage.py runserver`
 
 - Starts the development server.
 
