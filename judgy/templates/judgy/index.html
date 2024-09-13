@@ -1,7 +1,9 @@
-{% extends "judgy/base.html" %}
+{% extends 'judgy/base.html' %}
 
 {% block main %}
 
-<h1 class="text-center">judgy</h1>
+<h1 class="text-center">
+  {{ user.email|default:'judgy' }}
+</h1>
 
 {% endblock %}

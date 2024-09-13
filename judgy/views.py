@@ -1,5 +1,19 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from .forms import AuthenticationForm
 
-def home(request):
+def home_view(request):
     return render(request, 'judgy/index.html')
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('judgy:home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'judgy/login.html', { 'form': form })
+
+def register_view(request):
+    pass
