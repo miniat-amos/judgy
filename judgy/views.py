@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
 from .forms import AuthenticationForm
 
@@ -14,6 +14,10 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, 'judgy/login.html', { 'form': form })
+
+def logout_view(request):
+    logout(request)
+    return redirect('judgy:home')
 
 def register_view(request):
     pass
