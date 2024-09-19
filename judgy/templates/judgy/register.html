@@ -1,0 +1,70 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}Registration{% endblock %}
+
+{% block main %}
+
+{% for errors in form.errors.values %}
+  {% for error in errors %}
+    <div
+      class="alert alert-danger alert-dismissible fade fixed-top show text-center"
+      role="alert"
+    >
+      {{ error }}
+      <button class="btn btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+<div class="align-items-center d-flex justify-content-center vh-100 vw-100">
+  <div class="p-5 rounded text-center">
+    <form method="post">
+      {% csrf_token %}
+
+      <h2>Create Account</h2>
+
+      <div class="my-3">
+        <div class="row">
+          <div class="col">
+            <div class="form-floating">
+              {{ form.first_name }}
+              <label for="first_name">First Name</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              {{ form.last_name }}
+              <label for="last_name">Last Name</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="my-3">
+        <div class="form-floating">
+          {{ form.email }}
+          <label for="email">Email Address</label>
+        </div>
+      </div>
+
+      <div class="my-3">
+        <div class="form-floating">
+          {{ form.password1 }}
+          <label for="password1">Password</label>
+        </div>
+      </div>
+
+      <div class="my-3">
+        <div class="form-floating">
+          {{ form.password2 }}
+          <label for="password2">Password Confirmation</label>
+        </div>
+      </div>
+
+      <button class="btn btn-primary p-2 w-100">CREATE ACCOUNT</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

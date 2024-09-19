@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
-from .forms import AuthenticationForm
+from .forms import AuthenticationForm, CustomUserCreationForm
 
 def home_view(request):
     return render(request, 'judgy/index.html')
@@ -20,4 +20,11 @@ def logout_view(request):
     return redirect('judgy:home')
 
 def register_view(request):
-    pass
+    if request.method == 'POST':
+        form = CustomUserCreationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.save())
+            return redirect('judgy:home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'judgy/register.html', { 'form': form })

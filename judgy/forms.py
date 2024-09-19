@@ -6,7 +6,55 @@ from .models import User
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ('first_name', 'last_name', 'email')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['email'].required = True
+        self.fields['password1'].required = True
+        self.fields['password2'].required = True
+
+        self.fields['first_name'].widget.attrs.update({
+            'id': 'first_name',
+            'class': 'form-control',
+            'autocomplete': 'given-name',
+            'autofocus': False,
+            'placeholder': 'First Name'
+        })
+        self.fields['last_name'].widget.attrs.update({
+            'id': 'last_name',
+            'class': 'form-control',
+            'autocomplete': 'family-name',
+            'autofocus': False,
+            'placeholder': 'Last Name'
+        })
+        self.fields['email'].widget.attrs.update({
+            'id': 'email',
+            'class': 'form-control',
+            'autocomplete': 'email',
+            'autofocus': False,
+            'placeholder': 'Email Address'
+        })
+        self.fields['password1'].widget.attrs.update({
+            'id': 'password1',
+            'class': 'form-control',
+            'autocomplete': 'new-password',
+            'autofocus': False,
+            'placeholder': 'Password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'id': 'password2',
+            'class': 'form-control',
+            'autocomplete': 'new-password',
+            'autofocus': False,
+            'placeholder': 'Password Confirmation'
+        })
+
+        if 'usable_password' in self.fields:
+            del self.fields['usable_password']
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
