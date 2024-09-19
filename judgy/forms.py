@@ -69,7 +69,7 @@ class AuthenticationForm(forms.Form):
             'class': 'form-control',
             'autocomplete': 'email',
             'autofocus': True,
-            'placeholder': 'email'
+            'placeholder': 'Email Address'
         })
     )
     password = forms.CharField(
@@ -78,7 +78,8 @@ class AuthenticationForm(forms.Form):
             'id': 'password',
             'class': 'form-control',
             'autocomplete': 'current-password',
-            'placeholder': 'password'
+            'autofocus': False,
+            'placeholder': 'Password'
         })
     )
 

@@ -1,33 +1,6 @@
 {% extends 'judgy/base.html' %}
 
-{% block title %}login{% endblock %}
-
-{% block style %}
-
-<style>
-  .form-login {
-    max-width: 330px;
-    padding: 1rem;
-  }
-
-  .form-login .form-floating:focus-within {
-    z-index: 2;
-  }
-
-  .form-login input[type='email'] {
-    margin-bottom: -1px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-
-  .form-login input[type='password'] {
-    margin-bottom: 10px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-</style>
-
-{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block main %}
 
@@ -43,20 +16,28 @@
   {% endfor %}
 {% endfor %}
 
-<div class="align-items-center d-flex py-4 vh-100">
-  <div class="form-login m-auto w-100">
+<div class="align-items-center d-flex justify-content-center vh-100 vw-100">
+  <div class="p-5 rounded text-center">
     <form method="post">
       {% csrf_token %}
 
-      <div class="form-floating">
-        {{ form.email }}
-        <label for="email">email</label>
+      <h2>Log In</h2>
+
+      <div class="my-3">
+        <div class="form-floating">
+          {{ form.email }}
+          <label for="email">Email Address</label>
+        </div>
       </div>
-      <div class="form-floating">
-        {{ form.password }}
-        <label for="password">password</label>
+
+      <div class="my-3">
+        <div class="form-floating">
+          {{ form.password }}
+          <label for="password">Password</label>
+        </div>
       </div>
-      <button class="btn btn-primary py-2 w-100" type="submit">login</button>
+
+      <button class="btn btn-primary p-2 w-100">LOG IN</button>
     </form>
   </div>
 </div>
