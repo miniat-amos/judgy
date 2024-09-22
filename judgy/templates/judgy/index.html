@@ -2,8 +2,13 @@
 
 {% block main %}
 
-<h1 class="text-center">
-  {{ user.email|default:'judgy' }}
-</h1>
+<div
+  class="align-items-center d-flex justify-content-center text-center"
+  style="height: calc(100vh - 7.5rem)"
+>
+  <h1>
+    {{ user.email|default:'judgy' }}
+  </h1>
+</div>
 
 {% endblock %}

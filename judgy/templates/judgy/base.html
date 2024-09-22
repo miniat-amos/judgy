@@ -18,7 +18,18 @@
     {% block style %}{% endblock %}
     {% block script %}{% endblock %}
   </head>
-  <body class="vh-100">
-    {% block main %}{% endblock %}
+  <body
+    class="d-flex flex-column min-vh-100 min-vw-100"
+    style="padding-top: 3.75rem"
+  >
+    <main class="d-flex flex-column flex-grow-1 flex-shrink-1">
+      {% include 'judgy/header.html' %}
+
+      <div class="flex-grow-1 flex-shrink-1">
+        {% block main %}{% endblock %}
+      </div>
+
+      {% include 'judgy/footer.html' %}
+    </main>
   </body>
 </html>
