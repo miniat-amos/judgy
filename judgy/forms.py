@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import User
+from django.utils import timezone
+from .models import User, Competition
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -106,3 +107,92 @@ class AuthenticationForm(forms.Form):
 
     def get_user(self):
         return self.user
+
+class CompetitionCreationForm(forms.ModelForm):
+    class Meta:
+        model = Competition
+        fields = [
+            'name',
+            'description',
+            'start',
+            'end',
+            'enroll_start',
+            'enroll_end'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['name'].required = True
+        self.fields['description'].required = False
+        self.fields['start'].required = True
+        self.fields['end'].required = True
+        self.fields['enroll_start'].required = True
+        self.fields['enroll_end'].required = True
+
+        self.fields['name'].widget.attrs.update({
+            'id': 'name',
+            'class': 'form-control',
+            'autofocus': True,
+            'placeholder': 'Competition Name'
+        })
+        self.fields['description'].widget.attrs.update({
+            'id': 'description',
+            'class': 'form-control',
+            'autofocus': False,
+            'placeholder': 'Competition Description'
+        })
+        self.fields['start'].widget.attrs.update({
+            'id': 'start',
+            'class': 'form-control',
+            'autofocus': False,
+            'type': 'datetime-local'
+        })
+        self.fields['end'].widget.attrs.update({
+            'id': 'end',
+            'class': 'form-control',
+            'autofocus': False,
+            'type': 'datetime-local'
+        })
+        self.fields['enroll_start'].widget.attrs.update({
+            'id': 'enroll-start',
+            'class': 'form-control',
+            'autofocus': False,
+            'type': 'datetime-local'
+        })
+        self.fields['enroll_end'].widget.attrs.update({
+            'id': 'enroll-end',
+            'class': 'form-control',
+            'autofocus': False,
+            'type': 'datetime-local'
+        })
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get('start')
+        end = cleaned_data.get('end')
+        enroll_start = cleaned_data.get('enroll_start')
+        enroll_end = cleaned_data.get('enroll_end')
+
+        print(cleaned_data)
+
+        # Validate that start is before end
+        if start and end and start >= end:
+            self.add_error('end', 'End date must be after start date.')
+        
+        # Validate that enroll_start is before enroll_end
+        if enroll_start and enroll_end and enroll_start >= enroll_end:
+            self.add_error('enroll_end', 'Enrollment end date must be after enrollment start date.')
+
+        # Validate that the dates are not in the past
+        now = timezone.now()
+        if start and start < now:
+            self.add_error('start', 'Start date cannot be in the past.')
+        if end and end < now:
+            self.add_error('end', 'End date cannot be in the past.')
+        if enroll_start and enroll_start < now:
+            self.add_error('enroll_start', 'Enrollment start date cannot be in the past.')
+        if enroll_end and enroll_end < now:
+            self.add_error('enroll_end', 'Enrollment end date cannot be in the past.')
+
+        return cleaned_data

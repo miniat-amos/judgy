@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
-from .forms import AuthenticationForm, CustomUserCreationForm
+from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm
 
 def home_view(request):
     return render(request, 'judgy/index.html')
@@ -28,3 +28,13 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'judgy/register.html', { 'form': form })
+
+def competition_create_view(request):
+    if request.method == 'POST':
+        form = CompetitionCreationForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('judgy:home')
+    else:
+        form = CompetitionCreationForm()
+    return render(request, 'judgy/competition_create.html', { 'form': form })

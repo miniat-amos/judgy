@@ -1,0 +1,109 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}Create Competition{% endblock %}
+
+{% block style %}
+
+<style>
+  textarea {
+    overflow: hidden;
+  }
+</style>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(() => {
+    $('textarea')
+      .on('input', function () {
+        this.style.height = 'auto';
+        this.style.height = `${this.scrollHeight}px`;
+      })
+      .trigger('input');
+
+    $('#start, #end, #enroll-start, #enroll-end').attr('type', 'datetime-local');
+  });
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+{% for errors in form.errors.values %}
+  {% for error in errors %}
+    <div
+      class='alert alert-danger alert-dismissible fade fixed-top show text-center'
+      role='alert'
+    >
+      {{ error }}
+      <button class='btn btn-close' data-bs-dismiss='alert'></button>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+<div
+  class='align-items-center d-flex justify-content-center text-center'
+  style='height: calc(100vh - 7.5rem)'
+>
+  <form method='post'>
+    {% csrf_token %}
+
+    <h2>Create Competition</h2>
+
+    <div class='my-3'>
+      <div class='form-floating'>
+        {{ form.name }}
+        <label for='name'>Competition Name</label>
+      </div>
+    </div>
+
+    <div class='my-3'>
+      <div class='form-floating'>
+        {{ form.description }}
+        <label for='description'>Competition Description</label>
+      </div>
+    </div>
+
+    <div class='my-3'>
+      <div class='row'>
+        <div class='col'>
+          <div class='form-floating'>
+            {{ form.start }}
+            <label for='start'>Competition Start</label>
+          </div>
+        </div>
+
+        <div class='col'>
+          <div class='form-floating'>
+            {{ form.end }}
+            <label for='end'>Competition End</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='my-3'>
+      <div class='row'>
+        <div class='col'>
+          <div class='form-floating'>
+            {{ form.enroll_start }}
+            <label for='enroll-start'>Enroll Start</label>
+          </div>
+        </div>
+
+        <div class='col'>
+          <div class='form-floating'>
+            {{ form.enroll_end }}
+            <label for='enroll-end'>Enroll End</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class='btn btn-primary p-2 w-100'>CREATE COMPETITION</button>
+  </form>
+</div>
+
+{% endblock %}
