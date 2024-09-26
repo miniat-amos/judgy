@@ -1,0 +1,16 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }}{% endblock %}
+
+{% block main %}
+
+<div
+  class="align-items-center d-flex justify-content-center text-center"
+  style="min-height: calc(100vh - 7.5rem)"
+>
+  <h1>
+    {{ competition.name }}
+  </h1>
+</div>
+
+{% endblock %}

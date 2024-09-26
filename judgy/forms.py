@@ -174,8 +174,6 @@ class CompetitionCreationForm(forms.ModelForm):
         enroll_start = cleaned_data.get('enroll_start')
         enroll_end = cleaned_data.get('enroll_end')
 
-        print(cleaned_data)
-
         # Validate that start is before end
         if start and end and start >= end:
             self.add_error('end', 'End date must be after start date.')

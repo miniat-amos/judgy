@@ -1,7 +1,8 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm
+from .models import Competition
 
 def home_view(request):
     return render(request, 'judgy/index.html')
@@ -36,8 +37,12 @@ def competition_create_view(request):
     if request.method == 'POST':
         form = CompetitionCreationForm(data=request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('judgy:home')
+            competition = form.save()
+            return redirect('judgy:competition_code', code=competition.code)
     else:
         form = CompetitionCreationForm()
     return render(request, 'judgy/competition_create.html', { 'form': form })
+
+def competition_code_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+    return render(request, 'judgy/competition_code.html', { 'competition': competition })
