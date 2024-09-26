@@ -2,27 +2,10 @@
 
 {% block title %}Create Competition{% endblock %}
 
-{% block style %}
-
-<style>
-  textarea {
-    overflow: hidden;
-  }
-</style>
-
-{% endblock %}
-
 {% block script %}
 
 <script>
   $(() => {
-    $('textarea')
-      .on('input', function () {
-        this.style.height = 'auto';
-        this.style.height = `${this.scrollHeight}px`;
-      })
-      .trigger('input');
-
     $('#start, #end, #enroll-start, #enroll-end').attr('type', 'datetime-local');
   });
 </script>
@@ -44,8 +27,8 @@
 {% endfor %}
 
 <div
-  class='align-items-center d-flex justify-content-center text-center'
-  style='height: calc(100vh - 7.5rem)'
+  class='align-items-center d-flex justify-content-center p-5 text-center'
+  style='min-height: calc(100vh - 7.5rem)'
 >
   <form method='post'>
     {% csrf_token %}
