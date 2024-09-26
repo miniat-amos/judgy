@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm
 
@@ -29,6 +30,8 @@ def register_view(request):
         form = CustomUserCreationForm()
     return render(request, 'judgy/register.html', { 'form': form })
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def competition_create_view(request):
     if request.method == 'POST':
         form = CompetitionCreationForm(data=request.POST)
