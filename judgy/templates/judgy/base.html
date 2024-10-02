@@ -24,6 +24,15 @@
     <script>
       $(() => {
         $('textarea').css('height', 'auto');
+
+        fetch("{% url 'judgy:set_timezone' %}", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+        });
       });
     </script>
 

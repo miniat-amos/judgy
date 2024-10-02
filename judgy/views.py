@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
@@ -30,6 +31,12 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'judgy/register.html', { 'form': form })
+
+def set_timezone_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        request.session['django_timezone'] = data.get('timezone')
+    return redirect('judgy:home')
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
