@@ -1,0 +1,29 @@
+{% extends "judgy/base.html" %}
+
+{% block title %}Submissions{% endblock %}
+
+
+{% block main %} 
+
+
+<div class="align-items-center d-flex flex-column justify-content-center text-center"
+     style="height: calc(100vh - 7.5rem);">
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.file }}
+        <input type="submit" value="Upload" style="margin-top: 10px;" />
+    </form>
+    
+    {% if file_content %}
+    <div class="mt-5">
+        <h3>Output:</h3>
+        <p>{{ file_content }}</p>
+    </div>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}
+

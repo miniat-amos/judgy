@@ -16,5 +16,34 @@ services:
       test: ["CMD", "mysql", "-h", "localhost", "-u", "root", "-p", "${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
       timeout: 20s
       retries: 10
+
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: python:latest
+
+  ruby_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ruby:latest
+    
+  gcc_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: gcc:latest
+
+  node_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: node:latest
+        
 volumes:
   data:

@@ -194,3 +194,7 @@ class CompetitionCreationForm(forms.ModelForm):
             self.add_error('enroll_end', 'Enrollment end date cannot be in the past.')
 
         return cleaned_data
+    
+class UploadFileForm(forms.Form):
+    file = forms.FileField()
+

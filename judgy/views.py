@@ -1,9 +1,17 @@
 import json
+import os
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm
+from django.conf import settings
+from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm
 from .models import Competition
+from .functions import start_containers
+from .utils import get_output_file
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 def home_view(request):
     return render(request, 'judgy/index.html')
@@ -53,3 +61,29 @@ def competition_create_view(request):
 def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
     return render(request, 'judgy/competition_code.html', { 'competition': competition })
+
+@login_required
+def submissions(request):
+    if request.method == "POST":
+        logger.info("POST request received.")
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            logger.info("Form is valid.")
+            start_containers(request.FILES["file"])
+        
+            output_file = get_output_file()
+
+            with open(output_file, 'r') as f:
+                file_content = f.read()
+                
+            context = {'file_content': file_content}
+            return render(request, "judgy/submissions.html", context)
+            
+        else:
+            logger.error("Form is invalid.")
+            logger.error(form.errors)  # Log the errors
+            return render(request, 'judgy/submissions.html', {'form': form})
+    else:
+        logger.info("GET request received.")
+        form = UploadFileForm()
+    return render(request, "judgy/submissions.html", {"form": form})
