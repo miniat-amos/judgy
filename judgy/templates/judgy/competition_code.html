@@ -2,15 +2,52 @@
 
 {% block title %}{{ competition.name }}{% endblock %}
 
+{% block script %}
+
+<script>
+  $(() => {
+    new QRCode(
+      $('#qrcode')[0],
+      `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`
+    );
+  });
+</script>
+
+{% endblock %}
+
 {% block main %}
 
-<div
-  class="align-items-center d-flex justify-content-center text-center"
-  style="min-height: calc(100vh - 7.5rem)"
->
-  <h1>
-    {{ competition.name }}
-  </h1>
+<div class="bg-body-tertiary">
+  <div class="mx-5 px-5">
+    <div class="align-items-stretch d-flex">
+      <div class="d-flex justify-content-start py-5 w-100">
+        <div>
+          <h1>{{ competition.name }}</h1>
+          <div>{{ competition.description }}</div>
+          <br>
+          <div class="d-flex">
+            <div class="me-5 pe-5">Start:<br>{{ competition.start }}</div>
+            <div class="ms-5 ps-5">End:<br>{{ competition.end }}</div>
+          </div>
+          <br>
+          <div class="d-flex">
+            <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start }}</div>
+            <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end }}</div>
+          </div>
+          <br>
+          <br>
+          <button class="btn btn-success">ENROLL</button>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end py-5 w-100">
+        <div>
+          <div id="qrcode"></div>
+          <br>
+          <h2 class="text-center">CODE: {{ competition.code }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock %}
