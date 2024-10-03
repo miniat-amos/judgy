@@ -26,13 +26,13 @@
           <div>{{ competition.description }}</div>
           <br>
           <div class="d-flex">
-            <div class="me-5 pe-5">Start:<br>{{ competition.start }}</div>
-            <div class="ms-5 ps-5">End:<br>{{ competition.end }}</div>
+            <div class="me-5 pe-5">Start:<br>{{ competition.start|date:'m/d/Y, h:i A' }}</div>
+            <div class="ms-5 ps-5">End:<br>{{ competition.end|date:'m/d/Y, h:i A' }}</div>
           </div>
           <br>
           <div class="d-flex">
-            <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start }}</div>
-            <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end }}</div>
+            <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start|date:'m/d/Y, h:i A' }}</div>
+            <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end|date:'m/d/Y, h:i A' }}</div>
           </div>
           <br>
           <br>
