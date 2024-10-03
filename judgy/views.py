@@ -1,5 +1,5 @@
+import logging
 import json
-import os
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,9 +7,6 @@ from django.conf import settings
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm
 from .models import Competition
 from .functions import start_containers
-from .utils import get_output_file
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +69,6 @@ def submissions(request):
             current_user = request.user
             output_file = start_containers(request.FILES["file"], current_user)
         
-            # output_file = get_output_file(current_user)
-
             with open(output_file, 'r') as f:
                 file_content = f.read()
                 

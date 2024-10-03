@@ -1,4 +1,3 @@
-import os
 import logging
 from django.conf import settings
 from pathlib import Path
@@ -30,8 +29,6 @@ def make_output_file(output_dir, file_name="output.txt"):
     output_file.touch(exist_ok=True)
     return output_file
 
-def get_output_file(current_user):
-    output_dir = "outputs"
-    output_file = Path(output_dir) / str(current_user.email) / "output.txt"
-    return output_file
 
+
+    
