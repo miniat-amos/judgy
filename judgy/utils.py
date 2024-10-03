@@ -14,7 +14,7 @@ def create_user_dir(passed_in_dir, current_user):
         main_directory.mkdir(exist_ok=True)
 
         # Define and create the user-specific directory
-        user_dir = main_directory / str(current_user.id)
+        user_dir = main_directory / str(current_user.email)
         user_dir.mkdir(exist_ok=True)
 
         logging.info(f"Created directory: {user_dir}")
@@ -32,6 +32,6 @@ def make_output_file(output_dir, file_name="output.txt"):
 
 def get_output_file(current_user):
     output_dir = "outputs"
-    output_file = Path(output_dir) / str(current_user.id) / "output.txt"
+    output_file = Path(output_dir) / str(current_user.email) / "output.txt"
     return output_file
 
