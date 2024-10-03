@@ -2,11 +2,22 @@ import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm
 from .models import Competition
 
 def home_view(request):
-    return render(request, 'judgy/index.html')
+    now = timezone.now()
+
+    past_competitions = Competition.objects.filter(end__lt=now).order_by('-end')
+    ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by('start')
+    upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
+
+    return render(request, 'judgy/index.html', {
+        'past_competitions': past_competitions,
+        'ongoing_competitions': ongoing_competitions,
+        'upcoming_competitions': upcoming_competitions
+    })
 
 def login_view(request):
     if request.method == 'POST':

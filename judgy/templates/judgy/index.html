@@ -2,13 +2,116 @@
 
 {% block main %}
 
-<div
-  class="align-items-center d-flex justify-content-center text-center"
-  style="height: calc(100vh - 7.5rem)"
->
-  <h1>
-    {{ user.email|default:'judgy' }}
-  </h1>
+<div class="container">
+  <h1 class="py-5 text-center">Competitions</h1>
+
+  <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        id="ongoing-tab"
+        class="nav-link active"
+        style="width: 8rem"
+        data-bs-target="#ongoing-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Ongoing
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        id="upcoming-tab"
+        class="nav-link"
+        style="width: 8rem"
+        data-bs-target="#upcoming-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Upcoming
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        id="past-tab"
+        class="nav-link"
+        style="width: 8rem"
+        data-bs-target="#past-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Past
+      </button>
+    </li>
+  </ul>
+
+  <div class="py-5 tab-content">
+    <div id="ongoing-tab-pane" class="tab-pane fade show active" role="tabpanel">
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for competition in ongoing_competitions %}
+          <div class="col">
+            <a
+              class="card h-100 bg-body-tertiary text-decoration-none"
+              href="{% url 'judgy:competition_code' competition.code %}"
+            >
+              <div class="card-body">
+                <h5 class="card-title">{{ competition.name }}</h5>
+                <p class="card-text">{{ competition.description }}</p>
+              </div>
+              <div class="card-footer">
+                <div>Start: {{ competition.start }}</div>
+                <div>End: {{ competition.end }}</div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="upcoming-tab-pane" class="tab-pane fade" role="tabpanel">
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for competition in upcoming_competitions %}
+          <div class="col">
+            <a
+              class="card h-100 bg-body-tertiary text-decoration-none"
+              href="{% url 'judgy:competition_code' competition.code %}"
+            >
+              <div class="card-body">
+                <h5 class="card-title">{{ competition.name }}</h5>
+                <p class="card-text">{{ competition.description }}</p>
+              </div>
+              <div class="card-footer">
+                <div>Start: {{ competition.start }}</div>
+                <div>End: {{ competition.end }}</div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="past-tab-pane" class="tab-pane fade" role="tabpanel">
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for competition in past_competitions %}
+          <div class="col">
+            <a
+              class="card h-100 bg-body-tertiary text-decoration-none"
+              href="{% url 'judgy:competition_code' competition.code %}"
+            >
+              <div class="card-body">
+                <h5 class="card-title">{{ competition.name }}</h5>
+                <p class="card-text">{{ competition.description }}</p>
+              </div>
+              <div class="card-footer">
+                <div>Start: {{ competition.start }}</div>
+                <div>End: {{ competition.end }}</div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock %}
