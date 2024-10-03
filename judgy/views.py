@@ -69,9 +69,10 @@ def submissions(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             logger.info("Form is valid.")
-            start_containers(request.FILES["file"])
+            current_user = request.user
+            output_file = start_containers(request.FILES["file"], current_user)
         
-            output_file = get_output_file()
+            # output_file = get_output_file(current_user)
 
             with open(output_file, 'r') as f:
                 file_content = f.read()

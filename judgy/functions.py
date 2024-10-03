@@ -1,6 +1,6 @@
 import os
 import docker
-from .utils import create_directory, get_output_file
+from .utils import make_output_file, create_user_dir
 from django.conf import settings
 from pathlib import Path
 
@@ -13,13 +13,13 @@ languages = {
 }
 
 
-def start_containers(f):
+def start_containers(f, current_user):
     # Get file extension
     file_extension = os.path.splitext(f.name)[1]
     submitted_image = languages[file_extension]["image"]
 
     # Make submissions dir
-    submissions_dir = create_directory("submissions")
+    submissions_dir = create_user_dir("submissions", current_user)
 
     # Store file in submissions dir
     input_file = os.path.join(submissions_dir, f.name)
@@ -30,7 +30,8 @@ def start_containers(f):
             destination.write(chunk)
 
     # Create output directory
-    output_file = get_output_file()
+    output_dir = create_user_dir("outputs", current_user)
+    output_file = make_output_file(output_dir)
 
     # Connect to docker daemon
     client = docker.from_env()
@@ -71,3 +72,5 @@ def start_containers(f):
 
     container.stop()
     container.remove()
+    
+    return output_file
