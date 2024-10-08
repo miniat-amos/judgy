@@ -34,10 +34,7 @@ def start_containers(f, current_user):
     # Create output directory
     output_dir = create_user_dir("outputs", current_user)
     output_file = make_file(output_dir, "output.txt")
-    
-    # Create score directory
-    score_dir = create_user_dir("score", current_user)
-    score_file = make_file(score_dir, "score.txt")
+    score_file = make_file(output_dir, "score.txt")
 
     # Connect to docker daemon
     client = docker.from_env()
