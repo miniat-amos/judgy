@@ -24,10 +24,11 @@ def create_user_dir(passed_in_dir, current_user):
         raise
 
 
-def make_output_file(output_dir, file_name="output.txt"):
-    output_file = Path(output_dir) / file_name
-    output_file.touch(exist_ok=True)
-    return output_file
+def make_file(passed_in_dir, file_name):
+    new_file = Path(passed_in_dir) / file_name
+    new_file.touch(exist_ok=True) 
+    new_file.open('w').close() 
+    return new_file
 
 
 

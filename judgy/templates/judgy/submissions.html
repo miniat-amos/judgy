@@ -15,10 +15,17 @@
         <input type="submit" value="Upload" style="margin-top: 10px;" />
     </form>
     
-    {% if file_content %}
+    {% if user_output %}
     <div class="mt-5">
         <h3>Output:</h3>
-        <p>{{ file_content }}</p>
+        <p>{{ user_output }}</p>
+    </div>
+    {% endif %}
+
+    {% if user_score %}
+    <div class="mt-5">
+        <h3>Score:</h3>
+        <p>{{ user_score }}</p>
     </div>
     {% endif %}
 </div>

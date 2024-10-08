@@ -67,12 +67,17 @@ def submissions(request):
         if form.is_valid():
             logger.info("Form is valid.")
             current_user = request.user
-            output_file = start_containers(request.FILES["file"], current_user)
+            output_file, score_file = start_containers(request.FILES["file"], current_user)
         
             with open(output_file, 'r') as f:
-                file_content = f.read()
+                user_output = f.read()
                 
-            context = {'file_content': file_content}
+            with open(score_file, 'r') as f:
+                user_score = f.read()
+                
+            context = {'user_output': user_output,
+                       'user_score': user_score}
+            
             return render(request, "judgy/submissions.html", context)
             
         else:
