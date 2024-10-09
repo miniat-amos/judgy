@@ -58,9 +58,4 @@ def create_user_dir(passed_in_dir, current_user):
     except OSError as e:
         logging.error(f"Error creating directory {user_directory}: {e}")
         raise
-
-
-
-
-
     
