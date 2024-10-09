@@ -8,7 +8,7 @@ from pathlib import Path
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm, ProblemCreationForm
 from .models import Competition
 from .functions import start_containers
-from .utils import create_comp_dir, create_problem_dir, save_file
+from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
 logger = logging.getLogger(__name__)
 
@@ -72,21 +72,16 @@ def competition_code_view(request, code):
            input_files = request.FILES["input_files"]
            judging_program = request.FILES["judging_program"]
            
-           save_file(problem_dir, rules_file, f"{problem_name}_rules")
-           save_file(problem_dir, input_files, f"{problem_name}_test_files")
-           save_file(problem_dir, judging_program, f"{problem_name}_judging_program")
+           save_problem_files(problem_dir, rules_file, f"{problem_name}_rules")
+           save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
+           save_problem_files(problem_dir, judging_program, f"{problem_name}_judging_program")
+           
            
            return redirect('judgy:competition_code', code=code)
        else:
             logger.error("Form is invalid.")
             logger.error(form.errors)  
-            context = {
-            'competition': competition,
-            'is_superuser': is_superuser,
-            'form': form
-        }
 
-           
     else:
         form = ProblemCreationForm()
     

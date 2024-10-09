@@ -3,7 +3,7 @@ from django.conf import settings
 from pathlib import Path
 
 
-def save_file(problem_dir, file, subdir):
+def save_problem_files(problem_dir, file, subdir):
     target_dir = problem_dir / subdir
     target_dir.mkdir(exist_ok=True)
     
@@ -12,18 +12,22 @@ def save_file(problem_dir, file, subdir):
         for chunk in file.chunks():
             destination.write(chunk)
 
-def create_comp_dir(comp_code):
-         main_directory = Path(settings.BASE_DIR) / comp_code
-         main_directory.mkdir(exist_ok=True)
-         
-         submissions_directory = main_directory / "submissions"
-         submissions_directory.mkdir(exist_ok=True)
-         
-         output_directory = main_directory / "outputs"
-         output_directory.mkdir(exist_ok=True)
-         
-         
+def make_file(passed_in_dir, file_name):
+    new_file = Path(passed_in_dir) / file_name
+    new_file.touch(exist_ok=True) 
+    new_file.open('w').close() 
+    return new_file
 
+def create_comp_dir(comp_code):
+    main_directory = Path(settings.BASE_DIR) / comp_code
+    main_directory.mkdir(exist_ok=True)
+    
+    submissions_directory = main_directory / "submissions"
+    submissions_directory.mkdir(exist_ok=True)
+    
+    output_directory = main_directory / "outputs"
+    output_directory.mkdir(exist_ok=True)
+         
 def create_problem_dir(problem_name, comp_code):
     main_directory = Path(settings.BASE_DIR) / comp_code
     problems_directory = main_directory / "problems"
@@ -34,7 +38,6 @@ def create_problem_dir(problem_name, comp_code):
     
     return problem.resolve()
     
-
 def create_user_dir(passed_in_dir, current_user):
     if not hasattr(current_user, 'id') or not current_user.id:
         raise ValueError("The current user must have a valid ID.")
@@ -57,11 +60,6 @@ def create_user_dir(passed_in_dir, current_user):
         raise
 
 
-def make_file(passed_in_dir, file_name):
-    new_file = Path(passed_in_dir) / file_name
-    new_file.touch(exist_ok=True) 
-    new_file.open('w').close() 
-    return new_file
 
 
 
