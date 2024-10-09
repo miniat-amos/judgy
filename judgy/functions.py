@@ -64,7 +64,7 @@ def start_containers(f, current_user):
         container = client.containers.run(
             docker_image,
             command=f"""
-                bash -c '{interpreter} {container_user_file} > {container_output_path} && python3 judge.py mine.dat {interpreter} {container_user_file} > {container_score_path}'
+                bash -c '{interpreter} {container_user_file} < mine.dat > {container_output_path} && python3 judge.py mine.dat {interpreter} {container_user_file} > {container_score_path}'
                 """,
             volumes=volumes,
             detach=True,
@@ -76,7 +76,7 @@ def start_containers(f, current_user):
         container = client.containers.run(
             docker_image,
             command=f"""
-                    bash -c '{compiler} {container_user_file} -o {container_main_directory}/a.out && ({container_main_directory}/a.out) > {container_output_path} && python3 judge.py mine.dat {container_main_directory}/a.out > {container_score_path}'
+                    bash -c '{compiler} {container_user_file} -o {container_main_directory}/a.out && ({container_main_directory}/a.out) < mine.dat > {container_output_path} && python3 judge.py mine.dat {container_main_directory}/a.out > {container_score_path}'
                     """,
             volumes=volumes,
             detach=True,

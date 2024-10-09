@@ -5,7 +5,7 @@ FROM ${BASE_IMAGE}
 WORKDIR /usr/app
 
 COPY ./testing/judge_progs/ .
-COPY ./testing/test_files .
+COPY ./testing/test_files/ .
 
 RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
