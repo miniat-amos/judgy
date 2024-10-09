@@ -218,9 +218,7 @@ class ProblemCreationForm(forms.Form):
     input_files = forms.FileField(
         label='Problem Input Files',
         widget=forms.ClearableFileInput(attrs={
-            'allow_multiple_selected': True,
-            'class': 'form-control',
-            'accept': '.txt, .csv, .zip',  
+            'class': 'form-control'
         })
     )
     judging_program = forms.FileField(

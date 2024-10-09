@@ -2,6 +2,16 @@ import logging
 from django.conf import settings
 from pathlib import Path
 
+
+def save_file(problem_dir, file, subdir):
+    target_dir = problem_dir / subdir
+    target_dir.mkdir(exist_ok=True)
+    
+    file_path = target_dir / file.name
+    with open(file_path, 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+
 def create_comp_dir(comp_code):
          main_directory = Path(settings.BASE_DIR) / comp_code
          main_directory.mkdir(exist_ok=True)
@@ -12,10 +22,18 @@ def create_comp_dir(comp_code):
          output_directory = main_directory / "outputs"
          output_directory.mkdir(exist_ok=True)
          
-         problems_directory = main_directory / "problems"
-         problems_directory.mkdir(exist_ok=True)
          
-         
+
+def create_problem_dir(problem_name, comp_code):
+    main_directory = Path(settings.BASE_DIR) / comp_code
+    problems_directory = main_directory / "problems"
+    problems_directory.mkdir(exist_ok=True)
+    
+    problem = problems_directory / problem_name
+    problem.mkdir(exist_ok=True)
+    
+    return problem.resolve()
+    
 
 def create_user_dir(passed_in_dir, current_user):
     if not hasattr(current_user, 'id') or not current_user.id:

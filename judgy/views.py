@@ -8,7 +8,7 @@ from pathlib import Path
 from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm, ProblemCreationForm
 from .models import Competition
 from .functions import start_containers
-from .utils import create_comp_dir
+from .utils import create_comp_dir, create_problem_dir, save_file
 
 logger = logging.getLogger(__name__)
 
@@ -59,16 +59,42 @@ def competition_create_view(request):
     return render(request, 'judgy/competition_create.html', { 'form': form })
 
 def competition_code_view(request, code):
-    if request.method == 'POST':
-        print("Hello")
+    competition = get_object_or_404(Competition, code=code)
+    is_superuser = request.user.is_superuser
     
+    if request.method == 'POST':
+       form = ProblemCreationForm(request.POST, request.FILES)
+       if form.is_valid():
+           problem_name = form.cleaned_data['name']
+           problem_dir = create_problem_dir(problem_name, code)
+           
+           rules_file = request.FILES['rules']
+           input_files = request.FILES["input_files"]
+           judging_program = request.FILES["judging_program"]
+           
+           save_file(problem_dir, rules_file, f"{problem_name}_rules")
+           save_file(problem_dir, input_files, f"{problem_name}_test_files")
+           save_file(problem_dir, judging_program, f"{problem_name}_judging_program")
+           
+           return redirect('judgy:competition_code', code=code)
+       else:
+            logger.error("Form is invalid.")
+            logger.error(form.errors)  
+            context = {
+            'competition': competition,
+            'is_superuser': is_superuser,
+            'form': form
+        }
+
+           
     else:
-        competition = get_object_or_404(Competition, code=code)
-        is_superuser = request.user.is_superuser
         form = ProblemCreationForm()
-        context = {'competition': competition,
-               'is_superuser': is_superuser,
-               'form': form}
+    
+        context = {
+            'competition': competition,
+            'is_superuser': is_superuser,
+            'form': form
+        }
     
     return render(request, 'judgy/competition_code.html', context)
 
