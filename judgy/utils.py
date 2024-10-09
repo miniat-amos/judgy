@@ -2,6 +2,21 @@ import logging
 from django.conf import settings
 from pathlib import Path
 
+def create_comp_dir(comp_code):
+         main_directory = Path(settings.BASE_DIR) / comp_code
+         main_directory.mkdir(exist_ok=True)
+         
+         submissions_directory = main_directory / "submissions"
+         submissions_directory.mkdir(exist_ok=True)
+         
+         output_directory = main_directory / "outputs"
+         output_directory.mkdir(exist_ok=True)
+         
+         problems_directory = main_directory / "problems"
+         problems_directory.mkdir(exist_ok=True)
+         
+         
+
 def create_user_dir(passed_in_dir, current_user):
     if not hasattr(current_user, 'id') or not current_user.id:
         raise ValueError("The current user must have a valid ID.")
@@ -9,18 +24,18 @@ def create_user_dir(passed_in_dir, current_user):
     main_directory = Path(settings.BASE_DIR) / passed_in_dir
     
     try:
-        # Ensure the submissions directory exists
+        
         main_directory.mkdir(exist_ok=True)
 
         # Define and create the user-specific directory
-        user_dir = main_directory / str(current_user.email)
-        user_dir.mkdir(exist_ok=True)
+        user_directory = main_directory / str(current_user.email)
+        user_directory.mkdir(exist_ok=True)
 
-        logging.info(f"Created directory: {user_dir}")
-        return str(user_dir)
+        logging.info(f"Created directory: {user_directory}")
+        return str(user_directory)
 
     except OSError as e:
-        logging.error(f"Error creating directory {user_dir}: {e}")
+        logging.error(f"Error creating directory {user_directory}: {e}")
         raise
 
 

@@ -197,4 +197,37 @@ class CompetitionCreationForm(forms.ModelForm):
     
 class UploadFileForm(forms.Form):
     file = forms.FileField()
+    
+class ProblemCreationForm(forms.Form):
+    name = forms.CharField(
+        label='Problem Name',
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Problem Name',
+            'autofocus': True
+        })
+    )
+    rules = forms.FileField(
+        label='Problem Rules',
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.pdf, .docx',  
+        })
+    )
+    input_files = forms.FileField(
+        label='Problem Input Files',
+        widget=forms.ClearableFileInput(attrs={
+            'allow_multiple_selected': True,
+            'class': 'form-control',
+            'accept': '.txt, .csv, .zip',  
+        })
+    )
+    judging_program = forms.FileField(
+        label='Judging Program',
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.py, .cpp, .java',  
+        })
+    )
 

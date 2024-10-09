@@ -4,9 +4,11 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm
+from pathlib import Path
+from .forms import AuthenticationForm, CustomUserCreationForm, CompetitionCreationForm, UploadFileForm, ProblemCreationForm
 from .models import Competition
 from .functions import start_containers
+from .utils import create_comp_dir
 
 logger = logging.getLogger(__name__)
 
@@ -50,14 +52,25 @@ def competition_create_view(request):
         form = CompetitionCreationForm(data=request.POST)
         if form.is_valid():
             competition = form.save()
+            create_comp_dir(str(competition.code))
             return redirect('judgy:competition_code', code=competition.code)
     else:
         form = CompetitionCreationForm()
     return render(request, 'judgy/competition_create.html', { 'form': form })
 
 def competition_code_view(request, code):
-    competition = get_object_or_404(Competition, code=code)
-    return render(request, 'judgy/competition_code.html', { 'competition': competition })
+    if request.method == 'POST':
+        print("Hello")
+    
+    else:
+        competition = get_object_or_404(Competition, code=code)
+        is_superuser = request.user.is_superuser
+        form = ProblemCreationForm()
+        context = {'competition': competition,
+               'is_superuser': is_superuser,
+               'form': form}
+    
+    return render(request, 'judgy/competition_code.html', context)
 
 @login_required
 def submissions(request):

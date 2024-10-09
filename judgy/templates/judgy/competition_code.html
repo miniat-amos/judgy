@@ -50,4 +50,52 @@
   </div>
 </div>
 
+{% if is_superuser %}
+
+<div>
+  <div
+  class='align-items-center d-flex justify-content-center p-5 text-center'
+>
+  <form method='post'>
+    {% csrf_token %}
+
+
+    <h2>Add Problems</h2>
+
+    <table>
+     <tr>
+        <th>Problem Name</th>
+        <th>Problem Rules (PDF)</th>
+        <th>Problem Test File(s)</th>
+        <th>Judging Program</th>
+        <th>Add problem</th>
+     </tr>
+     <tr>
+      <td>
+        {{ form.name }}
+      </td>
+      <td>
+        {{ form.rules }}
+      </td>
+      <td>
+        {{ form.input_files }}
+      </td>
+      <td>
+        {{ form.judging_program }}
+      </td>
+      <td>
+        <button class='btn btn-primary'>Add Problem</button>
+      </td>
+     </tr>
+    </table>
+
+  
+
+
+
+  </form>
+</div>
+
+{% endif %}
+
 {% endblock %}
