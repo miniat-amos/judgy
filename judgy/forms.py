@@ -208,11 +208,11 @@ class ProblemCreationForm(forms.Form):
             'autofocus': True
         })
     )
-    rules = forms.FileField(
-        label='Problem Rules',
+    zip = forms.FileField(
+        label='Problem Zip',
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
-            'accept': '.pdf, .docx',  
+            'accept': '.zip',  
         })
     )
     input_files = forms.FileField(

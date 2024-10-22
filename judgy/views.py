@@ -68,11 +68,11 @@ def competition_code_view(request, code):
            problem_name = form.cleaned_data['name']
            problem_dir = create_problem_dir(problem_name, code)
            
-           rules_file = request.FILES['rules']
+           zip_file = request.FILES['zip']
            input_files = request.FILES["input_files"]
            judging_program = request.FILES["judging_program"]
            
-           save_problem_files(problem_dir, rules_file, f"{problem_name}_rules")
+           save_problem_files(problem_dir, zip_file, f"{problem_name}_rules")
            save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
            save_problem_files(problem_dir, judging_program, f"{problem_name}_judging_program")
            
