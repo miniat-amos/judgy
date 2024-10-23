@@ -46,6 +46,7 @@
 # Docker files
 !Dockerfile
 !docker-compose.yml
+!docker_setup.sh
 
 **/__pycache__
 **/migrations

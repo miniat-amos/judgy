@@ -132,7 +132,7 @@ def submissions(request):
 
         else:
             logger.error("Form is invalid.")
-            logger.error(form.errors)  # Log the errors
+            logger.error(form.errors)
             return render(request, "judgy/submissions.html", {"form": form})
     else:
         logger.info("GET request received.")

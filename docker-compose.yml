@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: python:latest
+        COMP_CODE: ${COMP_CODE}
 
   ruby_app:
     build:
@@ -30,13 +31,15 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: ruby:latest
-    
+        COMP_CODE: ${COMP_CODE}
+
   gcc_app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: gcc:latest
+        COMP_CODE: ${COMP_CODE}
 
   node_app:
     build:
@@ -44,6 +47,7 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: node:latest
+        COMP_CODE: ${COMP_CODE}
         
 volumes:
   data:
