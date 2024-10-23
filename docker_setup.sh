@@ -7,4 +7,6 @@ fi
 
 COMP_CODE=$1
 
+export COMP_CODE
+
 docker compose build --build-arg COMP_CODE=$COMP_CODE
