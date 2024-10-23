@@ -16,7 +16,7 @@ fi
 # Assign variable from first argument
 COMP_CODE=$1
 
-# Export as env variable to allow docker compose to use
+# Export as env variable to allow docker compose to use it
 export COMP_CODE
 
 # Run docker compose build with the COMP_CODE argument
