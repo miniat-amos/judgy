@@ -10,7 +10,7 @@ def home_view(request):
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lt=now).order_by('-end')
-    ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by('start')
+    ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by('end')
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
 
     return render(request, 'judgy/index.html', {

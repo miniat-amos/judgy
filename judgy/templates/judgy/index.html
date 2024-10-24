@@ -4,12 +4,31 @@
 
 <style>
   .card {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: box-shadow 0.3s, transform 0.3s;
+
+    & .btn {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    &:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05) translateY(-10px);
+
+      & .btn {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
   }
 
-  .card:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05) translateY(-10px);
+  .edit, .delete {
+    color: var(--bs-dark);
+
+    &:hover {
+      color: var(--bs-light);
+    }
   }
 </style>
 
@@ -59,6 +78,12 @@
     };
     update_time();
     setInterval(update_time, 1000);
+
+    $('#delete-competition').on('show.bs.modal', event => {
+      $('.modal-body .name').text($(event.relatedTarget).data('name'));
+      $('.modal-body .description').text($(event.relatedTarget).data('description'));
+      $('.modal-body').css('color', $(event.relatedTarget).data('color'));
+    });
   });
 </script>
 
@@ -67,6 +92,12 @@
 {% block main %}
 
 <div class="container">
+  {% if user.is_superuser %}
+    <div class="pt-5 text-center">
+      <a class="btn btn-success" href="{% url 'judgy:competition_create' %}">Create Competition</a>
+    </div>
+  {% endif %}
+
   <h1 class="py-5 text-center">Competitions</h1>
 
   <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
@@ -121,7 +152,27 @@
               href="{% url 'judgy:competition_code' competition.code %}"
               data-end="{{ competition.end|date:'Y-m-d H:i:s' }}"
             >
-              <div class="card-img-top" style="background: {{ competition.color }}; height: 100px;"></div>
+              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
+                {% if user.is_superuser %}
+                  <button
+                    class="edit btn p-0"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button
+                    class="delete btn p-0"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete-competition"
+                    data-name="{{ competition.name }}"
+                    data-description="{{ competition.description }}"
+                    data-color="{{ competition.color }}"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                {% endif %}
+              </div>
               <div class="card-body">
                 <h5 class="card-title">{{ competition.name }}</h5>
                 <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
@@ -141,7 +192,27 @@
               href="{% url 'judgy:competition_code' competition.code %}"
               data-start="{{ competition.start|date:'Y-m-d H:i:s' }}"
             >
-              <div class="card-img-top" style="background: {{ competition.color }}; height: 100px;"></div>
+              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
+                {% if user.is_superuser %}
+                  <button
+                    class="edit btn p-0"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button
+                    class="delete btn p-0"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete-competition"
+                    data-name="{{ competition.name }}"
+                    data-description="{{ competition.description }}"
+                    data-color="{{ competition.color }}"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                {% endif %}
+              </div>
               <div class="card-body">
                 <h5 class="card-title">{{ competition.name }}</h5>
                 <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
@@ -160,7 +231,27 @@
               class="card h-100 bg-body-tertiary text-decoration-none"
               href="{% url 'judgy:competition_code' competition.code %}"
             >
-              <div class="card-img-top" style="background: {{ competition.color }}; height: 100px;"></div>
+              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
+                {% if user.is_superuser %}
+                  <button
+                    class="edit btn p-0"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button
+                    class="delete btn p-0"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete-competition"
+                    data-name="{{ competition.name }}"
+                    data-description="{{ competition.description }}"
+                    data-color="{{ competition.color }}"
+                    onclick="event.preventDefault();"
+                  >
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                {% endif %}
+              </div>
               <div class="card-body">
                 <h5 class="card-title">{{ competition.name }}</h5>
                 <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
@@ -175,5 +266,7 @@
     </div>
   </div>
 </div>
+
+{% include 'judgy/delete_competition.html' %}
 
 {% endblock %}

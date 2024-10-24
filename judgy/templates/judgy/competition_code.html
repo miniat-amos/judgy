@@ -21,7 +21,26 @@
       colorDark: '{{ competition.color }}',
       colorLight: '#00000000'
     });
+
+    $('#delete-competition').on('show.bs.modal', event => {
+      $('.modal-body .name').text('{{ competition.name }}');
+      $('.modal-body .description').text('{{ competition.description }}');
+      $('.modal-body').css('color', '{{ competition.color }}');
+    });
   });
+
+  function setup() {
+    noCanvas();
+    const update_progress_bar = () => {
+      const start = new Date('{{ competition.start|date:'Y-m-d H:i:s' }}');
+      const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
+      const now = new Date();
+
+      $('.progress-bar').css('width', `${constrain(map(now, start, end, 0, 100), 0, 100)}%`);
+    };
+    update_progress_bar();
+    setInterval(update_progress_bar, 1000);
+  }
 </script>
 
 {% endblock %}
@@ -46,8 +65,16 @@
             <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end|date:'m/d/Y, h:i A' }}</div>
           </div>
           <br>
+          <div class="progress" role="progressbar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
+          </div>
           <br>
-          <button class="btn btn-success">ENROLL</button>
+          {% if user.is_superuser %}
+            <button class="btn btn-warning me-1">EDIT</button>
+            <button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
+          {% else %}
+            <button class="btn btn-success">ENROLL</button>
+          {% endif %}
         </div>
       </div>
       <div class="d-flex justify-content-end py-5 w-100">
@@ -60,5 +87,7 @@
     </div>
   </div>
 </div>
+
+{% include 'judgy/delete_competition.html' %}
 
 {% endblock %}
