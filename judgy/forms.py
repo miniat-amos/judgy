@@ -117,7 +117,8 @@ class CompetitionCreationForm(forms.ModelForm):
             'start',
             'end',
             'enroll_start',
-            'enroll_end'
+            'enroll_end',
+            'color'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -129,6 +130,7 @@ class CompetitionCreationForm(forms.ModelForm):
         self.fields['end'].required = True
         self.fields['enroll_start'].required = True
         self.fields['enroll_end'].required = True
+        self.fields['color'].required = True
 
         self.fields['name'].widget.attrs.update({
             'id': 'name',
@@ -165,6 +167,12 @@ class CompetitionCreationForm(forms.ModelForm):
             'class': 'form-control',
             'autofocus': False,
             'type': 'datetime-local'
+        })
+        self.fields['color'].widget.attrs.update({
+            'id': 'color',
+            'class': 'form-control',
+            'autofocus': False,
+            'type': 'color'
         })
 
     def clean(self):

@@ -7,7 +7,13 @@
 <script>
   $(() => {
     $('#start, #end, #enroll-start, #enroll-end').attr('type', 'datetime-local');
+    $('#color').attr('type', 'color');
   });
+
+  function setup() {
+    colorMode(HSB);
+    $('#color').val(`#${hex(color(random(360) | 0, 100, 100).levels.slice(0, 3), 2).join('')}`);
+  }
 </script>
 
 {% endblock %}
@@ -86,6 +92,13 @@
             <label for='enroll-end'>Enroll End</label>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class='my-3'>
+      <div class='form-floating'>
+        {{ form.color }}
+        <label for='color'>Competition Color</label>
       </div>
     </div>
 

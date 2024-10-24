@@ -2,14 +2,25 @@
 
 {% block title %}{{ competition.name }}{% endblock %}
 
+{% block style %}
+
+<style>
+  ::selection {
+    color: {{ competition.color }};
+  }
+</style>
+
+{% endblock %}
+
 {% block script %}
 
 <script>
   $(() => {
-    new QRCode(
-      $('#qrcode')[0],
-      `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`
-    );
+    new QRCode($('#qrcode')[0], {
+      text: `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`,
+      colorDark: '{{ competition.color }}',
+      colorLight: '#00000000'
+    });
   });
 </script>
 
@@ -43,7 +54,7 @@
         <div>
           <div id="qrcode"></div>
           <br>
-          <h2 class="text-center">CODE: {{ competition.code }}</h2>
+          <h2 class="text-center" style="color: {{ competition.color }};">CODE: {{ competition.code }}</h2>
         </div>
       </div>
     </div>

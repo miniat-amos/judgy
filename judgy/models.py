@@ -26,6 +26,7 @@ class Competition(models.Model):
     end = models.DateTimeField()
     enroll_start = models.DateTimeField()
     enroll_end = models.DateTimeField()
+    color = models.CharField(max_length=7)
 
     def save(self, *args, **kwargs):
         if not self.code:
