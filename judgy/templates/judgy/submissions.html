@@ -1,0 +1,55 @@
+{% extends "judgy/base.html" %}
+
+{% block title %}Submissions{% endblock %}
+
+{% block script %} 
+
+<script>
+    $(document).ready(function() {
+        $("#code-submit").on("submit", function(event) {
+            
+            $("#spinner").show()
+        })
+    })
+    
+</script>
+
+{% endblock %}
+
+{% block main %} 
+
+
+  
+
+<div class="align-items-center d-flex flex-column justify-content-center text-center"
+     style="height: calc(100vh - 7.5rem);">
+    
+    <form id="code-submit" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.file }}
+        <input type="submit" value="Upload" style="margin-top: 10px;" />
+    </form>
+
+    <div id="spinner" class="spinner-border mt-5" role="status" style="display: none;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    
+    {% if user_output %}
+    <div class="mt-5">
+        <h3>Output:</h3>
+        <p>{{ user_output }}</p>
+    </div>
+    {% endif %}
+
+    {% if user_score %}
+    <div class="mt-5">
+        <h3>Score:</h3>
+        <p>{{ user_score }}</p>
+    </div>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}
+
