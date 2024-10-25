@@ -7,6 +7,15 @@
 <style>
   ::selection {
     color: {{ competition.color }};
+
+  }
+
+  .problems-btn {
+    background-color: {{ competition.color }};
+  }
+
+  .problems-btn:hover {
+    background-color: {{ competition.color }};
   }
 </style>
 
@@ -88,51 +97,15 @@
   </div>
 </div>
 
-{% if is_superuser %}
+{% if user.is_superuser %}
 
-<div>
+
   <div
   class='align-items-center d-flex justify-content-center p-5 text-center'
 >
-  <form method='post' enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <h2>Add Problems</h2>
-
-    <table>
-     <tr>
-        <th>{{ form.name.label }}</th>
-        <th>{{ form.zip.label }}</th>
-        <th>{{ form.input_files.label }}</th>
-        <th>{{ form.judging_program.label }}</th>
-        <th></th>
-     </tr>
-     <tr>
-      <td>
-        {{ form.name }}
-      </td>
-      <td>
-        {{ form.zip }}
-      </td>
-      <td>
-        {{ form.input_files }}
-      </td>
-      <td>
-        {{ form.judging_program }}
-      </td>
-      <td>
-        <button class='btn btn-primary'>Add Problem</button>
-      </td>
-     </tr>
-    </table>
-
-  
-  </form>
+  <a class="btn problems-btn"  href="{% url 'judgy:competition_addproblems' code=competition.code %}">Add problems</a>
 </div>
 
-{% else %}
-
-<p>hello</p>
 
 {% endif %}
 

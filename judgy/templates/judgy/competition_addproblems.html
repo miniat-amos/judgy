@@ -1,0 +1,95 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %} {{ competition.name }} {% endblock %}
+
+{% block style %}
+
+<style>
+.new-problem {
+    background-color: {{ competition.color }};
+}
+
+</style>
+
+{% endblock %}
+
+{% block script %} 
+
+<script>
+
+    $(document).ready(function() {
+        $("#new_problem").on("click", add_row);
+    
+        function add_row() {
+            let newRow = `<tr>
+                <td>
+                  {{ form.name }}
+                </td>
+                <td>
+                  {{ form.zip }}
+                </td>
+                <td>
+                  {{ form.input_files }}
+                </td>
+                <td>
+                  {{ form.judging_program }}
+                </td>
+               </tr>`;
+            $("#problem_table").append(newRow);  
+        }
+    });
+    
+    
+
+</script>
+
+{% endblock %} 
+
+{% block main %}   
+<div
+class='align-items-center d-flex justify-content-center p-5 text-center'
+>
+<form method='post' enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <h2>Add Problems</h2>
+
+  <table id="problem_table">
+    <tbody>
+        <tr>
+           <th>{{ form.name.label }}</th>
+           <th>{{ form.zip.label }}</th>
+           <th>{{ form.input_files.label }}</th>
+           <th>{{ form.judging_program.label }}</th>
+           <th></th>
+        </tr>
+        <tr>
+         <td>
+           {{ form.name }}
+         </td>
+         <td>
+           {{ form.zip }}
+         </td>
+         <td>
+           {{ form.input_files }}
+         </td>
+         <td>
+           {{ form.judging_program }}
+         </td>
+        </tr>
+
+    </tbody>
+</table>
+
+<div class="mt-2">
+    <button class="btn new-problem" id="new_problem" type="button" style="width: 100%;">
+        <i class="bi bi-plus"></i>
+    </button>
+</div>
+
+
+
+
+</form>
+</div>
+{% endblock %}
