@@ -10,9 +10,13 @@
 
   }
 
-  .problems-btn {
+  .add-problems-btn {
     background-color: {{ competition.color }};
   }
+
+  .new-problem-btn {
+    background-color: {{ competition.color }};
+}
 
 </style>
 
@@ -27,13 +31,52 @@
       colorDark: '{{ competition.color }}',
       colorLight: '#00000000'
     });
-
-    $('#delete-competition').on('show.bs.modal', event => {
+    
+   $('#delete-competition').on('show.bs.modal', event => {
       $('.modal-body .name').text('{{ competition.name }}');
       $('.modal-body .description').text('{{ competition.description }}');
       $('.modal-body').css('color', '{{ competition.color }}');
     });
+
+
+
+      $("#new-problem").on("click", add_row);
+  
+      function add_row() {
+          const rowCount = $('#problem-table tbody tr').not(':first').length + 1;
+          let newRow = `<tr id="row-${rowCount}">
+            <td>${rowCount}.</td>
+              <td>
+                {{ form.name }}
+              </td>
+              <td>
+                {{ form.zip }}
+              </td>
+              <td>
+                {{ form.input_files }}
+              </td>
+              <td>
+                {{ form.judging_program }}
+              </td>
+               <td>
+                  <button type="button" class="btn delete-btn" data-row="${rowCount}">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+
+             </tr>`;
+          $("#problem-table").append(newRow);  
+      }
+
+    
+      $('#problem-table tbody').on('click', '.delete-btn', function() {
+        const rowNumber = $(this).data('row'); 
+        $(`#row-${rowNumber}`).remove();      
+    });
+    
   });
+
+
 
   function setup() {
     noCanvas();
@@ -100,13 +143,17 @@
   <div
   class='align-items-center d-flex justify-content-center p-5 text-center'
 >
-  <a class="btn problems-btn"  href="{% url 'judgy:competition_addproblems' code=competition.code %}">Add problems</a>
+  <!-- <a class="btn problems-btn"  href="{% url 'judgy:competition_addproblems' code=competition.code %}">Add problems</a> -->
+
+  <button class="btn add-problems-btn ms-1" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
+
 </div>
 
 
 {% endif %}
 
 
-{% include 'judgy/delete_competition.html' %}
+{% include 'judgy/includes/delete_competition.html' %}
+{% include 'judgy/includes/competition_addproblems.html' %}
 
 {% endblock %}

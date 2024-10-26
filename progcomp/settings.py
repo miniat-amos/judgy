@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import pymysql
 from decouple import config
 from pathlib import Path
+import os
 
 pymysql.install_as_MySQLdb()
 
@@ -59,7 +60,7 @@ TEMPLATES = [
     {
         "APP_DIRS": True,
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "OPTIONS": {
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",

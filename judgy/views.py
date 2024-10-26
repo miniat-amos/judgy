@@ -85,14 +85,13 @@ def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
 
     if request.method == "POST":
-     
-
             return redirect("judgy:competition_code", code=code)
 
     else:
-
+        form = ProblemCreationForm()
         context = {
             "competition": competition,
+            "form": form,
         }
 
     return render(request, "judgy/competition_code.html", context)
