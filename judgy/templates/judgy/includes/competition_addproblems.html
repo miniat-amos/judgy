@@ -11,15 +11,17 @@
           {% csrf_token %}
                 
           <table id="problem-table">
+            <thead>
+              <tr>
+                 <th></th>
+                 <th>{{ form.name.label }}</th>
+                 <th>{{ form.zip.label }}</th>
+                 <th>{{ form.input_files.label }}</th>
+                 <th>{{ form.judging_program.label }}</th>
+                 <th>Delete Problem</th>
+              </tr>
+            </thead>
             <tbody>
-                <tr>
-                   <th></th>
-                   <th>{{ form.name.label }}</th>
-                   <th>{{ form.zip.label }}</th>
-                   <th>{{ form.input_files.label }}</th>
-                   <th>{{ form.judging_program.label }}</th>
-                   <th>Delete Problem</th>
-                </tr>
                 <tr id="row-1">
                   <td>1.</td>
                  <td>

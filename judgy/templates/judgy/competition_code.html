@@ -42,7 +42,7 @@
     $("#new-problem").on("click", add_row);
   
     function add_row() {
-        const rowCount = $('#problem-table tbody tr').not(':first').length + 1;
+        const rowCount = $('#problem-table tbody tr').length + 1;
         let newRow = `
           <tr id="row-${rowCount}">
             <td>${rowCount}.</td>
@@ -57,7 +57,7 @@
             </td>
           </tr>`;
           
-        $("#problem-table").append(newRow);  
+        $("#problem-table tbody").append(newRow);  
     }
 
     
@@ -65,6 +65,7 @@
         const rowNumber = $(this).data('row'); 
         $(`#row-${rowNumber}`).remove();      
     });
+
     
   });
 
