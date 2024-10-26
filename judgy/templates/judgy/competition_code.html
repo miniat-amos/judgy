@@ -63,7 +63,12 @@
     
     $('#problem-table tbody').on('click', '.delete-btn', function() {
         const rowNumber = $(this).data('row'); 
-        $(`#row-${rowNumber}`).remove();      
+        const confirmed = confirm(`Are you sure you want to delete row ${rowNumber}?`);
+
+        if (confirmed)
+        {
+          $(`#row-${rowNumber}`).remove();      
+        }
     });
 
     
