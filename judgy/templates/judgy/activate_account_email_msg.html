@@ -1,0 +1,7 @@
+{% autoescape off %}
+Hi {{ user_name|default:"there" }},
+
+Thanks for signing up for Judgy. To finish your registration, please enter this verification code.
+
+{{ verification_code }}
+{% endautoescape %}
