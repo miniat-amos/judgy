@@ -103,26 +103,25 @@ def competition_addproblems(request, code):
     competition = get_object_or_404(Competition, code=code)
 
     if request.method == "POST":
-        # form = ProblemCreationForm(request.POST, request.FILES)
-        # if form.is_valid():
-        #     problem_name = form.cleaned_data["name"]
-        #     problem_dir = create_problem_dir(problem_name, code)
+        form = ProblemCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            problem_name = form.cleaned_data["name"]
+            problem_dir = create_problem_dir(problem_name, code)
 
-        #     zip_file = request.FILES["zip"]
-        #     input_files = request.FILES["input_files"]
-        #     judging_program = request.FILES["judging_program"]
+            zip_file = request.FILES["zip"]
+            input_files = request.FILES["input_files"]
+            judging_program = request.FILES["judging_program"]
 
-        #     save_problem_files(problem_dir, zip_file, f"{problem_name}_zip")
-        #     save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
-        #     save_problem_files(
-        #         problem_dir, judging_program, f"{problem_name}_judging_program"
-        #     )
+            save_problem_files(problem_dir, zip_file, f"{problem_name}_zip")
+            save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
+            save_problem_files(
+                problem_dir, judging_program, f"{problem_name}_judging_program"
+            )
 
             return redirect("judgy:competition_code", code=code)
        
     else:
         form = ProblemCreationForm()
-
         context = {
             "competition": competition,
             "form": form,
