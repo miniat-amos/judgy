@@ -39,37 +39,29 @@
     });
 
 
-
-      $("#new-problem").on("click", add_row);
+    $("#new-problem").on("click", add_row);
   
-      function add_row() {
-          const rowCount = $('#problem-table tbody tr').not(':first').length + 1;
-          let newRow = `<tr id="row-${rowCount}">
+    function add_row() {
+        const rowCount = $('#problem-table tbody tr').not(':first').length + 1;
+        let newRow = `
+          <tr id="row-${rowCount}">
             <td>${rowCount}.</td>
-              <td>
-                {{ form.name }}
-              </td>
-              <td>
-                {{ form.zip }}
-              </td>
-              <td>
-                {{ form.input_files }}
-              </td>
-              <td>
-                {{ form.judging_program }}
-              </td>
-               <td>
-                  <button type="button" class="btn delete-btn" data-row="${rowCount}">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </td>
-
-             </tr>`;
-          $("#problem-table").append(newRow);  
-      }
+            <td> {{ form.name }} </td>
+            <td> {{ form.zip }} </td>
+            <td> {{ form.input_files }} </td>
+            <td> {{ form.judging_program }} </td>
+            <td>
+              <button type="button" class="btn delete-btn" data-row="${rowCount}">
+                  <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+          
+        $("#problem-table").append(newRow);  
+    }
 
     
-      $('#problem-table tbody').on('click', '.delete-btn', function() {
+    $('#problem-table tbody').on('click', '.delete-btn', function() {
         const rowNumber = $(this).data('row'); 
         $(`#row-${rowNumber}`).remove();      
     });
