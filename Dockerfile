@@ -15,9 +15,3 @@ RUN apt-get update && \
     touch ./outputs/output.txt && \
     touch ./outputs/score.txt && \
     rm -rf /var/lib/apt/lists/*
-
-
-
-
-
-

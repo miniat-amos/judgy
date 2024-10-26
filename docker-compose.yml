@@ -24,6 +24,7 @@ services:
       args:
         BASE_IMAGE: python:latest
         COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-python_app
 
   ruby_app:
     build:
