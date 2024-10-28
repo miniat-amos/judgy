@@ -23,15 +23,22 @@ logger = logging.getLogger(__name__)
 def home_view(request):
     now = timezone.now()
 
-    past_competitions = Competition.objects.filter(end__lt=now).order_by('-end')
-    ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by('end')
-    upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
+    past_competitions = Competition.objects.filter(end__lt=now).order_by("-end")
+    ongoing_competitions = Competition.objects.filter(
+        start__lte=now, end__gte=now
+    ).order_by("end")
+    upcoming_competitions = Competition.objects.filter(start__gt=now).order_by("start")
 
-    return render(request, 'judgy/index.html', {
-        'past_competitions': past_competitions,
-        'ongoing_competitions': ongoing_competitions,
-        'upcoming_competitions': upcoming_competitions
-    })
+    return render(
+        request,
+        "judgy/index.html",
+        {
+            "past_competitions": past_competitions,
+            "ongoing_competitions": ongoing_competitions,
+            "upcoming_competitions": upcoming_competitions,
+        },
+    )
+
 
 def login_view(request):
     if request.method == "POST":
@@ -85,6 +92,21 @@ def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
 
     if request.method == "POST":
+        form = ProblemCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            problem_name = form.cleaned_data["name"]
+            problem_dir = create_problem_dir(problem_name, code)
+
+            zip_file = request.FILES["zip"]
+            input_files = request.FILES["input_files"]
+            judging_program = request.FILES["judging_program"]
+
+            save_problem_files(problem_dir, zip_file, f"{problem_name}_zip")
+            save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
+            save_problem_files(
+                problem_dir, judging_program, f"{problem_name}_judging_program"
+            )
+
             return redirect("judgy:competition_code", code=code)
 
     else:
@@ -95,6 +117,7 @@ def competition_code_view(request, code):
         }
 
     return render(request, "judgy/competition_code.html", context)
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -118,7 +141,7 @@ def competition_addproblems(request, code):
             )
 
             return redirect("judgy:competition_code", code=code)
-       
+
     else:
         form = ProblemCreationForm()
         context = {
