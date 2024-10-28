@@ -14,8 +14,7 @@ from pathlib import Path
 
 
 def save_problem_files(problem_dir, dirs, names, files):
-    for i, f in enumerate(files):
-        file = files[i]
+    for i, file in enumerate(files):
         target_dir = problem_dir / dirs[i]
         target_dir.mkdir(exist_ok=True)
         file_path = target_dir / names[i]

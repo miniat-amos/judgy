@@ -100,7 +100,6 @@ def competition_code_view(request, code):
             input_files = request.FILES.getlist("input_files")
             judging_programs = request.FILES.getlist("judging_program")
 
-            print(row_numbers)
             for i, row in enumerate(row_numbers):
                 name = problem_names[i]
                 zip_file = zip_files[i]
