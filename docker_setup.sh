@@ -20,4 +20,4 @@ COMP_CODE=$1
 export COMP_CODE
 
 # Run docker compose build with the COMP_CODE argument
-docker compose build --build-arg COMP_CODE=$COMP_CODE
+docker compose -f docker-compose.languages.yml build --build-arg COMP_CODE=$COMP_CODE
