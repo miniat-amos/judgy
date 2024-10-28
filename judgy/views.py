@@ -114,9 +114,15 @@ def competition_code_view(request, code):
                     f"{name}_judging_program",
                 ]
 
+                file_names = [
+                    f"{name}.zip",
+                    f"{name}-{input_file.name}",
+                    f"{name}-judge.py",
+                ]
+
                 files = [zip_file, input_file, judging_program]
 
-                save_problem_files(problem_dir, directories, files)
+                save_problem_files(problem_dir, directories, file_names, files)
 
                 # save_problem_files(problem_dir, zip_file, f"{name}_zip")
 

@@ -13,12 +13,12 @@ from pathlib import Path
 #             destination.write(chunk)
 
 
-def save_problem_files(problem_dir, dirs, files):
+def save_problem_files(problem_dir, dirs, names, files):
     for i, f in enumerate(files):
         file = files[i]
         target_dir = problem_dir / dirs[i]
         target_dir.mkdir(exist_ok=True)
-        file_path = target_dir / file.name
+        file_path = target_dir / names[i]
         with open(file_path, "wb+") as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
