@@ -51,6 +51,7 @@
             <td> {{ form.input_files }} </td>
             <td> {{ form.judging_program }} </td>
             <td>
+              <input type="hidden" name="row_number" value="${rowCount}">
               <button type="button" class="btn delete-btn" data-row="${rowCount}">
                   <i class="bi bi-trash"></i>
               </button>
@@ -138,7 +139,6 @@
 
 {% if user.is_superuser %}
 
-
   <div
   class='align-items-center d-flex justify-content-center p-5 text-center'
 >
@@ -146,7 +146,6 @@
   <button class="btn add-problems-btn ms-1" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
 
 </div>
-
 
 {% endif %}
 

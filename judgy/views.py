@@ -94,18 +94,37 @@ def competition_code_view(request, code):
     if request.method == "POST":
         form = ProblemCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            problem_name = form.cleaned_data["name"]
-            problem_dir = create_problem_dir(problem_name, code)
+            row_numbers = request.POST.getlist("row_number")
+            problem_names = request.POST.getlist("name")
+            zip_files = request.FILES.getlist("zip")
+            input_files = request.FILES.getlist("input_files")
+            judging_programs = request.FILES.getlist("judging_program")
 
-            zip_file = request.FILES["zip"]
-            input_files = request.FILES["input_files"]
-            judging_program = request.FILES["judging_program"]
+            print(row_numbers)
+            for i, row in enumerate(row_numbers):
+                name = problem_names[i]
+                zip_file = zip_files[i]
+                input_file = input_files[i]
+                judging_program = judging_programs[i]
+                problem_dir = create_problem_dir(name, code)
 
-            save_problem_files(problem_dir, zip_file, f"{problem_name}_zip")
-            save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
-            save_problem_files(
-                problem_dir, judging_program, f"{problem_name}_judging_program"
-            )
+                directories = [
+                    f"{name}_zip",
+                    f"{name}_input_file",
+                    f"{name}_judging_program",
+                ]
+
+                files = [zip_file, input_file, judging_program]
+
+                save_problem_files(problem_dir, directories, files)
+
+                # save_problem_files(problem_dir, zip_file, f"{name}_zip")
+
+                # save_problem_files(problem_dir, input_file, f"{name}_test_files")
+
+                # save_problem_files(
+                #     problem_dir, judging_program, f"{name}_judging_program"
+                # )
 
             return redirect("judgy:competition_code", code=code)
 
@@ -117,39 +136,6 @@ def competition_code_view(request, code):
         }
 
     return render(request, "judgy/competition_code.html", context)
-
-
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-def competition_addproblems(request, code):
-    competition = get_object_or_404(Competition, code=code)
-
-    if request.method == "POST":
-        form = ProblemCreationForm(request.POST, request.FILES)
-        if form.is_valid():
-            problem_name = form.cleaned_data["name"]
-            problem_dir = create_problem_dir(problem_name, code)
-
-            zip_file = request.FILES["zip"]
-            input_files = request.FILES["input_files"]
-            judging_program = request.FILES["judging_program"]
-
-            save_problem_files(problem_dir, zip_file, f"{problem_name}_zip")
-            save_problem_files(problem_dir, input_files, f"{problem_name}_test_files")
-            save_problem_files(
-                problem_dir, judging_program, f"{problem_name}_judging_program"
-            )
-
-            return redirect("judgy:competition_code", code=code)
-
-    else:
-        form = ProblemCreationForm()
-        context = {
-            "competition": competition,
-            "form": form,
-        }
-
-    return render(request, "judgy/competition_addproblems.html", context)
 
 
 @login_required

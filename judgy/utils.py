@@ -3,49 +3,64 @@ from django.conf import settings
 from pathlib import Path
 
 
-def save_problem_files(problem_dir, file, subdir):
-    target_dir = problem_dir / subdir
-    target_dir.mkdir(exist_ok=True)
-    
-    file_path = target_dir / file.name
-    with open(file_path, 'wb+') as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
+# def save_problem_files(problem_dir, file, subdir):
+#     target_dir = problem_dir / subdir
+#     target_dir.mkdir(exist_ok=True)
+
+#     file_path = target_dir / file.name
+#     with open(file_path, "wb+") as destination:
+#         for chunk in file.chunks():
+#             destination.write(chunk)
+
+
+def save_problem_files(problem_dir, dirs, files):
+    for i, f in enumerate(files):
+        file = files[i]
+        target_dir = problem_dir / dirs[i]
+        target_dir.mkdir(exist_ok=True)
+        file_path = target_dir / file.name
+        with open(file_path, "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+
 
 def make_file(passed_in_dir, file_name):
     new_file = Path(passed_in_dir) / file_name
-    new_file.touch(exist_ok=True) 
-    new_file.open('w').close() 
+    new_file.touch(exist_ok=True)
+    new_file.open("w").close()
     return new_file
+
 
 def create_comp_dir(comp_code):
     main_directory = Path(settings.BASE_DIR) / comp_code
     main_directory.mkdir(exist_ok=True)
-    
+
     submissions_directory = main_directory / "submissions"
     submissions_directory.mkdir(exist_ok=True)
-    
+
     output_directory = main_directory / "outputs"
     output_directory.mkdir(exist_ok=True)
-         
+
+
 def create_problem_dir(problem_name, comp_code):
     main_directory = Path(settings.BASE_DIR) / comp_code
     problems_directory = main_directory / "problems"
     problems_directory.mkdir(exist_ok=True)
-    
+
     problem = problems_directory / problem_name
     problem.mkdir(exist_ok=True)
-    
+
     return problem.resolve()
-    
+
+
 def create_user_dir(passed_in_dir, current_user):
-    if not hasattr(current_user, 'id') or not current_user.id:
+    if not hasattr(current_user, "id") or not current_user.id:
         raise ValueError("The current user must have a valid ID.")
 
     main_directory = Path(settings.BASE_DIR) / passed_in_dir
-    
+
     try:
-        
+
         main_directory.mkdir(exist_ok=True)
 
         # Define and create the user-specific directory
@@ -58,4 +73,3 @@ def create_user_dir(passed_in_dir, current_user):
     except OSError as e:
         logging.error(f"Error creating directory {user_directory}: {e}")
         raise
-    
