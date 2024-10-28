@@ -3,16 +3,6 @@ from django.conf import settings
 from pathlib import Path
 
 
-# def save_problem_files(problem_dir, file, subdir):
-#     target_dir = problem_dir / subdir
-#     target_dir.mkdir(exist_ok=True)
-
-#     file_path = target_dir / file.name
-#     with open(file_path, "wb+") as destination:
-#         for chunk in file.chunks():
-#             destination.write(chunk)
-
-
 def save_problem_files(problem_dir, dirs, names, files):
     for i, file in enumerate(files):
         target_dir = problem_dir / dirs[i]

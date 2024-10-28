@@ -123,14 +123,6 @@ def competition_code_view(request, code):
 
                 save_problem_files(problem_dir, directories, file_names, files)
 
-                # save_problem_files(problem_dir, zip_file, f"{name}_zip")
-
-                # save_problem_files(problem_dir, input_file, f"{name}_test_files")
-
-                # save_problem_files(
-                #     problem_dir, judging_program, f"{name}_judging_program"
-                # )
-
             return redirect("judgy:competition_code", code=code)
 
     else:
