@@ -7,10 +7,6 @@
 # competition code. All images will come preloaded
 # with judging programs and test files.
 
-#!/bin/bash
-
-#!/bin/bash
-
 if [ $# -ne 1 ]; then
     echo "Usage: $0 COMP_CODE"
     exit 1
