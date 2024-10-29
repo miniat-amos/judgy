@@ -151,7 +151,6 @@ def submissions(request):
             return render(request, "judgy/submissions.html", context)
 
         else:
-            logger.error(form.errors)
             return render(request, "judgy/submissions.html", {"form": form})
     else:
         form = UploadFileForm()
