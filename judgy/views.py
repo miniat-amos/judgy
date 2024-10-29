@@ -3,8 +3,6 @@ import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from django.conf import settings
-from pathlib import Path
 from django.utils import timezone
 from .forms import (
     AuthenticationForm,
