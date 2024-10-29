@@ -1,4 +1,3 @@
-import logging
 import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -14,8 +13,6 @@ from .forms import (
 from .models import Competition
 from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
-
-logger = logging.getLogger(__name__)
 
 
 def home_view(request):
