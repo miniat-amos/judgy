@@ -90,6 +90,8 @@ def start_containers(f, current_user):
     return output_file, score_file
 
 
+# Create Docker images based on the competition code
+# Preloads all Docker images with problem files
 def create_images(competition_code):
-
-    subprocess.run(f"bash ./docker_setup.sh {competition_code}", shell=True)
+    docker_image_script = Path(settings.BASE_DIR) / "docker_setup.sh"
+    subprocess.run(f"bash {docker_image_script} {competition_code}", shell=True)
