@@ -12,6 +12,7 @@ from .forms import (
     CompetitionCreationForm,
     UploadFileForm,
     ProblemCreationForm,
+    ConfirmationCodeForm
 )
 from .models import Competition
 from .functions import start_containers
@@ -85,25 +86,50 @@ def send_verification_email(request, user, to_email):
     else:
         messages.error(request, f'Problem sending an email to {to_email}. Please verify the address.')
 
+def register_verify_view(request):
+    if request.method == "POST":
+        form = ConfirmationCodeForm(request.POST)
+        if form.is_valid():
+            confirmation_code = ''.join([form.cleaned_data['code1'],
+                                          form.cleaned_data['code2'],
+                                          form.cleaned_data['code3'],
+                                          form.cleaned_data['code4'],
+                                          form.cleaned_data['code5'],
+                                          form.cleaned_data['code6']])
+            # Here you would verify the confirmation code
+            expected_code = request.session.get('confirmation_code')  # Or however you're storing it
+
+            if confirmation_code == expected_code:
+                # Proceed with account verification
+                messages.success(request, 'Your account has been successfully verified!')
+                # return redirect('')
+            else:
+                messages.error(request, 'Invalid confirmation code. Please try again.')
+    else:
+        form = ConfirmationCodeForm()
+        
+    # return redirect("judgy:home")
+    return render(request, "judgy/register_verify.html", {"form": form})
+
 def register_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
             user = form.save()
             send_verification_email(request, user, user.email)
-            login(request, form.save())
-            return redirect("judgy:home")
+            # redirect("judgy:register_verify")
+            # login(request, form.save())
+            # return redirect("judgy:home")
+            return redirect("judgy:register_verify")
     else:
         form = CustomUserCreationForm()
     return render(request, "judgy/register.html", {"form": form})
-
 
 def set_timezone_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         request.session["django_timezone"] = data.get("timezone")
     return redirect("judgy:home")
-
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)

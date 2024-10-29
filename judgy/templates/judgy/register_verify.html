@@ -1,0 +1,65 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}Confirmation Code{% endblock %}
+
+{% block main %}
+
+{% for errors in form.errors.values %}
+  {% for error in errors %}
+    <div
+      class="alert alert-danger alert-dismissible fade fixed-top show text-center"
+      role="alert"
+    >
+      {{ error }}
+      <button class="btn btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+<div
+  class="align-items-center d-flex justify-content-center text-center"
+  style="height: calc(100vh - 7.5rem)"
+>
+  <form method="post">
+    {% csrf_token %}
+
+    <h1>Accout Verification</h1>
+
+    <p>You should have received an email with a six digit code. Please enter it.</p>
+
+    <div class="my-3 d-flex justify-content-center">
+      {{ form.code1 }}
+      {{ form.code2 }}
+      {{ form.code3 }}
+      {{ form.code4 }}
+      {{ form.code5 }}
+      {{ form.code6 }}
+    </div>
+
+    <button class="btn btn-primary p-2 w-25">SUBMIT</button>
+  </form>
+</div>
+
+<script>
+  // Select all input fields for the code
+  const inputs = document.querySelectorAll('input[type="text"]');
+  
+  // Add an input event listener to each field
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      // Move to the next input if the current one is not empty and there is a next input
+      if (input.value.length === 1 && inputs[index + 1]) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    // Allow backspace to focus on the previous field if empty
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Backspace' && input.value === '' && inputs[index - 1]) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+</script>
+
+{% endblock %}
