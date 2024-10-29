@@ -25,11 +25,9 @@ def start_containers(f, current_user):
     submissions_dir = create_user_dir("submissions", current_user)
 
     # Store file in submissions dir
-    submitted_file = os.path.join(submissions_dir, f.name)
+    submitted_file = submissions_dir / f.name
     with open(submitted_file, "wb+") as destination:
         for chunk in f.chunks():
-            # Looping over UploadedFile.chunks() instead of using read()
-            # ensures that large files don’t overwhelm your system’s memory.
             destination.write(chunk)
 
     # Create output directory
@@ -44,10 +42,11 @@ def start_containers(f, current_user):
     docker_image = f"judgy-{submitted_image}_app"
     container_name = f"{submitted_image}_container"
     container_main_directory = "/usr/app"
-    container_user_file = os.path.join(container_main_directory, f.name)
-    container_output_directory = os.path.join(container_main_directory, "outputs")
-    container_output_path = os.path.join(container_output_directory, "output.txt")
-    container_score_path = os.path.join(container_output_directory, "score.txt")
+    container_user_file = container_main_directory / f.name
+    container_output_directory = container_main_directory / "outputs"
+    container_output_path = container_output_directory / "output.txt"
+    container_score_path = container_output_directory / "score.txt"
+
     volumes = {
         submitted_file: {"bind": container_user_file, "mode": "rw"},
         output_file: {

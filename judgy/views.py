@@ -139,14 +139,11 @@ def competition_code_view(request, code):
 @login_required
 def submissions(request):
     if request.method == "POST":
-        logger.info("POST request received.")
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            logger.info("Form is valid.")
             current_user = request.user
-            output_file, score_file = start_containers(
-                request.FILES["file"], current_user
-            )
+            submitted_file = request.FILES["file"]
+            output_file, score_file = start_containers(submitted_file, current_user)
 
             with open(output_file, "r") as f:
                 user_output = f.read()
@@ -159,10 +156,8 @@ def submissions(request):
             return render(request, "judgy/submissions.html", context)
 
         else:
-            logger.error("Form is invalid.")
             logger.error(form.errors)
             return render(request, "judgy/submissions.html", {"form": form})
     else:
-        logger.info("GET request received.")
         form = UploadFileForm()
     return render(request, "judgy/submissions.html", {"form": form})
