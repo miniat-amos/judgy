@@ -14,7 +14,7 @@ from .forms import (
     ProblemCreationForm,
 )
 from .models import Competition
-from .functions import start_containers
+from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
 logger = logging.getLogger(__name__)
@@ -122,7 +122,7 @@ def competition_code_view(request, code):
                 files = [zip_file, input_file, judging_program]
 
                 save_problem_files(problem_dir, directories, file_names, files)
-                
+                create_images(code)
 
             return redirect("judgy:competition_code", code=code)
 

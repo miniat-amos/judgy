@@ -1,5 +1,6 @@
 import os
 import docker
+import subprocess
 from .utils import make_file, create_user_dir
 from django.conf import settings
 from pathlib import Path
@@ -15,7 +16,7 @@ languages = {
 
 def start_containers(f, current_user):
     # Variables for local machine
-    
+
     # Get file extension
     file_extension = os.path.splitext(f.name)[1]
     submitted_image = languages[file_extension]["image"]
@@ -43,7 +44,7 @@ def start_containers(f, current_user):
     docker_image = f"judgy-{submitted_image}_app"
     container_name = f"{submitted_image}_container"
     container_main_directory = "/usr/app"
-    container_user_file = os.path.join(container_main_directory, f.name)  
+    container_user_file = os.path.join(container_main_directory, f.name)
     container_output_directory = os.path.join(container_main_directory, "outputs")
     container_output_path = os.path.join(container_output_directory, "output.txt")
     container_score_path = os.path.join(container_output_directory, "score.txt")
@@ -52,13 +53,13 @@ def start_containers(f, current_user):
         output_file: {
             "bind": container_output_path,
             "mode": "rw",
-    },
+        },
         score_file: {
             "bind": container_score_path,
             "mode": "rw",
-    },
-}
-    
+        },
+    }
+
     if languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
         container = client.containers.run(
@@ -85,5 +86,10 @@ def start_containers(f, current_user):
 
     container.stop()
     container.remove()
-    
+
     return output_file, score_file
+
+
+def create_images(competition_code):
+
+    subprocess.run(f"bash ./docker_setup.sh {competition_code}", shell=True)
