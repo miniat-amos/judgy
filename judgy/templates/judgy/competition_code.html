@@ -7,17 +7,15 @@
 <style>
   ::selection {
     color: {{ competition.color }};
-
   }
 
   .add-problems-btn {
-    background-color: {{ competition.color }};
+    background: {{ competition.color }};
   }
 
   .new-problem-btn {
-    background-color: {{ competition.color }};
-}
-
+    background: {{ competition.color }};
+  }
 </style>
 
 {% endblock %}
@@ -38,57 +36,59 @@
       $('.modal-body').css('color', '{{ competition.color }}');
     });
 
-    // Add a new row when they want to add a new problem
-    $("#new-problem").on("click", add_row);
-  
-    function add_row() {
-        const rowCount = $('#problem-table tbody tr').length + 1;
-        let newRow = `
-          <tr id="row-${rowCount}">
-            <td>${rowCount}.</td>
-            <td> {{ form.name }} </td>
-            <td> {{ form.zip }} </td>
-            <td> {{ form.input_files }} </td>
-            <td> {{ form.judging_program }} </td>
-            <td>
-              <input type="hidden" name="row_number" value="${rowCount}">
-              <button type="button" class="btn delete-btn" data-row="${rowCount}">
-                  <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>`;
-          
-        $("#problem-table tbody").append(newRow);  
-    }
-
-    
-    // Delete the row when they to delete a problem
-    $('#problem-table tbody').on('click', '.delete-btn', function() {
-        const rowNumber = $(this).data('row'); 
-        const confirmed = confirm(`Are you sure you want to delete row ${rowNumber}?`);
-
-        if (confirmed)
-        {
-          $(`#row-${rowNumber}`).remove();      
+    $('#delete-competition .btn-danger').on('click', async () => {
+      const response = await fetch("{% url 'judgy:competition_code' competition.code %}", {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}'
         }
+      });
+      if (response.ok) location.href = "{% url 'judgy:home' %}";
     });
 
-    
+    $("#new-problem").on("click", () => {
+      const row_count = $('#problem-table tbody tr').length + 1;
+        $("#problem-table tbody").append(`
+          <tr id="row-${row_count}">
+            <td>${row_count}.</td>
+            <td>{{ form.name }}</td>
+            <td>{{ form.zip }}</td>
+            <td>{{ form.input_files }}</td>
+            <td>{{ form.judging_program }}</td>
+            <td>
+              <input type="hidden" name="row_number" value="${row_count}" />
+              <button type="button" class="btn delete-btn" data-row="${row_count}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+    });
+
+    $('#problem-table tbody').on('click', function () {
+      const row_number = $(this).data('row');
+      const confirmed = confirm(
+        `Are you sure you want to delete row ${row_number}?`
+      );
+      if (confirmed) $(`#row-${row_number}`).remove();
+    });
   });
-
-
 
   function setup() {
     noCanvas();
+    let intervalID;
     const update_progress_bar = () => {
       const start = new Date('{{ competition.start|date:'Y-m-d H:i:s' }}');
       const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
       const now = new Date();
 
-      $('.progress-bar').css('width', `${constrain(map(now, start, end, 0, 100), 0, 100)}%`);
+      const progress = constrain(map(now, start, end, 0, 100), 0, 100);
+      $('.progress-bar').css('width', `${progress}%`);
+
+      if (progress == 100) clearInterval(intervalID);
     };
     update_progress_bar();
-    setInterval(update_progress_bar, 1000);
+    intervalID = setInterval(update_progress_bar, 100);
   }
 </script>
 

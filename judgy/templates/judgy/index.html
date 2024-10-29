@@ -53,8 +53,6 @@
             .text(`Ending in: ${d}d ${h}h ${m}m`)
             .removeClass('text-success text-warning text-danger')
             .addClass(d ? 'text-success' : h ? 'text-warning' : 'text-danger');
-        } else {
-          location.reload();
         }
       });
       $('#upcoming-tab-pane .card').each(function () {
@@ -71,8 +69,6 @@
             .text(`Starting in: ${d}d ${h}h ${m}m`)
             .removeClass('text-success text-warning text-danger')
             .addClass(d ? 'text-success' : h ? 'text-warning' : 'text-danger');
-        } else {
-          location.reload();
         }
       });
     };
@@ -80,9 +76,27 @@
     setInterval(update_time, 1000);
 
     $('#delete-competition').on('show.bs.modal', event => {
+      $('.modal-body').data('code', $(event.relatedTarget).data('code'));
       $('.modal-body .name').text($(event.relatedTarget).data('name'));
       $('.modal-body .description').text($(event.relatedTarget).data('description'));
       $('.modal-body').css('color', $(event.relatedTarget).data('color'));
+    });
+
+    $('#delete-competition .btn-danger').on('click', async () => {
+      const code = $('.modal-body').data('code');
+      const response = await fetch(
+        "{% url 'judgy:competition_code' 'code' %}".replace(
+          'code',
+          code
+        ),
+        {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        }
+      );
+      if (response.ok) $(`[data-code=${code}]`).closest('.col').remove();
     });
   });
 </script>
@@ -164,6 +178,7 @@
                     class="delete btn p-0"
                     data-bs-toggle="modal"
                     data-bs-target="#delete-competition"
+                    data-code="{{ competition.code }}"
                     data-name="{{ competition.name }}"
                     data-description="{{ competition.description }}"
                     data-color="{{ competition.color }}"
@@ -204,6 +219,7 @@
                     class="delete btn p-0"
                     data-bs-toggle="modal"
                     data-bs-target="#delete-competition"
+                    data-code="{{ competition.code }}"
                     data-name="{{ competition.name }}"
                     data-description="{{ competition.description }}"
                     data-color="{{ competition.color }}"
@@ -243,6 +259,7 @@
                     class="delete btn p-0"
                     data-bs-toggle="modal"
                     data-bs-target="#delete-competition"
+                    data-code="{{ competition.code }}"
                     data-name="{{ competition.name }}"
                     data-description="{{ competition.description }}"
                     data-color="{{ competition.color }}"

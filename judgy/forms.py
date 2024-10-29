@@ -141,7 +141,7 @@ class CompetitionCreationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["name"].required = True
-        self.fields["description"].required = False
+        self.fields["description"].required = True
         self.fields["start"].required = True
         self.fields["end"].required = True
         self.fields["enroll_start"].required = True
