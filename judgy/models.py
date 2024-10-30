@@ -4,11 +4,9 @@ from django.db import models
 from .managers import UserManager
 
 class User(AbstractUser):
-    '''
-    User model where email is the unique identifier for authentication instead of username.
-    '''
     username = None
     email = models.EmailField(unique=True)
+    is_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
