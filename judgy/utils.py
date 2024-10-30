@@ -11,7 +11,7 @@ def make_file(passed_in_dir, file_name):
 
 
 def create_comp_dir(comp_code):
-    main_directory = Path(settings.BASE_DIR) / comp_code
+    main_directory = Path(settings.BASE_DIR) / comp_code.lower()
     main_directory.mkdir(exist_ok=True)
 
     submissions_directory = main_directory / "submissions"
@@ -22,7 +22,7 @@ def create_comp_dir(comp_code):
 
 
 def create_problem_dir(problem_name, comp_code):
-    main_directory = Path(settings.BASE_DIR) / comp_code
+    main_directory = Path(settings.BASE_DIR) / comp_code.lower()
 
     problems_directory = main_directory / "problems"
     problems_directory.mkdir(exist_ok=True)

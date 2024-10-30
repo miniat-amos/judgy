@@ -93,4 +93,4 @@ def start_containers(f, current_user):
 # Preloads all Docker images with problem files
 def create_images(competition_code):
     docker_image_script = Path(settings.BASE_DIR) / "docker_setup.sh"
-    subprocess.run(f"bash {docker_image_script} {competition_code}", shell=True)
+    subprocess.run(f"bash {docker_image_script} {competition_code.lower()}", shell=True)
