@@ -11,20 +11,24 @@ def make_file(passed_in_dir, file_name):
 
 
 def create_comp_dir(comp_code):
-    main_directory = Path(settings.BASE_DIR) / comp_code.lower()
+    main_directory = Path(settings.BASE_DIR) / "competitions"
     main_directory.mkdir(exist_ok=True)
 
-    submissions_directory = main_directory / "submissions"
+    comp_directory = main_directory / comp_code.lower()
+    comp_directory.mkdir(exist_ok=True)
+
+    submissions_directory = comp_directory / "submissions"
     submissions_directory.mkdir(exist_ok=True)
 
-    output_directory = main_directory / "outputs"
+    output_directory = comp_directory / "outputs"
     output_directory.mkdir(exist_ok=True)
 
 
 def create_problem_dir(problem_name, comp_code):
-    main_directory = Path(settings.BASE_DIR) / comp_code.lower()
+    main_directory = Path(settings.BASE_DIR) / "competitions"
+    comp_directory = main_directory / comp_code.lower()
 
-    problems_directory = main_directory / "problems"
+    problems_directory = comp_directory / "problems"
     problems_directory.mkdir(exist_ok=True)
 
     problem = problems_directory / problem_name
