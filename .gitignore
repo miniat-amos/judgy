@@ -46,6 +46,7 @@
 # Docker files
 !Dockerfile
 !docker-compose.yml
+!docker-compose.languages.yml
 !docker_setup.sh
 !docker_delete.sh
 

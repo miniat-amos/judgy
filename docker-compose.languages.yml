@@ -1,0 +1,36 @@
+services:
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: python:latest
+        COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-python_app
+
+  ruby_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ruby:latest
+        COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-ruby_app
+
+  gcc_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: gcc:latest
+        COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-gcc_app
+
+  node_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: node:latest
+        COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-node_app

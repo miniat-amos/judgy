@@ -1,5 +1,4 @@
 import json
-import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
@@ -12,11 +11,10 @@ from .forms import (
     ProblemCreationForm,
     UploadFileForm
 )
-from .functions import start_containers
 from .models import Competition
+from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
-logger = logging.getLogger(__name__)
 
 def home_view(request):
     now = timezone.now()
@@ -119,6 +117,7 @@ def competition_code_view(request, code):
                 files = [zip_file, input_file, judging_program]
 
                 save_problem_files(problem_dir, directories, file_names, files)
+                create_images(code)
 
             return redirect("judgy:competition_code", code=code)
         return render(request, "judgy/competition_code.html", {
@@ -137,13 +136,11 @@ def competition_code_view(request, code):
 @login_required
 def submissions(request):
     if request.method == "POST":
-        logger.info("POST request received.")
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            logger.info("Form is valid.")
-            output_file, score_file = start_containers(
-                request.FILES["file"], request.user
-            )
+            current_user = request.user
+            submitted_file = request.FILES["file"]
+            output_file, score_file = start_containers(submitted_file, current_user)
 
             with open(output_file, "r") as f:
                 user_output = f.read()
@@ -156,10 +153,7 @@ def submissions(request):
                 "user_score": user_score
             })
         else:
-            logger.error("Form is invalid.")
-            logger.error(form.errors)
-            return render(request, "judgy/submissions.html", { "form": form })
+            return render(request, "judgy/submissions.html", {"form": form})
     else:
-        logger.info("GET request received.")
         form = UploadFileForm()
     return render(request, "judgy/submissions.html", { "form": form })
