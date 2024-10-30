@@ -4,7 +4,7 @@ FROM ${BASE_IMAGE}
 
 ARG COMP_CODE
 
-WORKDIR /usr/ap
+WORKDIR /usr/app
 
 COPY ./${COMP_CODE}/problems/*/*judging_program/ .
 COPY ./${COMP_CODE}/problems/*/*test_files/ .
