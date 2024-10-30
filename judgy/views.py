@@ -9,12 +9,28 @@ from .forms import (
     CompetitionCreationForm,
     CustomUserCreationForm,
     ProblemCreationForm,
+    ConfirmationCodeForm,
     UploadFileForm
 )
 from .models import Competition
 from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
+# from .tokens import account_activation_token
+from django.template.loader import render_to_string
+from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth import get_user_model
+from datetime import timedelta
+from django.utils import timezone
+import random
+import string
+
+logger = logging.getLogger(__name__)
 
 def home_view(request):
     now = timezone.now()
@@ -47,15 +63,67 @@ def logout_view(request):
     logout(request)
     return redirect("judgy:home")
 
+def generate_verification_code(length=6):
+    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+
+def send_verification_email(request, user, to_email):
+    verification_code = generate_verification_code()  # Now generates a 6-digit numeric code
+    user.verification_code = verification_code
+    user.verification_code_expiration = timezone.now() + timedelta(minutes=10)  # Set expiration
+    user.save()
+
+    mail_subject = 'Welcome to Judgy!'
+    message = render_to_string("../templates/judgy/activate_account_email_msg.html",
+    {
+        'user_name': user.first_name,
+        'domain': get_current_site(request).domain,
+        'protocol': 'https' if request.is_secure() else 'http',
+        'verification_code': verification_code,  # Include the numeric code
+    })
+    email = EmailMessage(mail_subject, message, to=[to_email])
+    if email.send():
+        messages.success(request, 'Successfully created account. Please check your inbox for the verification code.')
+    else:
+        messages.error(request, f'Problem sending an email to {to_email}. Please verify the address.')
+
+def register_verify_view(request):
+    if request.method == "POST":
+        form = ConfirmationCodeForm(request.POST)
+        if form.is_valid():
+            confirmation_code = ''.join([form.cleaned_data['code1'],
+                                          form.cleaned_data['code2'],
+                                          form.cleaned_data['code3'],
+                                          form.cleaned_data['code4'],
+                                          form.cleaned_data['code5'],
+                                          form.cleaned_data['code6']])
+            # Here you would verify the confirmation code
+            expected_code = request.session.get('confirmation_code')  # Or however you're storing it
+
+            if confirmation_code == expected_code:
+                # Proceed with account verification
+                messages.success(request, 'Your account has been successfully verified!')
+                # return redirect('')
+            else:
+                messages.error(request, 'Invalid confirmation code. Please try again.')
+    else:
+        form = ConfirmationCodeForm()
+        
+    # return redirect("judgy:home")
+    return render(request, "judgy/register_verify.html", {"form": form})
+
 def register_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
-            login(request, form.save())
-            return redirect("judgy:home")
+            user = form.save()
+            send_verification_email(request, user, user.email)
+            # redirect("judgy:register_verify")
+            # login(request, form.save())
+            # return redirect("judgy:home")
+            return redirect("judgy:register_verify")
     else:
         form = CustomUserCreationForm()
-    return render(request, "judgy/register.html", { "form": form })
+    return render(request, "judgy/register.html", {"form": form})
 
 def set_timezone_view(request):
     if request.method == "POST":

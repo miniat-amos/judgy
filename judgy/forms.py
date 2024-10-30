@@ -276,3 +276,56 @@ class ProblemCreationForm(forms.Form):
             }
         ),
     )
+
+class ConfirmationCodeForm(forms.Form):
+    code1 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'autofocus': 'autofocus',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+    
+    code2 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+    
+    code3 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+    
+    code4 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+    
+    code5 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+    
+    code6 = forms.CharField(max_length=1, label='', widget=forms.TextInput(attrs={
+        'class': 'form-control text-center',
+        'maxlength': '1',
+        'style': 'width: 50px; display: inline-block;'
+    }))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Combine the code parts into a single confirmation code
+        confirmation_code = ''.join([cleaned_data.get('code1', ''),
+                                      cleaned_data.get('code2', ''),
+                                      cleaned_data.get('code3', ''),
+                                      cleaned_data.get('code4', ''),
+                                      cleaned_data.get('code5', ''),
+                                      cleaned_data.get('code6', '')])
+        # Here you can add additional validation, if needed
+        if not confirmation_code:
+            raise forms.ValidationError('Please enter the confirmation code.')
+
+        return cleaned_data
