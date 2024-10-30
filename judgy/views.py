@@ -30,8 +30,6 @@ from django.utils import timezone
 import random
 import string
 
-logger = logging.getLogger(__name__)
-
 def home_view(request):
     now = timezone.now()
 
