@@ -7,7 +7,7 @@ ARG COMP_CODE
 WORKDIR /usr/app
 
 COPY ./competitions/${COMP_CODE}/problems/*/*judging_program/ .
-COPY ./competitions/${COMP_CODE}/problems/*/*test_files/ .
+COPY ./competitions/${COMP_CODE}/problems/*/*input_file/ .
 
 RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
