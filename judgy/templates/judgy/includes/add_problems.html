@@ -1,0 +1,50 @@
+<div id="add-problems" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Add Problems</h1>
+        <button class="btn btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          {% csrf_token %}
+
+          <table id="problem-table">
+            <thead>
+              <tr>
+                <th>Problem #</th>
+                <th>{{ form.name.label }}</th>
+                <th>{{ form.zip.label }}</th>
+                <th>{{ form.input_files.label }}</th>
+                <th>{{ form.judging_program.label }}</th>
+                <th>Delete Problem</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-1">
+                <td>1.</td>
+                <td>{{ form.name }}</td>
+                <td>{{ form.zip }}</td>
+                <td>{{ form.input_files }}</td>
+                <td>{{ form.judging_program }}</td>
+                <td>
+                  <input type="hidden" name="row_number" value="1">
+                  <button class="delete-problem btn btn-danger" data-row="1">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button id="new-problem" class="btn p-2 w-100" style="background: {{ competition.color }};">
+            <i class="bi bi-plus"></i>
+          </button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-success" data-bs-dismiss="modal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>

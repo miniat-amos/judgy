@@ -8,14 +8,6 @@
   ::selection {
     color: {{ competition.color }};
   }
-
-  .add-problems-btn {
-    background: {{ competition.color }};
-  }
-
-  .new-problem-btn {
-    background: {{ competition.color }};
-  }
 </style>
 
 {% endblock %}
@@ -46,26 +38,26 @@
       if (response.ok) location.href = "{% url 'judgy:home' %}";
     });
 
-    $("#new-problem").on("click", () => {
+    $('#new-problem').on('click', () => {
       const row_count = $('#problem-table tbody tr').length + 1;
-        $("#problem-table tbody").append(`
-          <tr id="row-${row_count}">
-            <td>${row_count}.</td>
-            <td>{{ form.name }}</td>
-            <td>{{ form.zip }}</td>
-            <td>{{ form.input_files }}</td>
-            <td>{{ form.judging_program }}</td>
-            <td>
-              <input type="hidden" name="row_number" value="${row_count}" />
-              <button type="button" class="btn delete-btn" data-row="${row_count}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `);
+      $('#problem-table tbody').append(`
+        <tr id="row-${row_count}">
+          <td>${row_count}.</td>
+          <td>{{ form.name }}</td>
+          <td>{{ form.zip }}</td>
+          <td>{{ form.input_files }}</td>
+          <td>{{ form.judging_program }}</td>
+          <td>
+            <input type="hidden" name="row_number" value="${row_count}" />
+            <button class="delete-problem btn btn-danger" data-row="${row_count}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `);
     });
 
-    $('#problem-table tbody').on('click', function () {
+    $('.delete-problem').on('click', function () {
       const row_number = $(this).data('row');
       const confirmed = confirm(
         `Are you sure you want to delete row ${row_number}?`
@@ -138,19 +130,12 @@
 </div>
 
 {% if user.is_superuser %}
-
-  <div
-  class='align-items-center d-flex justify-content-center p-5 text-center'
->
-
-  <button class="btn add-problems-btn ms-1" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
-
-</div>
-
+  <div class="pt-5 text-center">
+    <button class="btn" style="background: {{ competition.color }};" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
+  </div>
 {% endif %}
 
-
 {% include 'judgy/includes/delete_competition.html' %}
-{% include 'judgy/includes/competition_addproblems.html' %}
+{% include 'judgy/includes/add_problems.html' %}
 
 {% endblock %}
