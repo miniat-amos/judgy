@@ -19,13 +19,11 @@ from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
 
 def home_view(request):
-    show_search_bar = True
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lt=now).order_by("-end")
     ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by("end")
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by("start")
-    
     
     return render(
         request,
@@ -34,23 +32,19 @@ def home_view(request):
             "past_competitions": past_competitions,
             "ongoing_competitions": ongoing_competitions,
             "upcoming_competitions": upcoming_competitions,
-            "show_search_bar": show_search_bar
         }
     )
     
-def search_view(request):
-    query = request.GET.get('query', '')
-    competitions = Competition.objects.filter(
-        Q(name__icontains=query) | Q(code__icontains=query)
-    )
+def search_view(self):
+    competitions = Competition.objects.all()
         
     data = [
         {
-         "name": obj.name, 
-         "code": obj.code,
-         "url": reverse('judgy:competition_code', args=[obj.code]),
+         "name": competition.name, 
+         "code": competition.code,
+         "url": reverse('judgy:competition_code', args=[competition.code]),
         }
-        for obj in competitions
+        for competition in competitions
     ]
     
     return JsonResponse(data, safe=False)

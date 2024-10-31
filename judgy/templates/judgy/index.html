@@ -32,42 +32,6 @@
   }
 
 
-  .search-container {
-    position: relative;
-    width: 300px; /* Adjust width as needed */
-}
-
-#search-bar {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-.dropdown-results {
-    position: absolute;
-    top: 100%; 
-    left: 0;
-    width: 100%;
-    background-color: black;
-    border: 1px solid #ccc;
-    border-top: none;
-    max-height: 200px;
-    overflow-y: auto;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    z-index: 1000; 
-}
-
-.dropdown-results li {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.dropdown-results li:hover {
-    background-color: gray;
-}
-
 </style>
 
 {% endblock %}
@@ -138,35 +102,7 @@
     });
   });
 
-  $(document).ready(function() {
-        $('#search-bar').on("input", function() { 
-            let query = $(this).val();
 
-            if (query.trim() === "") {
-              $('search-results').empty().hide()
-              return;
-            }
-            $.ajax({
-                url: "search/",
-                data: { 'query': query },
-                success: function(data) {
-                    console.log(data);
-                    let results = $('#search-results');
-                    results.empty();
-
-                    if(data.length) {
-                      $.each(data, function(index, item) {
-                        results.append('<li><a href="' + item.url + '">' + item.name + ' (' + item.code + ')</a></li>');
-                      });
-                      results.show()
-                    } else {
-                      results.empty()
-                    }
-                }
-            });
-        });
-    }
-);
 
 
 
