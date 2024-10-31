@@ -83,11 +83,10 @@
       $(document).ready(function() {
 
         $.ajax({
-            url: "search/",
+            url: "{% url 'judgy:search' %}",
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                console.log(data.name);
                 let results = $('#search-results');
                 
                 $('#search-bar').on("input", function() {
