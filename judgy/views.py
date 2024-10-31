@@ -1,9 +1,11 @@
 import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.db.models import Q
 from .forms import (
     AuthenticationForm,
     CompetitionCreationForm,
@@ -17,21 +19,41 @@ from .utils import create_comp_dir, create_problem_dir, save_problem_files
 
 
 def home_view(request):
+    show_search_bar = True
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lt=now).order_by("-end")
     ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by("end")
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by("start")
-
+    
+    
     return render(
         request,
         "judgy/index.html",
         {
             "past_competitions": past_competitions,
             "ongoing_competitions": ongoing_competitions,
-            "upcoming_competitions": upcoming_competitions
+            "upcoming_competitions": upcoming_competitions,
+            "show_search_bar": show_search_bar
         }
     )
+    
+def search_view(request):
+    query = request.GET.get('query', '')
+    competitions = Competition.objects.filter(
+        Q(name__icontains=query) | Q(code__icontains=query)
+    )
+        
+    data = [
+        {
+         "name": obj.name, 
+         "code": obj.code,
+         "url": reverse('judgy:competition_code', args=[obj.code]),
+        }
+        for obj in competitions
+    ]
+    
+    return JsonResponse(data, safe=False)
 
 def login_view(request):
     if request.method == "POST":
