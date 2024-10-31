@@ -30,7 +30,7 @@
 
       .search-container {
         position: relative;
-        width: 300px; /* Adjust width as needed */
+        width: 300px; 
     }
     
     #search-bar {
@@ -63,6 +63,8 @@
     .dropdown-results li:hover {
         background-color: gray;
     }
+
+    
     </style>
 
     <script>
@@ -104,7 +106,7 @@
                     if (filteredData.length) {
                         results.empty();
                         $.each(filteredData, function(index, item) {
-                            results.append('<li><a href="' + item.url + '">' + item.name + ' (' + item.code + ')</a></li>');
+                            results.append('<li><a style="display:block" href="' + item.url + '">' + item.name + ' (' + item.code + ')</a></li>');
                         });
                         results.show();
                     } else {
@@ -112,9 +114,6 @@
                     }
                 });
             },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
         });
     });
     
