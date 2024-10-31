@@ -98,6 +98,8 @@
                         results.empty().hide();
                         return;
                     }
+
+                    query = query.toLowerCase()
     
                     let filteredData = data.filter(item => 
                       item.name.toLowerCase().includes(query) || item.code.toLowerCase().includes(query)
