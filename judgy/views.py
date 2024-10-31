@@ -3,10 +3,12 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Q
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from .forms import (
     AuthenticationForm,
     CompetitionCreationForm,
@@ -15,8 +17,6 @@ from .forms import (
     ConfirmationCodeForm,
     UploadFileForm,
 )
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 from .models import Competition
 from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
@@ -44,19 +44,22 @@ def home_view(request):
     )
 
 
-def search_view(self):
-    competitions = Competition.objects.all()
+def search_view(request):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        competitions = Competition.objects.all()
 
-    data = [
-        {
-            "name": competition.name,
-            "code": competition.code,
-            "url": reverse("judgy:competition_code", args=[competition.code]),
-        }
-        for competition in competitions
-    ]
+        data = [
+            {
+                "name": competition.name,
+                "code": competition.code,
+                "url": reverse("judgy:competition_code", args=[competition.code]),
+            }
+            for competition in competitions
+        ]
 
-    return JsonResponse(data, safe=False)
+        return JsonResponse(data, safe=False)
+    else:
+        return HttpResponseForbidden("Forbidden")
 
 
 def login_view(request):
