@@ -20,18 +20,26 @@
 
 ########################################
 #                                      #
-#               Judgy App              #
+#               Ngninx                 #
 #                                      #
 ########################################
-!judgy/
+!nginx/
 
 ########################################
 #                                      #
 #   Main Django files and directories  #
 #                                      #
 ########################################
-!progcomp/
-!manage.py
+
+!django_project/
+django_project/*
+!django_project/judgy/
+!django_project/progcomp/
+!django_project/manage.py
+!django_project/docker-compose.languages.yml
+!django_project/Dockerfile
+!django_project/docker_setup.sh
+!django_project/docker_delete.sh
 
 ########################################
 #                                      #
@@ -39,16 +47,16 @@
 #                                      #
 ########################################
 
+# Files for server setup
+!docker-compose.web.yml
+!Dockerfile
+!entrypoint.sh
+
+
 # Requirements files
 !requirements.in
 !requirements.txt
 
-# Docker files
-!Dockerfile
-!docker-compose.yml
-!docker-compose.languages.yml
-!docker_setup.sh
-!docker_delete.sh
 
 **/__pycache__
 **/migrations

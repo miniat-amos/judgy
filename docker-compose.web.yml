@@ -1,0 +1,48 @@
+services:
+  db:
+    image: mysql/mysql-server:8.0
+    container_name: judgy_mysql
+    restart: always
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  django_gunicorn:
+    container_name: judgy_app
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - static:/static
+    env_file:
+      - .env
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+
+  nginx:
+    container_name: judgy_nginx
+    build: ./nginx
+    volumes:
+      - static:/static
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - django_gunicorn
+        
+volumes:
+  static:
+  data:
