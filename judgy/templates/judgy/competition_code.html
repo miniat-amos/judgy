@@ -40,28 +40,27 @@
 
     $('#new-problem').on('click', () => {
       const row_count = $('#problem-table tbody tr').length + 1;
-      $('#problem-table tbody').append(`
-        <tr id="row-${row_count}">
-          <td>${row_count}.</td>
-          <td>{{ form.name }}</td>
-          <td>{{ form.zip }}</td>
-          <td>{{ form.input_files }}</td>
-          <td>{{ form.judging_program }}</td>
-          <td>
-            <input type="hidden" name="row_number" value="${row_count}" />
-            <button class="delete-problem btn btn-danger" data-row="${row_count}">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `);
+        $("#problem-table tbody").append(`
+          <tr id="row-${row_count}">
+            <td>${row_count}.</td>
+            <td>{{ form.name }}</td>
+            <td>{{ form.zip }}</td>
+            <td>{{ form.input_files }}</td>
+            <td>{{ form.judging_program }}</td>
+            <td>
+              <input type="hidden" name="row_number" value="${row_count}" />
+              <button type="button" class="btn btn-danger delete-btn" data-row="${row_count}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `);
     });
 
-    $('.delete-problem').on('click', function () {
+    
+    $(document).on('click', '.delete-btn', function () {
       const row_number = $(this).data('row');
-      const confirmed = confirm(
-        `Are you sure you want to delete row ${row_number}?`
-      );
+      const confirmed = confirm(`Are you sure you want to delete row ${row_number}?`);
       if (confirmed) $(`#row-${row_number}`).remove();
     });
   });

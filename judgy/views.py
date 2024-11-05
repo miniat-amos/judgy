@@ -1,31 +1,36 @@
 import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.db.models import Q
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from .forms import (
     AuthenticationForm,
     CompetitionCreationForm,
     CustomUserCreationForm,
     ProblemCreationForm,
     ConfirmationCodeForm,
-    UploadFileForm
+    UploadFileForm,
 )
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 from .models import Competition
 from .functions import start_containers, create_images
 from .utils import create_comp_dir, create_problem_dir, save_problem_files
 from datetime import timedelta
 import random
 
+
 def home_view(request):
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lt=now).order_by("-end")
-    ongoing_competitions = Competition.objects.filter(start__lte=now, end__gte=now).order_by("end")
+    ongoing_competitions = Competition.objects.filter(
+        start__lte=now, end__gte=now
+    ).order_by("end")
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by("start")
 
     return render(
@@ -34,9 +39,28 @@ def home_view(request):
         {
             "past_competitions": past_competitions,
             "ongoing_competitions": ongoing_competitions,
-            "upcoming_competitions": upcoming_competitions
-        }
+            "upcoming_competitions": upcoming_competitions,
+        },
     )
+
+
+def search_view(request):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        competitions = Competition.objects.all()
+
+        data = [
+            {
+                "name": competition.name,
+                "code": competition.code,
+                "url": reverse("judgy:competition_code", args=[competition.code]),
+            }
+            for competition in competitions
+        ]
+
+        return JsonResponse(data, safe=False)
+    else:
+        return HttpResponseForbidden("Forbidden")
+
 
 def login_view(request):
     if request.method == "POST":
@@ -46,14 +70,17 @@ def login_view(request):
             return redirect("judgy:home")
     else:
         form = AuthenticationForm()
-    return render(request, "judgy/login.html", { "form": form })
+    return render(request, "judgy/login.html", {"form": form})
+
 
 def logout_view(request):
     logout(request)
     return redirect("judgy:home")
 
+
 def generate_verification_code(length=6):
-    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return "".join([str(random.randint(0, 9)) for _ in range(length)])
+
 
 def send_verification_email(request, user, to_email):
     verification_code = generate_verification_code()
@@ -61,12 +88,11 @@ def send_verification_email(request, user, to_email):
     user.verification_code_expiration = timezone.now() + timedelta(minutes=10)
     user.save()
 
-    mail_subject = 'Welcome to Judgy!'
-    message = render_to_string("../templates/judgy/activate_account_email_msg.html",
-    {
-        'user_name': user.first_name,
-        'verification_code': verification_code
-    })
+    mail_subject = "Welcome to Judgy!"
+    message = render_to_string(
+        "../templates/judgy/activate_account_email_msg.html",
+        {"user_name": user.first_name, "verification_code": verification_code},
+    )
     email = EmailMessage(mail_subject, message, to=[to_email])
     email.send()
     # if email.send():
@@ -74,29 +100,35 @@ def send_verification_email(request, user, to_email):
     # else:
     #     messages.error(request, f'Problem sending an email to {to_email}. Please verify the address.')
 
+
 def register_verify_view(request):
     if request.method == "POST":
         form = ConfirmationCodeForm(request.POST)
         if form.is_valid():
-            confirmation_code = ''.join([form.cleaned_data['code1'],
-                                          form.cleaned_data['code2'],
-                                          form.cleaned_data['code3'],
-                                          form.cleaned_data['code4'],
-                                          form.cleaned_data['code5'],
-                                          form.cleaned_data['code6']])
-            expected_code = request.session.get('confirmation_code')
+            confirmation_code = "".join(
+                [
+                    form.cleaned_data["code1"],
+                    form.cleaned_data["code2"],
+                    form.cleaned_data["code3"],
+                    form.cleaned_data["code4"],
+                    form.cleaned_data["code5"],
+                    form.cleaned_data["code6"],
+                ]
+            )
+            expected_code = request.session.get("confirmation_code")
 
             if confirmation_code == expected_code:
                 login(request, form.save())
                 return redirect("judgy:home")
                 # messages.success(request, 'Your account has been successfully verified!')
             else:
-                messages.error(request, 'Invalid confirmation code. Please try again.')
+                messages.error(request, "Invalid confirmation code. Please try again.")
     else:
         form = ConfirmationCodeForm()
-        
+
     # return redirect("judgy:home")
     return render(request, "judgy/register_verify.html", {"form": form})
+
 
 def register_view(request):
     if request.method == "POST":
@@ -109,11 +141,13 @@ def register_view(request):
         form = CustomUserCreationForm()
     return render(request, "judgy/register.html", {"form": form})
 
+
 def set_timezone_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         request.session["django_timezone"] = data.get("timezone")
     return redirect("judgy:home")
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -126,17 +160,19 @@ def competition_create_view(request):
             return redirect("judgy:competition_code", code=competition.code)
     else:
         form = CompetitionCreationForm()
-    return render(request, "judgy/competition_create.html", { "form": form })
+    return render(request, "judgy/competition_create.html", {"form": form})
+
 
 def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
 
     if request.method == "GET":
         form = ProblemCreationForm()
-        return render(request, "judgy/competition_code.html", {
-            "competition": competition,
-            "form": form
-        })
+        return render(
+            request,
+            "judgy/competition_code.html",
+            {"competition": competition, "form": form},
+        )
 
     if request.method == "POST":
         form = ProblemCreationForm(request.POST, request.FILES)
@@ -157,13 +193,13 @@ def competition_code_view(request, code):
                 directories = [
                     f"{name}_zip",
                     f"{name}_input_file",
-                    f"{name}_judging_program"
+                    f"{name}_judging_program",
                 ]
 
                 file_names = [
                     f"{name}.zip",
                     f"{name}-{input_file.name}",
-                    f"{name}-judge.py"
+                    f"{name}-judge.py",
                 ]
 
                 files = [zip_file, input_file, judging_program]
@@ -172,11 +208,12 @@ def competition_code_view(request, code):
                 create_images(code)
 
             return redirect("judgy:competition_code", code=code)
-        return render(request, "judgy/competition_code.html", {
-            "competition": competition,
-            "form": form
-        })
-    
+        return render(
+            request,
+            "judgy/competition_code.html",
+            {"competition": competition, "form": form},
+        )
+
     if request.method == "PUT":
         pass
 
@@ -184,6 +221,7 @@ def competition_code_view(request, code):
         if request.user.is_authenticated and request.user.is_superuser:
             competition.delete()
             return JsonResponse({})
+
 
 @login_required
 def submissions(request):
@@ -200,12 +238,13 @@ def submissions(request):
             with open(score_file, "r") as f:
                 user_score = f.read()
 
-            return render(request, "judgy/submissions.html", {
-                "user_output": user_output,
-                "user_score": user_score
-            })
+            return render(
+                request,
+                "judgy/submissions.html",
+                {"user_output": user_output, "user_score": user_score},
+            )
         else:
             return render(request, "judgy/submissions.html", {"form": form})
     else:
         form = UploadFileForm()
-    return render(request, "judgy/submissions.html", { "form": form })
+    return render(request, "judgy/submissions.html", {"form": form})
