@@ -1,0 +1,85 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}Account Verification{% endblock %}
+
+{% block style %}
+
+<style>
+  .code {
+    height: 3rem;
+    width: 3rem;
+  }
+</style>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(() => {
+    $('.code')
+      .on('focus', function () {
+        $(this).select();
+      })
+      .on('input', function () {
+        if ($(this).val().length == 1) {
+          $(this).next('.code').select();
+        }
+        if ($('.code').toArray().every(input => $(input).val().length == 1)) {
+          $(this).closest('form').submit();
+        }
+      })
+      .on('keydown', function (event) {
+        if (event.key == 'Backspace' && $(this).val().length == 0) {
+          $(this).prev('.code').select();
+        }
+      })
+      .on('paste', function (event) {
+        const data = event.originalEvent.clipboardData.getData('text');
+        $(this).closest('form').find('.code').each((index, input) => $(input).val(data[index]));
+        if ($('.code').toArray().every(input => $(input).val().length == 1)) {
+          $(this).closest('form').submit();
+        }
+      });
+  });
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+{% for errors in form.errors.values %}
+  {% for error in errors %}
+    <div
+      class="alert alert-danger alert-dismissible fade fixed-top show text-center"
+      role="alert"
+    >
+      {{ error }}
+      <button class="btn btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+<div
+  class="align-items-center d-flex justify-content-center text-center"
+  style="height: calc(100vh - 7.5rem)"
+>
+  <form method="post">
+    {% csrf_token %}
+
+    <h2>Account Verification</h2>
+
+    Please enter the six-digit verification code sent to {{ user.email }}.
+
+    <div class="d-flex justify-content-evenly my-3">
+      {{ form.code1 }}
+      {{ form.code2 }}
+      {{ form.code3 }}
+      {{ form.code4 }}
+      {{ form.code5 }}
+      {{ form.code6 }}
+    </div>
+  </form>
+</div>
+
+{% endblock %}
