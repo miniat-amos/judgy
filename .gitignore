@@ -20,7 +20,7 @@
 
 ########################################
 #                                      #
-#               Ngninx                 #
+#           Nginx Directory            #
 #                                      #
 ########################################
 !nginx/
@@ -52,12 +52,11 @@ django_project/*
 !Dockerfile
 !entrypoint.sh
 
-
 # Requirements files
 !requirements.in
 !requirements.txt
 
-
+# Other
 **/__pycache__
 **/migrations
 !README.md
