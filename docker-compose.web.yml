@@ -39,9 +39,11 @@ services:
   nginx:
     container_name: judgy_nginx
     build: ./nginx
+    env_file:
+      - .env
     volumes:
       - static:/app/staticfiles
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
     ports:
       - "80:80"
       - "443:443"
@@ -49,6 +51,7 @@ services:
       - django_gunicorn
     networks:
       - prod
+    entrypoint: /bin/sh -c "envsubst '\$SERVER_NAME' < /etc/nginx/templates/default.template.conf > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
 
 networks:
   prod:
