@@ -1,6 +1,9 @@
 #!/bin/sh
 
-until mysqladmin ping -h "judgy_mysql" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
+echo "Entrypoint script is running"
+
+
+until mysqladmin ping -h "judgy_mysql_prod" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
     echo "Waiting for MySQL..."
     sleep 2
 done

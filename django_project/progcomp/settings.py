@@ -20,6 +20,13 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    BASE_DIR / 'judgy/static',
+]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -27,9 +34,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-0bpf-dwmwae^igshb($c5$w&a#v3w=ioq*p(3s@r^n1yr!fi#h"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["trackyourpacc.com"]
 
 # Application definition
 
@@ -80,8 +87,8 @@ WSGI_APPLICATION = "progcomp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "HOST": config("MYSQL_URL"),
-        "PORT": config("MYSQL_PORT"),
+        "HOST": config("MYSQL_HOST", default="judgy_mysql_prod"), 
+        "PORT": config("MYSQL_PORT", default="3306"),  
         "NAME": config("MYSQL_DATABASE"),
         "USER": config("MYSQL_USER"),
         "PASSWORD": config("MYSQL_PASSWORD"),

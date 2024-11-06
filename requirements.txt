@@ -20,6 +20,7 @@ docker-py==1.10.6
     # via -r requirements.in
 docker-pycreds==0.4.0
     # via docker-py
+gunicorn==23.0.0
 idna==3.10
     # via requests
 pycparser==2.22

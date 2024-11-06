@@ -1,7 +1,9 @@
 FROM python:3.12
 
 # Install required system packages
-# RUN apt-get update && apt-get install -y default-mysql-client
+RUN apt-get update && \
+    apt-get install -y default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip to the latest version
 RUN pip install --upgrade pip

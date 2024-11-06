@@ -1,10 +1,10 @@
 services:
   db:
     image: mysql/mysql-server:8.0
-    container_name: judgy_mysql
+    container_name: judgy_mysql_prod
     restart: always
     volumes:
-      - data:/var/lib/mysql
+      - prod_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -17,6 +17,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - prod 
 
   django_gunicorn:
     container_name: judgy_app
@@ -24,25 +26,33 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - static:/static
+      - static:/app/staticfiles
     env_file:
       - .env
     build:
       context: .
     ports:
       - "8000:8000"
+    networks:
+      - prod
 
   nginx:
     container_name: judgy_nginx
     build: ./nginx
     volumes:
-      - static:/static
+      - static:/app/staticfiles
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - django_gunicorn
-        
+    networks:
+      - prod
+
+networks:
+  prod:
+    driver: bridge
+
 volumes:
   static:
-  data:
+  prod_data:
