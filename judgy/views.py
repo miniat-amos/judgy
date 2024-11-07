@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -168,22 +168,8 @@ def competition_code_view(request, code):
             competition.delete()
             return JsonResponse({})
 
-def search_view(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        competitions = Competition.objects.all()
-
-        data = [
-            {
-                'name': competition.name,
-                'code': competition.code,
-                'url': reverse('judgy:competition_code', args=[competition.code]),
-            }
-            for competition in competitions
-        ]
-
-        return JsonResponse(data, safe=False)
-    else:
-        return HttpResponseForbidden('Forbidden')
+def competitions_view(request):
+    return JsonResponse(list(Competition.objects.all().values()), safe=False)
 
 @verified_required
 def submissions(request):
