@@ -3,7 +3,7 @@ FROM python:3.12
 # Install required system packages
 RUN apt-get update && \
     apt-get install -y default-mysql-client && \
-    RUN pip install --upgrade pip && \
+    pip install --upgrade pip && \
     rm -rf /var/lib/apt/lists/*
 
 
