@@ -13,12 +13,12 @@ services:
     ports:
       - "${MYSQL_PORT}:${MYSQL_PORT}"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}" ]
       interval: 30s
       timeout: 10s
       retries: 5
     networks:
-      - prod 
+      - prod
 
   django_gunicorn:
     container_name: judgy_app
@@ -51,7 +51,7 @@ services:
       - django_gunicorn
     networks:
       - prod
-    entrypoint: /bin/sh -c "envsubst '\$SERVER_NAME' < /etc/nginx/templates/default.template.conf > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+    entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
 
 networks:
   prod:
