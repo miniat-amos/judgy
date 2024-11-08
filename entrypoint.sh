@@ -12,9 +12,10 @@ python manage.py makemigrations judgy --no-input
 python manage.py migrate --no-input
 python manage.py collectstatic --no-input
 
-export DJANGO_SUPERUSER_USERNAME=$SUPER_USER_NAME
 export DJANGO_SUPERUSER_EMAIL=$SUPER_USER_EMAIL
 export DJANGO_SUPERUSER_PASSWORD=$SUPER_USER_PASSWORD
+export DJANGO_SUPERUSER_FIRSTNAME=$SUPER_USER_FIRST_NAME
+export DJANGO_SUPERUSER_LASTNAME=$SUPER_USER_LAST_NAME
 
 python manage.py createsuperuser --noinput
 
