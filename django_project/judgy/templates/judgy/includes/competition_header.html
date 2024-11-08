@@ -34,7 +34,7 @@
                   {{ user_team.name }}
                 </a>
               </h3>
-            {% elif competition.enroll_start <= now < competition.enroll_end %}
+            {% else %}
               <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create-team">ENROLL</button>
             {% endif %}
           {% endif %}

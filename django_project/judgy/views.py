@@ -122,8 +122,7 @@ def competition_code_view(request, code):
             'user_team': user_team,
             'teams': teams,
             'team_creation_form': team_creation_form,
-            'problem_creation_form': problem_creation_form,
-            'now': timezone.now()
+            'problem_creation_form': problem_creation_form
         })
 
     if request.method == 'POST':

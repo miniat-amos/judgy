@@ -44,7 +44,6 @@
 
         const response = await fetch("{% url 'judgy:competitions' %}");
         const competitions = await response.json();
-
         $('.search-input').on('input', function () {
           const input = $(this).val().trim();
           if (input) {
