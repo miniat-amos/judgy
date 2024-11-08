@@ -31,9 +31,9 @@ from .utils import (
 def home_view(request):
     now = timezone.now()
 
-    past_competitions = Competition.objects.filter(end__lt=now).order_by('-end')
+    past_competitions = Competition.objects.filter(end__lte=now).order_by('-end')
     ongoing_competitions = Competition.objects.filter(
-        start__lte=now, end__gte=now
+        start__lte=now, end__gt=now
     ).order_by('end')
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
 
@@ -122,7 +122,8 @@ def competition_code_view(request, code):
             'user_team': user_team,
             'teams': teams,
             'team_creation_form': team_creation_form,
-            'problem_creation_form': problem_creation_form
+            'problem_creation_form': problem_creation_form,
+            'now': timezone.now()
         })
 
     if request.method == 'POST':
@@ -174,14 +175,17 @@ def competition_code_view(request, code):
 
 @verified_required
 def team_create_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+
     if request.method == 'POST':
-        form = TeamCreationForm(data=request.POST)
-        if form.is_valid():
-            team = form.save(commit=False)
-            team.competition = get_object_or_404(Competition, code=code)
-            team.save()
-            team.members.add(request.user)
-            return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+        if competition.enroll_start <= timezone.now() < competition.enroll_end:
+            form = TeamCreationForm(data=request.POST)
+            if form.is_valid():
+                team = form.save(commit=False)
+                team.competition = competition
+                team.save()
+                team.members.add(request.user)
+                return redirect('judgy:team_name', code=team.competition.code, name=team.name)
         
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
