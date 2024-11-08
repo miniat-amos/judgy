@@ -111,15 +111,15 @@ def competition_create_view(request):
 
 def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
-    team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
-    teams = Team.objects.all()
+    user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
+    teams = Team.objects.filter(competition=competition)
 
     if request.method == 'GET':
         team_creation_form = TeamCreationForm()
         problem_creation_form = ProblemCreationForm()
         return render(request, 'judgy/competition_code.html', {
             'competition': competition,
-            'team': team,
+            'user_team': user_team,
             'teams': teams,
             'team_creation_form': team_creation_form,
             'problem_creation_form': problem_creation_form
@@ -185,9 +185,11 @@ def team_create_view(request, code):
         
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
+    user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     team = get_object_or_404(Team, competition=competition, name=name)
     return render(request, 'judgy/team_name.html', {
         'competition': competition,
+        'user_team': user_team,
         'team': team
     })
 

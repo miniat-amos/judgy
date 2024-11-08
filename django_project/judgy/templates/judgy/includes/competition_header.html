@@ -28,10 +28,10 @@
             <button class="btn btn-warning me-1">EDIT</button>
             <button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
           {% elif user.is_authenticated %}
-            {% if team %}
+            {% if user_team %}
               <h3>
-                <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
-                  {{ team.name }}
+                <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code user_team.name %}">
+                  {{ user_team.name }}
                 </a>
               </h3>
             {% else %}
