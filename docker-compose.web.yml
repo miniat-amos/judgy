@@ -27,6 +27,7 @@ services:
         condition: service_healthy
     volumes:
       - static:/app/staticfiles
+      - ../competitions:/app/competitions
     env_file:
       - .env
     build:
