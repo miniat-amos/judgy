@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
-from .models import User, Competition
+from .models import User, Competition, Team
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -275,6 +275,25 @@ class CompetitionCreationForm(forms.ModelForm):
             self.add_error('enroll_end', 'Enrollment end date cannot be in the past.')
 
         return cleaned_data
+
+class TeamCreationForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = [
+            'name'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].required = True
+        self.fields['name'].widget.attrs.update(
+            {
+                'id': 'name',
+                'class': 'form-control',
+                'autofocus': True,
+                'placeholder': 'Team Name',
+            }
+        )
 
 class ProblemCreationForm(forms.Form):
     name = forms.CharField(

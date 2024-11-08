@@ -8,6 +8,8 @@ from .views import (
     set_timezone_view,
     competition_create_view,
     competition_code_view,
+    team_create_view,
+    team_name_view,
     competitions_view,
     submissions
 )
@@ -23,6 +25,8 @@ urlpatterns = [
     path('set-timezone', set_timezone_view, name='set_timezone'),
     path('competition/create', competition_create_view, name='competition_create'),
     path('competition/<str:code>', competition_code_view, name='competition_code'),
+    path('competition/<str:code>/team/create', team_create_view, name='team_create'),
+    path('competition/<str:code>/team/<str:name>', team_name_view, name='team_name'),
     path('competitions', competitions_view, name='competitions'),
     path('submissions', submissions, name='submissions')
 ]

@@ -6,7 +6,6 @@ from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils import timezone
 from .decorators import verified_required
 from .forms import (
@@ -14,6 +13,7 @@ from .forms import (
     AuthenticationForm,
     AccountVerificationForm,
     CompetitionCreationForm,
+    TeamCreationForm,
     ProblemCreationForm,
     UploadFileForm
 )
@@ -21,7 +21,7 @@ from .functions import (
     create_images,
     start_containers
 )
-from .models import Competition
+from .models import Competition, Team
 from .utils import (
     create_comp_dir,
     create_problem_dir,
@@ -111,18 +111,23 @@ def competition_create_view(request):
 
 def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
+    team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
+    teams = Team.objects.all()
 
     if request.method == 'GET':
-        form = ProblemCreationForm()
-        return render(
-            request,
-            'judgy/competition_code.html',
-            {'competition': competition, 'form': form},
-        )
+        team_creation_form = TeamCreationForm()
+        problem_creation_form = ProblemCreationForm()
+        return render(request, 'judgy/competition_code.html', {
+            'competition': competition,
+            'team': team,
+            'teams': teams,
+            'team_creation_form': team_creation_form,
+            'problem_creation_form': problem_creation_form
+        })
 
     if request.method == 'POST':
-        form = ProblemCreationForm(request.POST, request.FILES)
-        if form.is_valid():
+        problem_creation_form = ProblemCreationForm(request.POST, request.FILES)
+        if problem_creation_form.is_valid():
             row_numbers = request.POST.getlist('row_number')
             problem_names = request.POST.getlist('name')
             zip_files = request.FILES.getlist('zip')
@@ -139,13 +144,13 @@ def competition_code_view(request, code):
                 directories = [
                     f'{name}_zip',
                     f'{name}_input_file',
-                    f'{name}_judging_program',
+                    f'{name}_judging_program'
                 ]
 
                 file_names = [
                     f'{name}.zip',
                     f'{name}-{input_file.name}',
-                    f'{name}-judge.py',
+                    f'{name}-judge.py'
                 ]
 
                 files = [zip_file, input_file, judging_program]
@@ -154,12 +159,11 @@ def competition_code_view(request, code):
                 create_images(code)
 
             return redirect('judgy:competition_code', code=code)
-        return render(
-            request,
-            'judgy/competition_code.html',
-            {'competition': competition, 'form': form},
-        )
-
+        return render(request, 'judgy/competition_code.html', {
+            'competition': competition,
+            'problem_creation_form': problem_creation_form
+        })
+    
     if request.method == 'PUT':
         pass
 
@@ -167,6 +171,25 @@ def competition_code_view(request, code):
         if request.user.is_authenticated and request.user.is_superuser:
             competition.delete()
             return JsonResponse({})
+
+@verified_required
+def team_create_view(request, code):
+    if request.method == 'POST':
+        form = TeamCreationForm(data=request.POST)
+        if form.is_valid():
+            team = form.save(commit=False)
+            team.competition = get_object_or_404(Competition, code=code)
+            team.save()
+            team.members.add(request.user)
+            return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+        
+def team_name_view(request, code, name):
+    competition = get_object_or_404(Competition, code=code)
+    team = get_object_or_404(Team, competition=competition, name=name)
+    return render(request, 'judgy/team_name.html', {
+        'competition': competition,
+        'team': team
+    })
 
 def competitions_view(request):
     return JsonResponse(list(Competition.objects.all().values()), safe=False)

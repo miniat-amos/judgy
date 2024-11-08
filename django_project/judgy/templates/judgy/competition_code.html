@@ -87,54 +87,81 @@
 
 {% block main %}
 
-<div class="bg-body-tertiary">
-  <div class="mx-5 px-5">
-    <div class="align-items-stretch d-flex">
-      <div class="d-flex justify-content-start py-5 w-100">
-        <div>
-          <h1>{{ competition.name }}</h1>
-          <div>{{ competition.description }}</div>
-          <br>
-          <div class="d-flex">
-            <div class="me-5 pe-5">Start:<br>{{ competition.start|date:'m/d/Y, h:i A' }}</div>
-            <div class="ms-5 ps-5">End:<br>{{ competition.end|date:'m/d/Y, h:i A' }}</div>
-          </div>
-          <br>
-          <div class="d-flex">
-            <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start|date:'m/d/Y, h:i A' }}</div>
-            <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end|date:'m/d/Y, h:i A' }}</div>
-          </div>
-          <br>
-          <div class="progress" role="progressbar">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
-          </div>
-          <br>
-          {% if user.is_superuser %}
-            <button class="btn btn-warning me-1">EDIT</button>
-            <button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
-          {% else %}
-            <button class="btn btn-success">ENROLL</button>
-          {% endif %}
-        </div>
-      </div>
-      <div class="d-flex justify-content-end py-5 w-100">
-        <div>
-          <div id="qrcode"></div>
-          <br>
-          <h2 class="text-center" style="color: {{ competition.color }};">CODE: {{ competition.code }}</h2>
-        </div>
+{% include 'judgy/includes/competition_header.html' %}
+
+<div class="container py-5">
+  <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        id="problems-tab"
+        class="nav-link active"
+        style="width: 8rem"
+        data-bs-target="#problems-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Problems
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        id="rankings-tab"
+        class="nav-link"
+        style="width: 8rem"
+        data-bs-target="#rankings-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Rankings
+      </button>
+    </li>
+  </ul>
+  <div class="py-5 tab-content">
+    <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
+    </div>
+    <div id="rankings-tab-pane" class="tab-pane fade" role="tabpanel">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Team</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for team in teams %}
+              <tr>
+                <th scope="row">1</th>
+                <td>
+                  <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
+                    {{ team.name }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
 {% if user.is_superuser %}
-  <div class="pt-5 text-center">
-    <button class="btn" style="background: {{ competition.color }};" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
+  <div class="align-items-center d-flex justify-content-center p-5 text-center">
+    <button
+      class="btn add-problems-btn ms-1"
+      data-bs-toggle="modal"
+      data-bs-target="#add-problems"
+    >
+      Add Problems
+    </button>
   </div>
 {% endif %}
 
 {% include 'judgy/includes/delete_competition.html' %}
+{% include 'judgy/includes/create_team.html' %}
 {% include 'judgy/includes/add_problems.html' %}
 
 {% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }} | {{ team.name }}{% endblock %}
+
+{% block style %}
+
+<style>
+  ::selection {
+    color: {{ competition.color }};
+  }
+</style>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(() => {
+    new QRCode($('#qrcode')[0], {
+      text: `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`,
+      colorDark: '{{ competition.color }}',
+      colorLight: '#00000000'
+    });
+  });
+
+  function setup() {
+    noCanvas();
+    let intervalID;
+    const update_progress_bar = () => {
+      const start = new Date('{{ competition.start|date:'Y-m-d H:i:s' }}');
+      const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
+      const now = new Date();
+
+      const progress = constrain(map(now, start, end, 0, 100), 0, 100);
+      $('.progress-bar').css('width', `${progress}%`);
+
+      if (progress == 100) clearInterval(intervalID);
+    };
+    update_progress_bar();
+    intervalID = setInterval(update_progress_bar, 100);
+  }
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+{% include 'judgy/includes/competition_header.html' %}
+
+<div class="mx-5 px-5">
+  <div class="align-items-stretch d-flex">
+    <div class="d-flex justify-content-start py-5 w-100">
+      <div>
+        <h1>{{ team.name }}</h1>
+        <div class="row g-4">
+          {% for member in team.members.all %}
+            <div class="col">
+              <div class="text-center">
+                <i class="bi bi-person" style="font-size: 8rem;"></i>
+                <h5>{{ member.first_name }} {{ member.last_name }}</h5>
+                <p>{{ member.email }}</p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end py-5 w-100">
+      <div class="text-center">
+        <i class="bi bi-1-circle-fill" style="font-size: 16rem; color: gold;"></i>
+        <br>
+        <h2 style="color: gold;">SCORE: 1000000</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -44,3 +44,14 @@ class Competition(models.Model):
 
     def __str__(self):
         return self.name
+
+class Team(models.Model):
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    members = models.ManyToManyField('User', related_name='teams')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['competition', 'name'], name='unique_competition_team_name')
+        ]
+    def __str__(self):
+        return self.name

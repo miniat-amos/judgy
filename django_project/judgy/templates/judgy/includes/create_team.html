@@ -1,0 +1,25 @@
+<form action="{% url 'judgy:team_create' competition.code %}" method="post">
+  {% csrf_token %}
+  <div id="create-team" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Create Team</h1>
+          <button class="btn btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class='my-3'>
+            <div class='form-floating'>
+              {{ team_creation_form.name }}
+              <label for='name'>Team Name</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" data-bs-dismiss="modal">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
