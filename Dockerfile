@@ -1,17 +1,30 @@
-# This argument will be passed from the compose file
-ARG BASE_IMAGE
-FROM ${BASE_IMAGE}
+FROM python:3.12
 
-ARG COMP_CODE
-
-WORKDIR /usr/app
-
-COPY ./competitions/${COMP_CODE}/problems/*/*judging_program/ .
-COPY ./competitions/${COMP_CODE}/problems/*/*input_file/ .
-
+# Install required system packages
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    mkdir outputs && \
-    touch ./outputs/output.txt && \
-    touch ./outputs/score.txt && \
+    apt-get install -y default-mysql-client && \
     rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip to the latest version
+RUN pip install --upgrade pip
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file
+COPY ./requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install setuptools 
+
+# Copy your application code
+COPY ./django_project .
+
+# Copy the entrypoint script
+COPY ./entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["sh", "/entrypoint.sh"]
