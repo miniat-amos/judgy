@@ -28,6 +28,7 @@ services:
     volumes:
       - static:/app/staticfiles
       - ./competitions:/app/competitions
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     build:
@@ -45,7 +46,6 @@ services:
     volumes:
       - static:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
-      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "80:80"
       - "443:443"
