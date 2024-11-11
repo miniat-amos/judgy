@@ -46,6 +46,7 @@ services:
     volumes:
       - static:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
+      - acme-challenge:/app/acme-challenges
     ports:
       - "80:80"
       - "443:443"
@@ -62,3 +63,4 @@ networks:
 volumes:
   static:
   prod_data:
+  acme-challenge: 
