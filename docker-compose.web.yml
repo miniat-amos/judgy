@@ -3,8 +3,6 @@ services:
     image: mysql/mysql-server:8.0
     container_name: judgy_mysql_prod
     restart: always
-    volumes:
-      - prod_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -12,8 +10,10 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "${MYSQL_PORT}:${MYSQL_PORT}"
+    volumes:
+      - prod_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -22,17 +22,18 @@ services:
 
   django_gunicorn:
     container_name: judgy_app
+    build:
+      context: .
+    restart: always
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
     volumes:
       - static:/app/staticfiles
       - ./competitions:/app/competitions
       - /var/run/docker.sock:/var/run/docker.sock
-    env_file:
-      - .env
-    build:
-      context: .
     ports:
       - "8000:8000"
     networks:
@@ -41,6 +42,10 @@ services:
   nginx:
     container_name: judgy_nginx
     build: ./nginx
+    restart: always
+    depends_on:
+      - django_gunicorn
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
     env_file:
       - .env
     volumes:
@@ -50,11 +55,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    depends_on:
-      - django_gunicorn
     networks:
       - prod
-    entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
 
 networks:
   prod:
@@ -63,4 +65,4 @@ networks:
 volumes:
   static:
   prod_data:
-  acme-challenge: 
+  acme-challenge:
