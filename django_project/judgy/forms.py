@@ -288,7 +288,7 @@ class TeamCreationForm(forms.ModelForm):
         self.fields['name'].required = True
         self.fields['name'].widget.attrs.update(
             {
-                'id': 'name',
+                'id': 'team-name',
                 'class': 'form-control',
                 'autofocus': True,
                 'placeholder': 'Team Name',

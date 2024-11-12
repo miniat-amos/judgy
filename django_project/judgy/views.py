@@ -173,27 +173,33 @@ def competition_code_view(request, code):
             return JsonResponse({})
 
 @verified_required
-def team_create_view(request, code):
+def team_enroll_view(request, code):
     competition = get_object_or_404(Competition, code=code)
 
     if request.method == 'POST':
         if competition.enroll_start <= timezone.now() < competition.enroll_end:
             form = TeamCreationForm(data=request.POST)
             if form.is_valid():
-                team = form.save(commit=False)
-                team.competition = competition
-                team.save()
+                name = form.cleaned_data.get('name')
+                team, created = Team.objects.get_or_create(
+                    competition=competition,
+                    name=name
+                )
                 team.members.add(request.user)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
-        
+
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     team = get_object_or_404(Team, competition=competition, name=name)
+    teams = Team.objects.filter(competition=competition)
+    team_creation_form = TeamCreationForm()
     return render(request, 'judgy/team_name.html', {
         'competition': competition,
         'user_team': user_team,
-        'team': team
+        'team': team,
+        'teams': teams,
+        'team_creation_form': team_creation_form
     })
 
 def competitions_view(request):

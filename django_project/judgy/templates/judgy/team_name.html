@@ -26,9 +26,29 @@
     const enroll_end = new Date('{{ competition.enroll_end|date:'Y-m-d H:i:s' }}');
     const now = new Date();
     if (!(enroll_start <= now && now < enroll_end)) {
-      $('[data-bs-target="#create-team"]').remove();
-      $('#create-team').closest('form').remove();
+      $('[data-bs-target="#enroll"]').remove();
+      $('#enroll').closest('form').remove();
     }
+
+    $('#team-name').on('input', function () {
+      const input = $(this).val().trim();
+      if (input) {
+        $('.teams').addClass('show');
+      } else {
+        $('.teams').removeClass('show');
+      }
+      $('.teams').html(`
+        {% for team in teams %}
+          ${RegExp(input).test('{{ team.name }}') ? `
+            <li>
+              <div class="dropdown-item" onclick="$('#team-name').val('{{ team.name }}'); $('.teams').removeClass('show');">
+                {{ team.name }}
+              </div>
+            </li>
+          ` : ''}
+        {% endfor %}
+      `);
+    });
   });
 
   function setup() {
@@ -82,5 +102,8 @@
     </div>
   </div>
 </div>
+
+{% include 'judgy/includes/delete_competition.html' %}
+{% include 'judgy/includes/enroll_team.html' %}
 
 {% endblock %}
