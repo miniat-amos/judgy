@@ -48,7 +48,7 @@
           <tbody class="table-group-divider">
             {% for team in teams %}
               <tr>
-                <th scope="row">1</th>
+                <th scope="row">{{ forloop.counter }}</th>
                 <td>
                   <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
                     {{ team.name }}
