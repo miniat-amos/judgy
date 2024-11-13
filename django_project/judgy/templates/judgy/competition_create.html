@@ -97,9 +97,20 @@
     </div>
 
     <div class='my-3'>
-      <div class='form-floating'>
-        {{ form.color }}
-        <label for='color'>Competition Color</label>
+      <div class="row">
+        <div class="col">
+          <div class='form-floating'>
+            {{ form.team_size_limit }}
+            <label for='team-size-limit'>Team Size Limit</label>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class='form-floating'>
+            {{ form.color }}
+            <label for='color'>Competition Color</label>
+          </div>
+        </div>
       </div>
     </div>
 

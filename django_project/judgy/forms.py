@@ -173,6 +173,7 @@ class CompetitionCreationForm(forms.ModelForm):
             'end',
             'enroll_start',
             'enroll_end',
+            'team_size_limit',
             'color',
         ]
 
@@ -185,6 +186,7 @@ class CompetitionCreationForm(forms.ModelForm):
         self.fields['end'].required = True
         self.fields['enroll_start'].required = True
         self.fields['enroll_end'].required = True
+        self.fields['team_size_limit'].required = True
         self.fields['color'].required = True
 
         self.fields['name'].widget.attrs.update(
@@ -233,6 +235,14 @@ class CompetitionCreationForm(forms.ModelForm):
                 'class': 'form-control',
                 'autofocus': False,
                 'type': 'datetime-local',
+            }
+        )
+        self.fields['team_size_limit'].widget.attrs.update(
+            {
+                'id': 'team-size-limit',
+                'class': 'form-control',
+                'autofocus': False,
+                'placeholder': 'Team Size Limit',
             }
         )
         self.fields['color'].widget.attrs.update(
@@ -296,9 +306,9 @@ class TeamEnrollForm(forms.ModelForm):
         )
 
 class TeamInviteForm(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, team_invite_limit, **kwargs):
         super().__init__(*args, **kwargs)
-        for i in range(1, 4):
+        for i in range(1, team_invite_limit + 1):
             self.fields[f'email_{i}'] = forms.EmailField(
                 max_length=254,
                 required=False,

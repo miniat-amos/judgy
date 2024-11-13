@@ -117,7 +117,8 @@ def competition_code_view(request, code):
 
     if request.method == 'GET':
         team_enroll_form = TeamEnrollForm()
-        team_invite_form = TeamInviteForm()
+        team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
+        team_invite_form = TeamInviteForm(team_invite_limit=team_invite_limit) if team_invite_limit != 0 else None
         problem_creation_form = ProblemCreationForm()
         return render(request, 'judgy/competition_code.html', {
             'competition': competition,
@@ -209,9 +210,10 @@ def team_invite_view(request, code):
 
     if request.method == 'POST':
         if competition.enroll_start <= timezone.now() < competition.enroll_end:
-            form = TeamInviteForm(data=request.POST)
+            team = Team.objects.filter(competition=competition, members=request.user).first()
+            team_invite_limit = competition.team_size_limit - (team.members.count() if team else 0)
+            form = TeamInviteForm(data=request.POST, team_invite_limit=team_invite_limit)
             if form.is_valid():
-                team = Team.objects.filter(competition=competition, members=request.user).first()
                 for field in form.fields:
                     email = form.cleaned_data[field]
                     if email:
@@ -225,7 +227,8 @@ def team_name_view(request, code, name):
     team = get_object_or_404(Team, competition=competition, name=name)
     teams = Team.objects.filter(competition=competition)
     team_enroll_form = TeamEnrollForm()
-    team_invite_form = TeamInviteForm()
+    team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
+    team_invite_form = TeamInviteForm(team_invite_limit=team_invite_limit) if team_invite_limit != 0 else None
     return render(request, 'judgy/team_name.html', {
         'competition': competition,
         'user_team': user_team,

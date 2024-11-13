@@ -73,16 +73,21 @@
       if (response.ok) location.href = "{% url 'judgy:competition_code' competition.code %}";
     });
 
-    $('#invite-people .email').not(':first').hide();
-    if ($('#invite-people .email').filter(':hidden').length == 0) {
-      $('#invite-people .button').hide();
-    }
-    $('#invite-people .next').on('click', () => {
-      $('#invite-people .email').filter(':hidden:first').show();
-      if ($('#invite-people .email').filter(':hidden').length == 0) {
+    '{% if team_invite_form %}'
+      $('#invite-people .email').not(':first').hide().addClass('hidden');
+      if ($('#invite-people .email').filter('.hidden').length == 0) {
         $('#invite-people .button').hide();
       }
-    });
+      $('#invite-people .next').on('click', () => {
+        $('#invite-people .email').filter('.hidden:first').show().removeClass('hidden');
+        if ($('#invite-people .email').filter('.hidden').length == 0) {
+          $('#invite-people .button').hide();
+        }
+      });
+    '{% else %}'
+      $('[data-bs-target="#invite-people"]').remove();
+      $('#invite-people').closest('form').remove();
+    '{% endif %}'
   });
 
   function setup() {
@@ -128,6 +133,8 @@
             <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start|date:'m/d/Y, h:i A' }}</div>
             <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end|date:'m/d/Y, h:i A' }}</div>
           </div>
+          <br>
+          <div>Team Size Limit: {{ competition.team_size_limit }}</div>
           <br>
           <div class="progress" role="progressbar">
             <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>

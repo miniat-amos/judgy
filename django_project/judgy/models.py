@@ -31,6 +31,7 @@ class Competition(models.Model):
     end = models.DateTimeField()
     enroll_start = models.DateTimeField()
     enroll_end = models.DateTimeField()
+    team_size_limit = models.PositiveIntegerField(default=4)
     color = models.CharField(max_length=7)
 
     def save(self, *args, **kwargs):
