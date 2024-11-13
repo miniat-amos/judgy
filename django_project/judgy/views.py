@@ -187,6 +187,18 @@ def team_enroll_view(request, code):
                 )
                 team.members.add(request.user)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+            
+@verified_required
+def team_leave_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+
+    if competition.enroll_start <= timezone.now() < competition.enroll_end:
+        team = Team.objects.filter(competition=competition, members=request.user).first()
+        if team:
+            team.members.remove(request.user)
+            if team.members.count() == 0:
+                team.delete()
+            return JsonResponse({})
 
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
