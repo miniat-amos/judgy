@@ -1,0 +1,34 @@
+<form action="{% url 'judgy:team_invite' competition.code %}" method="post">
+  {% csrf_token %}
+  <div id="invite-people" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Invite People</h1>
+          <button class="btn btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+          {% for field in team_invite_form %}
+            <div class="email my-3">
+              <div class="form-floating">
+                {{ field }}
+                <label for="email_{{ forloop.counter }}">Email Address</label>
+              </div>
+            </div>
+          {% endfor %}
+          <div class="button my-3">
+            <div class="form-floating">
+              <button class="next btn btn-success w-100" type="button">
+                <i class="bi bi-plus" style="font-size: 1.5rem"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+          <button class="btn btn-success" data-bs-dismiss="modal" type="submit">Invite</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

@@ -10,6 +10,7 @@ from .views import (
     competition_code_view,
     team_enroll_view,
     team_leave_view,
+    team_invite_view,
     team_name_view,
     competitions_view,
     submissions
@@ -28,6 +29,7 @@ urlpatterns = [
     path('competition/<str:code>', competition_code_view, name='competition_code'),
     path('competition/<str:code>/team/enroll', team_enroll_view, name='team_enroll'),
     path('competition/<str:code>/team/leave', team_leave_view, name='team_leave'),
+    path('competition/<str:code>/team/invite', team_invite_view, name='team_invite'),
     path('competition/<str:code>/team/<str:name>', team_name_view, name='team_name'),
     path('competitions', competitions_view, name='competitions'),
     path('submissions', submissions, name='submissions')

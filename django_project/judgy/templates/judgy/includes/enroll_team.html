@@ -1,7 +1,7 @@
 <form action="{% url 'judgy:team_enroll' competition.code %}" method="post">
   {% csrf_token %}
   <div id="enroll" class="modal fade">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5">Create or Join a Team</h1>
@@ -10,7 +10,7 @@
         <div class="modal-body" style="height: 16rem; overflow: clip auto;">
           <div class="dropdown">
             <div class='form-floating'>
-              {{ team_creation_form.name }}
+              {{ team_enroll_form.name }}
               <label for='team-name'>Team Name</label>
             </div>
             <ul class="teams dropdown-menu w-100"></ul>

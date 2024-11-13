@@ -72,6 +72,17 @@
       });
       if (response.ok) location.href = "{% url 'judgy:competition_code' competition.code %}";
     });
+
+    $('#invite-people .email').not(':first').hide();
+    if ($('#invite-people .email').filter(':hidden').length == 0) {
+      $('#invite-people .button').hide();
+    }
+    $('#invite-people .next').on('click', () => {
+      $('#invite-people .email').filter(':hidden:first').show();
+      if ($('#invite-people .email').filter(':hidden').length == 0) {
+        $('#invite-people .button').hide();
+      }
+    });
   });
 
   function setup() {
@@ -138,7 +149,7 @@
                   </h3>
                 </div>
                 <div class="d-flex gap-3 ms-5 ps-5">
-                  <button class="btn btn-success">INVITE</button>
+                  <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#invite-people">INVITE</button>
                   <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#leave-team">LEAVE</button>
                 </div>
               </div>
@@ -164,5 +175,6 @@
 {% include 'judgy/includes/delete_competition.html' %}
 {% include 'judgy/includes/enroll_team.html' %}
 {% include 'judgy/includes/leave_team.html' %}
+{% include 'judgy/includes/invite_people.html' %}
 
 {% endblock %}

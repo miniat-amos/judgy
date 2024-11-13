@@ -276,7 +276,7 @@ class CompetitionCreationForm(forms.ModelForm):
 
         return cleaned_data
 
-class TeamCreationForm(forms.ModelForm):
+class TeamEnrollForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = [
@@ -294,6 +294,23 @@ class TeamCreationForm(forms.ModelForm):
                 'placeholder': 'Team Name',
             }
         )
+
+class TeamInviteForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for i in range(1, 4):
+            self.fields[f'email_{i}'] = forms.EmailField(
+                max_length=254,
+                required=False,
+                widget=forms.EmailInput(
+                    attrs={
+                        'id': f'email_{i}',
+                        'class': 'form-control',
+                        'autocomplete': 'email',
+                        'placeholder': 'Email Address'
+                    }
+                )
+            )
 
 class ProblemCreationForm(forms.Form):
     name = forms.CharField(

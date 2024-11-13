@@ -13,7 +13,8 @@ from .forms import (
     AuthenticationForm,
     AccountVerificationForm,
     CompetitionCreationForm,
-    TeamCreationForm,
+    TeamEnrollForm,
+    TeamInviteForm,
     ProblemCreationForm,
     UploadFileForm
 )
@@ -21,7 +22,7 @@ from .functions import (
     create_images,
     start_containers
 )
-from .models import Competition, Team
+from .models import Competition, Team, User
 from .utils import (
     create_comp_dir,
     create_problem_dir,
@@ -115,13 +116,15 @@ def competition_code_view(request, code):
     teams = Team.objects.filter(competition=competition)
 
     if request.method == 'GET':
-        team_creation_form = TeamCreationForm()
+        team_enroll_form = TeamEnrollForm()
+        team_invite_form = TeamInviteForm()
         problem_creation_form = ProblemCreationForm()
         return render(request, 'judgy/competition_code.html', {
             'competition': competition,
             'user_team': user_team,
             'teams': teams,
-            'team_creation_form': team_creation_form,
+            'team_enroll_form': team_enroll_form,
+            'team_invite_form': team_invite_form,
             'problem_creation_form': problem_creation_form
         })
 
@@ -178,7 +181,7 @@ def team_enroll_view(request, code):
 
     if request.method == 'POST':
         if competition.enroll_start <= timezone.now() < competition.enroll_end:
-            form = TeamCreationForm(data=request.POST)
+            form = TeamEnrollForm(data=request.POST)
             if form.is_valid():
                 name = form.cleaned_data.get('name')
                 team, created = Team.objects.get_or_create(
@@ -200,18 +203,36 @@ def team_leave_view(request, code):
                 team.delete()
             return JsonResponse({})
 
+@verified_required
+def team_invite_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+
+    if request.method == 'POST':
+        if competition.enroll_start <= timezone.now() < competition.enroll_end:
+            form = TeamInviteForm(data=request.POST)
+            if form.is_valid():
+                team = Team.objects.filter(competition=competition, members=request.user).first()
+                for field in form.fields:
+                    email = form.cleaned_data[field]
+                    if email:
+                        user = User.objects.get(email=email)
+                        team.members.add(user)
+                return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     team = get_object_or_404(Team, competition=competition, name=name)
     teams = Team.objects.filter(competition=competition)
-    team_creation_form = TeamCreationForm()
+    team_enroll_form = TeamEnrollForm()
+    team_invite_form = TeamInviteForm()
     return render(request, 'judgy/team_name.html', {
         'competition': competition,
         'user_team': user_team,
         'team': team,
         'teams': teams,
-        'team_creation_form': team_creation_form
+        'team_enroll_form': team_enroll_form,
+        'team_invite_form': team_invite_form
     })
 
 def competitions_view(request):
