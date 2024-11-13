@@ -64,6 +64,24 @@
               .join('')
           );
         });
+
+        $(document).on('keydown', function (event) {
+          if (event.key == '/') {
+            if ($(':focus').is(':input')) return;
+            $('.search-input').focus();
+            event.preventDefault();
+          }
+
+          if (event.key == 'Escape') {
+            if ($(':focus').is(':input')) {
+              if ($(':focus').val().length) {
+                $(':focus').val('');
+              } else {
+                $(':focus').blur();
+              }
+            }
+          }
+        });
       });
     </script>
 
