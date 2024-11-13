@@ -1,0 +1,148 @@
+{% extends 'judgy/base.html' %}
+
+{% block style %}
+
+<style>
+  ::selection {
+    color: {{ competition.color }};
+  }
+</style>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(() => {
+    new QRCode($('#qrcode')[0], {
+      text: `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`,
+      colorDark: '{{ competition.color }}',
+      colorLight: '#00000000'
+    });
+    
+   $('#delete-competition').on('show.bs.modal', event => {
+      $('.modal-body .name').text('{{ competition.name }}');
+      $('.modal-body .description').text('{{ competition.description }}');
+      $('.modal-body').css('color', '{{ competition.color }}');
+    });
+
+    $('#delete-competition .btn-danger').on('click', async () => {
+      const response = await fetch("{% url 'judgy:competition_code' competition.code %}", {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}'
+        }
+      });
+      if (response.ok) location.href = "{% url 'judgy:home' %}";
+    });
+
+    const enroll_start = new Date('{{ competition.enroll_start|date:'Y-m-d H:i:s' }}');
+    const enroll_end = new Date('{{ competition.enroll_end|date:'Y-m-d H:i:s' }}');
+    const now = new Date();
+    if (!(enroll_start <= now && now < enroll_end)) {
+      $('[data-bs-target="#enroll"]').remove();
+      $('#enroll').closest('form').remove();
+    }
+
+    $('#team-name').on('input', function () {
+      const input = $(this).val().trim();
+      if (input) {
+        $('.teams').addClass('show');
+      } else {
+        $('.teams').removeClass('show');
+      }
+      $('.teams').html(`
+        {% for team in teams %}
+          ${RegExp(input).test('{{ team.name }}') ? `
+            <li>
+              <div class="dropdown-item" onclick="$('#team-name').val('{{ team.name }}'); $('.teams').removeClass('show');">
+                {{ team.name }}
+              </div>
+            </li>
+          ` : ''}
+        {% endfor %}
+      `);
+    });
+  });
+
+  function setup() {
+    noCanvas();
+    let intervalID;
+    const update_progress_bar = () => {
+      const start = new Date('{{ competition.start|date:'Y-m-d H:i:s' }}');
+      const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
+      const now = new Date();
+
+      const progress = constrain(map(now, start, end, 0, 100), 0, 100);
+      $('.progress-bar').css('width', `${progress}%`);
+
+      if (progress == 100) clearInterval(intervalID);
+    };
+    update_progress_bar();
+    intervalID = setInterval(update_progress_bar, 100);
+  }
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="bg-body-tertiary">
+  <div class="mx-5 px-5">
+    <div class="align-items-stretch d-flex">
+      <div class="d-flex justify-content-start py-5 w-100">
+        <div>
+          <h1>
+            <a class="text-decoration-none" href="{% url 'judgy:competition_code' competition.code %}">
+              {{ competition.name }}
+            </a>
+          </h1>
+          <div>{{ competition.description }}</div>
+          <br>
+          <div class="d-flex">
+            <div class="me-5 pe-5">Start:<br>{{ competition.start|date:'m/d/Y, h:i A' }}</div>
+            <div class="ms-5 ps-5">End:<br>{{ competition.end|date:'m/d/Y, h:i A' }}</div>
+          </div>
+          <br>
+          <div class="d-flex">
+            <div class="me-5 pe-5">Enroll Start:<br>{{ competition.enroll_start|date:'m/d/Y, h:i A' }}</div>
+            <div class="ms-5 ps-5">Enroll End:<br>{{ competition.enroll_end|date:'m/d/Y, h:i A' }}</div>
+          </div>
+          <br>
+          <div class="progress" role="progressbar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
+          </div>
+          <br>
+          {% if user.is_superuser %}
+            <button class="btn btn-warning me-1">EDIT</button>
+            <button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
+          {% elif user.is_authenticated %}
+            {% if user_team %}
+              <h3>
+                <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code user_team.name %}">
+                  {{ user_team.name }}
+                </a>
+              </h3>
+            {% else %}
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enroll">ENROLL</button>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      <div class="d-flex justify-content-end py-5 w-100">
+        <div>
+          <div id="qrcode"></div>
+          <br>
+          <h2 class="text-center" style="color: {{ competition.color }};">CODE: {{ competition.code }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block main_competition %}{% endblock %}
+
+{% include 'judgy/includes/delete_competition.html' %}
+{% include 'judgy/includes/enroll_team.html' %}
+
+{% endblock %}

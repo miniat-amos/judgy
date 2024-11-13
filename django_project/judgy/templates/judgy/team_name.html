@@ -1,79 +1,8 @@
-{% extends 'judgy/base.html' %}
+{% extends 'judgy/base_competition.html' %}
 
 {% block title %}{{ competition.name }} | {{ team.name }}{% endblock %}
 
-{% block style %}
-
-<style>
-  ::selection {
-    color: {{ competition.color }};
-  }
-</style>
-
-{% endblock %}
-
-{% block script %}
-
-<script>
-  $(() => {
-    new QRCode($('#qrcode')[0], {
-      text: `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`,
-      colorDark: '{{ competition.color }}',
-      colorLight: '#00000000'
-    });
-
-    const enroll_start = new Date('{{ competition.enroll_start|date:'Y-m-d H:i:s' }}');
-    const enroll_end = new Date('{{ competition.enroll_end|date:'Y-m-d H:i:s' }}');
-    const now = new Date();
-    if (!(enroll_start <= now && now < enroll_end)) {
-      $('[data-bs-target="#enroll"]').remove();
-      $('#enroll').closest('form').remove();
-    }
-
-    $('#team-name').on('input', function () {
-      const input = $(this).val().trim();
-      if (input) {
-        $('.teams').addClass('show');
-      } else {
-        $('.teams').removeClass('show');
-      }
-      $('.teams').html(`
-        {% for team in teams %}
-          ${RegExp(input).test('{{ team.name }}') ? `
-            <li>
-              <div class="dropdown-item" onclick="$('#team-name').val('{{ team.name }}'); $('.teams').removeClass('show');">
-                {{ team.name }}
-              </div>
-            </li>
-          ` : ''}
-        {% endfor %}
-      `);
-    });
-  });
-
-  function setup() {
-    noCanvas();
-    let intervalID;
-    const update_progress_bar = () => {
-      const start = new Date('{{ competition.start|date:'Y-m-d H:i:s' }}');
-      const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
-      const now = new Date();
-
-      const progress = constrain(map(now, start, end, 0, 100), 0, 100);
-      $('.progress-bar').css('width', `${progress}%`);
-
-      if (progress == 100) clearInterval(intervalID);
-    };
-    update_progress_bar();
-    intervalID = setInterval(update_progress_bar, 100);
-  }
-</script>
-
-{% endblock %}
-
-{% block main %}
-
-{% include 'judgy/includes/competition_header.html' %}
+{% block main_competition %}
 
 <div class="mx-5 px-5">
   <div class="align-items-stretch d-flex">
@@ -102,8 +31,5 @@
     </div>
   </div>
 </div>
-
-{% include 'judgy/includes/delete_competition.html' %}
-{% include 'judgy/includes/enroll_team.html' %}
 
 {% endblock %}
