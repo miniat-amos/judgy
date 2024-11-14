@@ -79,7 +79,7 @@
           for (const notification of updated_notifications) {
             if (!notifications.some(n => n.id == notification.id)) {
               $('.toast-container').append(`
-                <div class="toast" role="alert" data-id="${notification.id}" data-header="${notification.header}">
+                <div class="toast" role="alert" data-bs-autohide="false" data-id="${notification.id}" data-header="${notification.header}">
                   <div class="toast-header">
                     <i class="bi bi-bell me-2"></i>
                     <strong class="me-auto">${notification.header}</strong>
