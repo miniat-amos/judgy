@@ -73,6 +73,11 @@ class TeamJoinNotification(Notification):
 
     def save(self, *args, **kwargs):
         self.header = 'Join Request'
+        TeamJoinNotification.objects.filter(
+            user=self.user,
+            request_user=self.request_user,
+            team=self.team
+        ).delete()
         super().save(*args, **kwargs)
 
 class TeamInviteNotification(Notification):
@@ -80,4 +85,8 @@ class TeamInviteNotification(Notification):
 
     def save(self, *args, **kwargs):
         self.header = 'Team Invite'
+        TeamInviteNotification.objects.filter(
+            user=self.user,
+            team=self.team
+        ).delete()
         super().save(*args, **kwargs)
