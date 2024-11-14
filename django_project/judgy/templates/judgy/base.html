@@ -42,37 +42,43 @@
           body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
         });
 
-        {
-          const response = await fetch("{% url 'judgy:competitions' %}");
-          const competitions = await response.json();
-          $('.search-input').on('input', function () {
-            const input = $(this).val().trim();
-            if (input) {
-              $('.search-results').addClass('show');
-            } else {
-              $('.search-results').removeClass('show');
-            }
-            $('.search-results').html(
-              competitions
-                .filter(competition => RegExp(input, 'i').test(competition.name) || RegExp(input, 'i').test(competition.code))
-                .map(competition => `
-                  <li>
-                    <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'judgy:competition_code' 'code' %}".replace('code', competition.code)}>
-                      ${competition.name} (${competition.code})
-                    </a>
-                  </li>
-                `)
-                .join('')
-            );
-          });
-        }
+        const response = await fetch("{% url 'judgy:competitions' %}");
+        const competitions = await response.json();
+        $('.search-input').on('input', function () {
+          const input = $(this).val().trim();
+          if (input) {
+            $('.search-results').addClass('show');
+          } else {
+            $('.search-results').removeClass('show');
+          }
+          $('.search-results').html(
+            competitions
+              .filter(competition => RegExp(input, 'i').test(competition.name) || RegExp(input, 'i').test(competition.code))
+              .map(competition => `
+                <li>
+                  <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'judgy:competition_code' 'code' %}".replace('code', competition.code)}>
+                    ${competition.name} (${competition.code})
+                  </a>
+                </li>
+              `)
+              .join('')
+          );
+        });
 
-        {
+        let notifications = [];
+        const update_notifications = async () => {
           const response = await fetch("{% url 'judgy:notifications' %}");
-          const notifications = await response.json();
-          $('.toast-container').html(
-            notifications
-              .map(notification => `
+          const updated_notifications = await response.json();
+
+          for (const notification of notifications) {
+            if (!updated_notifications.some(n => n.id == notification.id)) {
+              $(`[data-id="${notification.id}"]`).remove();
+            }
+          }
+
+          for (const notification of updated_notifications) {
+            if (!notifications.some(n => n.id == notification.id)) {
+              $('.toast-container').append(`
                 <div class="toast" role="alert" data-id="${notification.id}" data-header="${notification.header}">
                   <div class="toast-header">
                     <i class="bi bi-bell me-2"></i>
@@ -99,12 +105,12 @@
                     `}
                   </div>
                 </div>
-              `)
-              .join('')
-          );
-          $('.toast').each(function () {
-            bootstrap.Toast.getOrCreateInstance($(this)).show();
-          })
+              `);
+
+              bootstrap.Toast.getOrCreateInstance($(`[data-id="${notification.id}"]`)).show();
+            }
+          }
+
           $('.toast .btn-close').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Update') {
               fetch("{% url 'judgy:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
@@ -114,6 +120,7 @@
               });
             }
           });
+
           $('.toast .accept').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Join Request') {
               fetch("{% url 'judgy:team_join_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
@@ -122,6 +129,7 @@
                 }
               });
             }
+
             if ($(this).closest('.toast').data('header') == 'Team Invite') {
               fetch("{% url 'judgy:team_invite_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
@@ -130,6 +138,7 @@
               });
             }
           });
+
           $('.toast .decline').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Join Request') {
               fetch("{% url 'judgy:team_join_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
@@ -138,6 +147,7 @@
                 }
               });
             }
+
             if ($(this).closest('.toast').data('header') == 'Team Invite') {
               fetch("{% url 'judgy:team_invite_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
@@ -146,7 +156,11 @@
               });
             }
           });
-        }
+
+          notifications = updated_notifications;
+        };
+        update_notifications();
+        setInterval(update_notifications, 10000);
 
         $(document).on('keydown', function (event) {
           if (event.key == '/') {

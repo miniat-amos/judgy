@@ -234,7 +234,7 @@ def team_join_accept_view(request, id):
             header='Update',
             body=f'"{team.name}" has accepted your request to join the team.'
         )
-        team.members.add(request.user)
+        team.members.add(notification.request_user)
         TeamJoinNotification.objects.filter(request_user=notification.request_user, team=team).delete()
         return JsonResponse({})
 
@@ -268,7 +268,14 @@ def team_leave_view(request, code):
         team = Team.objects.filter(competition=competition, members=request.user).first()
         if team:
             team.members.remove(request.user)
-            if team.members.count() == 0:
+            if team.members.count():
+                for member in team.members.all():
+                    Notification.objects.create(
+                        user=member,
+                        header='Update',
+                        body=f'{request.user} left the team.'
+                    )
+            else:
                 team.delete()
             return JsonResponse({})
 
