@@ -58,3 +58,26 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    header = models.CharField(max_length=255)
+    body = models.TextField()
+
+    def __str__(self):
+        return self.header
+
+class TeamJoinNotification(Notification):
+    request_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.header = 'Join Request'
+        super().save(*args, **kwargs)
+
+class TeamInviteNotification(Notification):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.header = 'Team Invite'
+        super().save(*args, **kwargs)

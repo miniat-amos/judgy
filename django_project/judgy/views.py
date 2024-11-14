@@ -22,7 +22,14 @@ from .functions import (
     create_images,
     start_containers
 )
-from .models import Competition, Team, User
+from .models import (
+  User,
+  Competition,
+  Team,
+  Notification,
+  TeamJoinNotification,
+  TeamInviteNotification
+)
 from .utils import (
     create_comp_dir,
     create_problem_dir,
@@ -91,6 +98,16 @@ def verify_view(request):
     else:
         form = AccountVerificationForm()
     return render(request, 'judgy/verify.html', {'form': form})
+
+@verified_required
+def notifications_view(request):
+    return JsonResponse(list(Notification.objects.filter(user=request.user).values()), safe=False)
+
+@verified_required
+def notification_clear_view(request, id):
+    notification = get_object_or_404(Notification, id=id, user=request.user)
+    notification.delete()
+    return JsonResponse({})
 
 def set_timezone_view(request):
     if request.method == 'POST':
@@ -189,9 +206,60 @@ def team_enroll_view(request, code):
                     competition=competition,
                     name=name
                 )
-                team.members.add(request.user)
+                if created:
+                    team.members.add(request.user)
+                else:
+                    for member in team.members.all():
+                        user = member
+                        body = f'Hi {member.first_name}, {request.user} wants to join your team "{team.name}" for the competition "{competition.name}".'
+                        TeamJoinNotification.objects.create(user=user, body=body, request_user=request.user, team=team)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
-            
+
+@verified_required
+def team_join_accept_view(request, id):
+    notification = get_object_or_404(TeamJoinNotification, id=id, user=request.user)
+    team = notification.team
+    competition = team.competition
+
+    if competition.enroll_start <= timezone.now() < competition.enroll_end:
+        for member in team.members.all():
+            if member != request.user:
+                Notification.objects.create(
+                    user=member,
+                    header='Update',
+                    body=f'{request.user} has accepted the request of {notification.request_user} to join the team.'
+                )
+        Notification.objects.create(
+            user=notification.request_user,
+            header='Update',
+            body=f'"{team.name}" has accepted your request to join the team.'
+        )
+        team.members.add(request.user)
+        TeamJoinNotification.objects.filter(request_user=notification.request_user, team=team).delete()
+        return JsonResponse({})
+
+@verified_required
+def team_join_decline_view(request, id):
+    notification = get_object_or_404(TeamJoinNotification, id=id, user=request.user)
+    team = notification.team
+    competition = team.competition
+
+    if competition.enroll_start <= timezone.now() < competition.enroll_end:
+        for member in team.members.all():
+            if member != request.user:
+                Notification.objects.create(
+                    user=member,
+                    header='Update',
+                    body=f'{request.user} has declined the request of {notification.request_user} to join the team.'
+                )
+        Notification.objects.create(
+            user=notification.request_user,
+            header='Update',
+            body=f'"{team.name}" has declined your request to join the team.'
+        )
+        TeamJoinNotification.objects.filter(request_user=notification.request_user, team=team).delete()
+        return JsonResponse({})
+
 @verified_required
 def team_leave_view(request, code):
     competition = get_object_or_404(Competition, code=code)
@@ -218,8 +286,42 @@ def team_invite_view(request, code):
                     email = form.cleaned_data[field]
                     if email:
                         user = User.objects.get(email=email)
-                        team.members.add(user)
+                        body = f'Hi {user.first_name}, {request.user} has invited you to join the team "{team.name}" for the competition "{competition.name}".'
+                        TeamInviteNotification.objects.create(user=user, body=body, team=team)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+
+@verified_required
+def team_invite_accept_view(request, id):
+    notification = get_object_or_404(TeamInviteNotification, id=id, user=request.user)
+    team = notification.team
+    competition = team.competition
+
+    if competition.enroll_start <= timezone.now() < competition.enroll_end:
+        for member in team.members.all():
+            Notification.objects.create(
+                user=member,
+                header='Update',
+                body=f'{request.user} has accepted the invitation to join the team.'
+            )
+        team.members.add(request.user)
+        notification.delete()
+        return JsonResponse({})
+
+@verified_required
+def team_invite_decline_view(request, id):
+    notification = get_object_or_404(TeamInviteNotification, id=id, user=request.user)
+    team = notification.team
+    competition = team.competition
+
+    if competition.enroll_start <= timezone.now() < competition.enroll_end:
+        for member in team.members.all():
+            Notification.objects.create(
+                user=member,
+                header='Update',
+                body=f'{request.user} has declined the invitation to join the team.'
+            )
+        notification.delete()
+        return JsonResponse({})
 
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)

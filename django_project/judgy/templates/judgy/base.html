@@ -42,28 +42,111 @@
           body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
         });
 
-        const response = await fetch("{% url 'judgy:competitions' %}");
-        const competitions = await response.json();
-        $('.search-input').on('input', function () {
-          const input = $(this).val().trim();
-          if (input) {
-            $('.search-results').addClass('show');
-          } else {
-            $('.search-results').removeClass('show');
-          }
-          $('.search-results').html(
-            competitions
-              .filter(competition => RegExp(input, 'i').test(competition.name) || RegExp(input, 'i').test(competition.code))
-              .map(competition => `
-                <li>
-                  <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'judgy:competition_code' 'code' %}".replace('code', competition.code)}>
-                    ${competition.name} (${competition.code})
-                  </a>
-                </li>
+        {
+          const response = await fetch("{% url 'judgy:competitions' %}");
+          const competitions = await response.json();
+          $('.search-input').on('input', function () {
+            const input = $(this).val().trim();
+            if (input) {
+              $('.search-results').addClass('show');
+            } else {
+              $('.search-results').removeClass('show');
+            }
+            $('.search-results').html(
+              competitions
+                .filter(competition => RegExp(input, 'i').test(competition.name) || RegExp(input, 'i').test(competition.code))
+                .map(competition => `
+                  <li>
+                    <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'judgy:competition_code' 'code' %}".replace('code', competition.code)}>
+                      ${competition.name} (${competition.code})
+                    </a>
+                  </li>
+                `)
+                .join('')
+            );
+          });
+        }
+
+        {
+          const response = await fetch("{% url 'judgy:notifications' %}");
+          const notifications = await response.json();
+          $('.toast-container').html(
+            notifications
+              .map(notification => `
+                <div class="toast" role="alert" data-id="${notification.id}" data-header="${notification.header}">
+                  <div class="toast-header">
+                    <i class="bi bi-bell me-2"></i>
+                    <strong class="me-auto">${notification.header}</strong>
+                    <button class="btn-close" data-bs-dismiss="toast"></button>
+                  </div>
+                  <div class="toast-body">
+                    ${notification.body}
+                    ${notification.header == 'Update' ? '' : `
+                      <div class="border-top mt-2 pt-2">
+                        <div class='row'>
+                          <div class='col'>
+                            <button class="accept btn btn-success w-100" data-bs-dismiss="toast">
+                              Accept
+                            </button>
+                          </div>
+                          <div class='col'>
+                            <button class="decline btn btn-danger w-100" data-bs-dismiss="toast">
+                              Decline
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    `}
+                  </div>
+                </div>
               `)
               .join('')
           );
-        });
+          $('.toast').each(function () {
+            bootstrap.Toast.getOrCreateInstance($(this)).show();
+          })
+          $('.toast .btn-close').on('click', function () {
+            if ($(this).closest('.toast').data('header') == 'Update') {
+              fetch("{% url 'judgy:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              });
+            }
+          });
+          $('.toast .accept').on('click', function () {
+            if ($(this).closest('.toast').data('header') == 'Join Request') {
+              fetch("{% url 'judgy:team_join_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              });
+            }
+            if ($(this).closest('.toast').data('header') == 'Team Invite') {
+              fetch("{% url 'judgy:team_invite_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              });
+            }
+          });
+          $('.toast .decline').on('click', function () {
+            if ($(this).closest('.toast').data('header') == 'Join Request') {
+              fetch("{% url 'judgy:team_join_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              });
+            }
+            if ($(this).closest('.toast').data('header') == 'Team Invite') {
+              fetch("{% url 'judgy:team_invite_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              });
+            }
+          });
+        }
 
         $(document).on('keydown', function (event) {
           if (event.key == '/') {
@@ -101,5 +184,6 @@
 
       {% include 'judgy/includes/footer.html' %}
     </main>
+    {% include 'judgy/includes/notifications.html' %}
   </body>
 </html>
