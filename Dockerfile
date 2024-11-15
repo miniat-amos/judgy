@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y jq \
     && curl -L "https://github.com/docker/compose/releases/download/$VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
 
-# Copy your application code
+# Copy application code
 COPY ./django_project .
 
 # Copy the entrypoint script

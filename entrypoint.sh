@@ -2,11 +2,15 @@
 
 echo "Entrypoint script is running"
 
+
+echo "Starting mysql container"
+
+docker compose -f ./docker-compose.web.yml up --build db -d 
+
 until mysqladmin ping -h "judgy_mysql_prod" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
     echo "Waiting for MySQL..."
     sleep 2
 done
-
 
 python manage.py makemigrations judgy --no-input
 python manage.py migrate --no-input
@@ -19,6 +23,12 @@ export DJANGO_SUPERUSER_LASTNAME=$SUPER_USER_LAST_NAME
 
 python manage.py createsuperuser --noinput
 
-chmod +x /app/docker_setup.sh /app/docker_delete.sh
+chmod +x ./django-project/docker_setup.sh ./django-project/docker_delete.sh
 
 gunicorn progcomp.wsgi:application --bind 0.0.0.0:8000
+
+docker compose -f ./docker-compose.web.yml up --build nginx -d
+
+
+
+
