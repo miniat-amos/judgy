@@ -43,8 +43,6 @@ services:
     container_name: judgy_nginx
     build: ./nginx
     restart: always
-    depends_on:
-      - django_gunicorn
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     env_file:
       - .env
