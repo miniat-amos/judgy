@@ -87,7 +87,7 @@ WSGI_APPLICATION = "progcomp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": config("MYSQL_BACKEND"),
-        "HOST": config("MYSQL_HOST", default="judgy_mysql_prod"),
+        "HOST": config("MYSQL_HOST", default="localhost"),
         "PORT": config("MYSQL_PORT", default="3306"),
         "NAME": config("MYSQL_DATABASE"),
         "USER": config("MYSQL_USER"),

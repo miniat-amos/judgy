@@ -20,25 +20,6 @@ services:
     networks:
       - prod
 
-  # django_gunicorn:
-  #   container_name: judgy_app
-  #   build:
-  #     context: .
-  #   restart: always
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - static:/app/staticfiles
-  #     - ./competitions:/app/competitions
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   ports:
-  #     - "8000:8000"
-  #   networks:
-  #     - prod
-
   nginx:
     container_name: judgy_nginx
     build: ./nginx
@@ -50,11 +31,8 @@ services:
       - ./django-project/staticfiles:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
       - acme-challenge:/app/acme-challenges
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - prod
+    network_mode: "host"
+
 
 networks:
   prod:

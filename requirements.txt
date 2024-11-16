@@ -18,8 +18,12 @@ django==5.1.2
     # via -r requirements.in
 docker==7.1.0
     # via -r requirements.in
+gunicorn==23.0.0
+    # via -r requirements.in
 idna==3.10
     # via requests
+packaging==24.2
+    # via gunicorn
 pycparser==2.22
     # via cffi
 pymysql==1.1.1
