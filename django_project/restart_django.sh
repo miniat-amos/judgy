@@ -7,4 +7,6 @@ restart_server() {
 
 source ./env/bin/activate
 
+cd ./django_project
+
 restart_server
