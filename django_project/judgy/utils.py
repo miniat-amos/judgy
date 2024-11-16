@@ -1,6 +1,9 @@
 import logging
+import os
 from django.conf import settings
 from pathlib import Path
+
+parent_dir = Path(settings.BASE_DIR).parent
 
 
 def make_file(passed_in_dir, file_name):
@@ -11,21 +14,14 @@ def make_file(passed_in_dir, file_name):
 
 
 def create_comp_dir(comp_code):
-    main_directory = Path(settings.BASE_DIR) / "competitions"
+    main_directory = parent_dir / "competitions"
     main_directory.mkdir(exist_ok=True)
 
     comp_directory = main_directory / comp_code.lower()
     comp_directory.mkdir(exist_ok=True)
 
-    submissions_directory = comp_directory / "submissions"
-    submissions_directory.mkdir(exist_ok=True)
-
-    output_directory = comp_directory / "outputs"
-    output_directory.mkdir(exist_ok=True)
-
-
 def create_problem_dir(problem_name, comp_code):
-    main_directory = Path(settings.BASE_DIR) / "competitions"
+    main_directory = parent_dir / "competitions"
     comp_directory = main_directory / comp_code.lower()
 
     problems_directory = comp_directory / "problems"
