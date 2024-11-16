@@ -39,6 +39,5 @@ networks:
     driver: bridge
 
 volumes:
-  static:
   prod_data:
   acme-challenge:
