@@ -47,6 +47,14 @@ create_virtualenv() {
 
 }
 
+
+# Run virtual env function
+create_virtualenv
+
+echo "Exporting .env variables"
+
+export $(grep -v '^#' .env | xargs)
+
 python_commands() {
     echo "Running python commands"
 
@@ -65,13 +73,6 @@ python_commands() {
     # Create the super user from .env
     python manage.py createsuperuser --noinput
 }
-
-# Run virtual env function
-create_virtualenv
-
-echo "Exporting .env variables"
-
-export $(grep -v '^#' .env | xargs)
 
 echo "Entering django project directory"
 
