@@ -1,8 +1,8 @@
 services:
   python_app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./django_project/Dockerfile
       args:
         BASE_IMAGE: python:latest
         COMP_CODE: ${COMP_CODE}
@@ -10,8 +10,8 @@ services:
 
   ruby_app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./django_project/Dockerfile
       args:
         BASE_IMAGE: ruby:latest
         COMP_CODE: ${COMP_CODE}
@@ -19,8 +19,8 @@ services:
 
   gcc_app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./django_project/Dockerfile
       args:
         BASE_IMAGE: gcc:latest
         COMP_CODE: ${COMP_CODE}
@@ -28,8 +28,8 @@ services:
 
   node_app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./django_project/Dockerfile
       args:
         BASE_IMAGE: node:latest
         COMP_CODE: ${COMP_CODE}
