@@ -28,7 +28,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./django-project/staticfiles:/app/staticfiles
+      - ./django_project/staticfiles:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
       - acme-challenge:/app/acme-challenges
     network_mode: "host"
