@@ -1,3 +1,6 @@
+#!/bin/bash
+
+
 restart_server() {
     echo "Restart Gunicorn server"
     pkill gunicorn || true  # Kill any existing Gunicorn processes
