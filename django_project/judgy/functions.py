@@ -52,8 +52,8 @@ def start_containers(f, current_user):
      # Volumes for file-to-file binding
     volumes = {
         str(submitted_file): {"bind": str(container_user_file), "mode": "rw"},
-        # str(output_file): {"bind": str(container_output_path), "mode": "rw"},
-        # str(score_file): {"bind": str(container_score_path), "mode": "rw"},
+        str(output_file): {"bind": str(container_output_path), "mode": "rw"},
+        str(score_file): {"bind": str(container_score_path), "mode": "rw"},
     }
 
 
@@ -61,8 +61,7 @@ def start_containers(f, current_user):
         interpreter = languages[file_extension]["interpreter"]
         container = client.containers.run(
             docker_image,
-            # command=f'bash -c "{interpreter} {container_user_file} < /app/golddigger-mine.dat > {container_output_path} && python3 golddigger-judge.py golddigger-mine.dat {interpreter} {container_user_file} > {container_score_path}"',
-            command=f'tail -f /dev/null',
+            command=f'bash -c "{interpreter} {container_user_file} < /app/golddigger-mine.dat > {container_output_path} && python3 golddigger-judge.py golddigger-mine.dat {interpreter} {container_user_file} > {container_score_path}"',
             volumes=volumes,
             detach=True,
             name=container_name,
@@ -78,7 +77,7 @@ def start_containers(f, current_user):
         )
 
     container.stop()
-    # container.remove()
+    container.remove()
 
     return output_file, score_file
 
