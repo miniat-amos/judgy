@@ -65,13 +65,18 @@ python_commands() {
     # Get all static files
     python manage.py collectstatic --no-input
 
-    export DJANGO_SUPERUSER_EMAIL=$SUPER_USER_EMAIL
-    export DJANGO_SUPERUSER_PASSWORD=$SUPER_USER_PASSWORD
-    export DJANGO_SUPERUSER_FIRSTNAME=$SUPER_USER_FIRST_NAME
-    export DJANGO_SUPERUSER_LASTNAME=$SUPER_USER_LAST_NAME
+    # Create the superuser if it doesn't already exist
+    echo "Creating superuser"
+    python make_superuser.py
 
-    # Create the super user from .env
-    python manage.py createsuperuser --noinput
+}
+
+# Start Gunicorn server
+start_server() {
+    echo "Starting Gunicorn server"
+    pkill gunicorn || true  # Kill any existing Gunicorn processes
+    mkdir ./logs
+    nohup gunicorn progcomp.wsgi:application --bind 0.0.0.0:8000 --workers 17 > logs/server_$(date +%F_%T).log 2>&1 &
 }
 
 echo "Entering django project directory"
@@ -95,8 +100,9 @@ python_commands
 chmod +x ./docker_setup.sh ./docker_delete.sh
 
 echo "Starting django web app in the background on port 8000"
-# Run the django web app on port 8000
-nohup gunicorn progcomp.wsgi:application --bind 0.0.0.0:8000 > nohup.out 2>&1 &
+
+
+start_server
 
 echo "Starting nginx"
 # Create the nginx container to start web server
