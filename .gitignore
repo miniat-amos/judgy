@@ -40,6 +40,7 @@ django_project/*
 !django_project/Dockerfile
 !django_project/docker_setup.sh
 !django_project/docker_delete.sh
+!django_project/restart_django.sh
 !django_project/make_superuser.py
 
 ########################################
