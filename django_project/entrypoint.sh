@@ -65,10 +65,10 @@ python_commands() {
     # Get all static files
     python manage.py collectstatic --no-input
 
-    DJANGO_SUPERUSER_EMAIL=$SUPER_USER_EMAIL
-    DJANGO_SUPERUSER_PASSWORD=$SUPER_USER_PASSWORD
-    DJANGO_SUPERUSER_FIRSTNAME=$SUPER_USER_FIRST_NAME
-    DJANGO_SUPERUSER_LASTNAME=$SUPER_USER_LAST_NAME
+    export DJANGO_SUPERUSER_EMAIL=$SUPER_USER_EMAIL
+    export DJANGO_SUPERUSER_PASSWORD=$SUPER_USER_PASSWORD
+    export DJANGO_SUPERUSER_FIRSTNAME=$SUPER_USER_FIRST_NAME
+    export DJANGO_SUPERUSER_LASTNAME=$SUPER_USER_LAST_NAME
 
     # Create the super user from .env
     python manage.py createsuperuser --noinput
