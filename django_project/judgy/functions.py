@@ -11,20 +11,30 @@ languages = {
     ".rb": {"image": "ruby", "type": "interpreted", "interpreter": "ruby"},
     ".c": {"image": "gcc", "type": "compiled", "compiler": "gcc"},
     ".cpp": {"image": "gcc", "type": "compiled", "compiler": "g++"},
+    ".java": {"image": "openjdk", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java",
+}
 }
 
 
 def start_containers(f, current_user):
     # Variables for local machine
-    file_extension = os.path.splitext(f.name)[1]
+
+    # Get file extension
+    file_extension = os.path.splitext(f[0].name)[1]
     submitted_image = languages[file_extension]["image"]
 
     # Make submissions dir
     submissions_dir = create_user_dir("submissions", current_user)
-    submitted_file = Path(submissions_dir) / f.name
-    with open(submitted_file, "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+
+    # Store file in submissions dir
+    submitted_files = []
+    for file in f:
+        file_path = Path(submissions_dir) / file.name
+        with open(file_path, "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        submitted_files.append(file_path)  # Track all file paths
+
 
     # Create output directory
     output_dir = create_user_dir("outputs", current_user)
@@ -32,32 +42,69 @@ def start_containers(f, current_user):
     score_file = make_file(output_dir, "score.txt")
 
     # Connect to docker daemon
-    client = docker.from_env()
+    try:    
+        client = docker.from_env()
+        print("docker initialized")
+    except Exception as e:
+        print(f"Error initializing Docker client: {e}")
 
     # Variables for container
     docker_image = f"judgy-0012-{submitted_image}_app"
     container_name = f"{submitted_image}_{current_user.first_name}_container"
     container_main_directory = Path("/app")
-    container_user_file = container_main_directory / f.name
+    # container_user_file = container_main_directory / f.name
     
     container_output_path = container_main_directory / "outputs" / "output.txt"
     container_score_path = container_main_directory / "outputs" / "score.txt"
+    # docker_image = f"judgy-ed68-{submitted_image}_app"
+    # container_name = f"{submitted_image}_container"
+    # container_main_directory = Path("/usr/app")
+    # # container_user_file = container_main_directory / submitted_files[0].name
+    # container_output_directory = container_main_directory / "outputs"
+    # container_output_path = container_output_directory / "output.txt"
+    # container_score_path = container_output_directory / "score.txt"
 
 
     # Debugging prints
-    print(f"Submitted file path: {submitted_file}")
+    # print(f"Submitted file path: {submitted_file}")
     print(f"Output file path: {output_file}")
     print(f"Score file path: {score_file}")
 
      # Volumes for file-to-file binding
     volumes = {
-        str(submitted_file): {"bind": str(container_user_file), "mode": "rw"},
+        # str(submitted_file): {"bind": str(container_user_file), "mode": "rw"},
         str(output_file): {"bind": str(container_output_path), "mode": "rw"},
         str(score_file): {"bind": str(container_score_path), "mode": "rw"},
     }
+    
+    # Add all submitted files to volumes
+    for submitted_file in submitted_files:
+        # file_extension = os.path.splitext(submitted_file.name)[1]
+        submitted_image = languages[file_extension]["image"]
+        docker_image = f"judgy-ed68-{submitted_image}_app"
+        container_name = f"{submitted_image}_container"
+        container_main_directory = Path("/usr/app")
+        container_user_file = container_main_directory / submitted_file.name
 
-
-    if languages[file_extension]["type"] == "interpreted":
+        volumes[str(submitted_file)] = {"bind": str(container_user_file), "mode": "rw"}
+    
+    if languages[file_extension]["type"] == "compiled-and-interpreted":
+        # Directory where Java files are stored in the container
+        interpreter = languages[file_extension]["interpreter"]
+        compiler = languages[file_extension]["compiler"]
+        
+        # Command to compile and execute the Java files
+        container = client.containers.run(
+            docker_image,
+            command=f"""
+                bash -c '{compiler} Main.java {interpreter} Main.class {container_output_path}'
+                """,
+            volumes=volumes,
+            detach=True,
+            name=container_name,
+        )
+        
+    elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
         container = client.containers.run(
             docker_image,
@@ -67,6 +114,7 @@ def start_containers(f, current_user):
             name=container_name,
         )
     elif languages[file_extension]["type"] == "compiled":
+        print("I MADE IT TO ELIF COMPILED LANGAUGES")
         compiler = languages[file_extension]["compiler"]
         container = client.containers.run(
             docker_image,
@@ -76,7 +124,7 @@ def start_containers(f, current_user):
             name=container_name,
         )
 
-    container.stop()
+    container.stop()    
     container.remove()
 
     return output_file, score_file

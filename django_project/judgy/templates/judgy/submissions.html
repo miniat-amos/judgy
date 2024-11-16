@@ -26,7 +26,8 @@
     
     <form id="code-submit" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.file }}
+        <!-- {{ form.file }} -->
+        <input type="file" name="file" multiple>
         <input type="submit" value="Upload" style="margin-top: 10px;" />
     </form>
 

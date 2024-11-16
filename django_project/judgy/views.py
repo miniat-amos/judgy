@@ -356,9 +356,10 @@ def submissions(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             current_user = request.user
-            submitted_file = request.FILES['file']
-            output_file, score_file = start_containers(submitted_file, current_user)
-
+            # submitted_file = request.FILES['file']
+            submitted_files = request.FILES.getlist('file')
+            output_file, score_file = start_containers(submitted_files, current_user)
+        
             with open(output_file, 'r') as f:
                 user_output = f.read()
 
@@ -367,7 +368,7 @@ def submissions(request):
 
             return render(
                 request,
-                'judgy/submissions.html',
+                'judgy/submissions.html',   
                 {'user_output': user_output, 'user_score': user_score},
             )
         else:
@@ -375,3 +376,4 @@ def submissions(request):
     else:
         form = UploadFileForm()
     return render(request, 'judgy/submissions.html', {'form': form})
+

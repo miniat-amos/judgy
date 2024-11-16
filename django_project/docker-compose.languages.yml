@@ -34,3 +34,12 @@ services:
         BASE_IMAGE: node:latest
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-node_app
+
+  java_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: openjdk:17-jdk-slim
+        COMP_CODE: ${COMP_CODE}
+    image: judgy-${COMP_CODE}-java_app
