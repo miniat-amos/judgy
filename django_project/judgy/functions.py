@@ -16,15 +16,11 @@ languages = {
 
 def start_containers(f, current_user):
     # Variables for local machine
-
-    # Get file extension
     file_extension = os.path.splitext(f.name)[1]
     submitted_image = languages[file_extension]["image"]
 
     # Make submissions dir
     submissions_dir = create_user_dir("submissions", current_user)
-
-    # Store file in submissions dir
     submitted_file = Path(submissions_dir) / f.name
     with open(submitted_file, "wb+") as destination:
         for chunk in f.chunks():
@@ -39,46 +35,50 @@ def start_containers(f, current_user):
     client = docker.from_env()
 
     # Variables for container
-    docker_image = f"judgy-2406-{submitted_image}_app"
-    container_name = f"{submitted_image}_container"
-    container_main_directory = Path("/usr/app")
+    docker_image = f"judgy-0012-{submitted_image}_app"
+    container_name = f"{submitted_image}_{current_user.first_name}_container"
+    container_main_directory = Path("/app")
     container_user_file = container_main_directory / f.name
-    container_output_directory = container_main_directory / "outputs"
-    container_output_path = container_output_directory / "output.txt"
-    container_score_path = container_output_directory / "score.txt"
+    
+    container_output_path = container_main_directory / "outputs" / "output.txt"
+    container_score_path = container_main_directory / "outputs" / "score.txt"
 
+
+    # Debugging prints
+    print(f"Submitted file path: {submitted_file}")
+    print(f"Output file path: {output_file}")
+    print(f"Score file path: {score_file}")
+
+     # Volumes for file-to-file binding
     volumes = {
         str(submitted_file): {"bind": str(container_user_file), "mode": "rw"},
-        str(output_file): {"bind": str(container_output_path), "mode": "rw"},
-        str(score_file): {"bind": str(container_score_path), "mode": "rw"},
+        # str(output_file): {"bind": str(container_output_path), "mode": "rw"},
+        # str(score_file): {"bind": str(container_score_path), "mode": "rw"},
     }
+
 
     if languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
         container = client.containers.run(
             docker_image,
-            command=f"""
-                bash -c '{interpreter} {container_user_file} < nuts-nuts.dat > {container_output_path} && python3 nuts-judge.py nuts-nuts.dat {interpreter} {container_user_file} > {container_score_path}'
-                """,
+            # command=f'bash -c "{interpreter} {container_user_file} < /app/golddigger-mine.dat > {container_output_path} && python3 golddigger-judge.py golddigger-mine.dat {interpreter} {container_user_file} > {container_score_path}"',
+            command=f'tail -f /dev/null',
             volumes=volumes,
             detach=True,
             name=container_name,
         )
-
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
         container = client.containers.run(
             docker_image,
-            command=f"""
-                    bash -c '{compiler} {container_user_file} -o {container_main_directory}/a.out && ({container_main_directory}/a.out) < mine.dat > {container_output_path} && python3 judge.py mine.dat {container_main_directory}/a.out > {container_score_path}'
-                    """,
+            command=f'bash -c "{compiler} {container_user_file} -o {container_main_directory}/a.out && ({container_main_directory}/a.out) < mine.dat > {container_output_path} && python3 judge.py mine.dat {container_main_directory}/a.out > {container_score_path}"',
             volumes=volumes,
             detach=True,
             name=container_name,
         )
 
     container.stop()
-    container.remove()
+    # container.remove()
 
     return output_file, score_file
 

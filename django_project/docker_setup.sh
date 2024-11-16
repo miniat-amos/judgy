@@ -1,11 +1,23 @@
 #!/bin/bash
-# Author - Slava Borysyuk
-# Date Created - 10/23/2024
-# Creates Docker images based on the competition
-# code passed in by Admin. It will create images
-# with all of the problems associated with that
-# competition code. All images will come preloaded
-# with judging programs and test files.
+# ==============================================
+# Script Name  : docker_setup.sh
+# Author       : Slava Borysyuk
+# Date Created : 10/23/2024
+# Description  : Builds Docker images for a specific competition using the provided 
+#                competition code. The images include judging programs and other files 
+#                for all problems associated with the competition.
+# Usage        : ./docker_setup.sh COMP_CODE
+# Arguments    : 
+#                - COMP_CODE: The unique competition code used for identifying the problems.
+# Dependencies : 
+#                - Requires Docker and Docker Compose to be installed and functional.
+# Environment  :
+#                - Exports `COMP_CODE` as an environment variable for Docker Compose.
+# Notes        :
+#  - Ensure `docker-compose.languages.yml` is correctly configured for this process.
+#  - COMP_CODE is passed as a build argument during the Docker image creation process.
+# ==============================================
+
 
 # Check if they passed in competition code
 if [ $# -ne 1 ]; then

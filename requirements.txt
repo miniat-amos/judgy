@@ -16,13 +16,14 @@ cryptography==43.0.3
     # via -r requirements.in
 django==5.1.2
     # via -r requirements.in
-docker-py==1.10.6
+docker==7.1.0
     # via -r requirements.in
-docker-pycreds==0.4.0
-    # via docker-py
 gunicorn==23.0.0
+    # via -r requirements.in
 idna==3.10
     # via requests
+packaging==24.2
+    # via gunicorn
 pycparser==2.22
     # via cffi
 pymysql==1.1.1
@@ -30,14 +31,10 @@ pymysql==1.1.1
 python-decouple==3.8
     # via -r requirements.in
 requests==2.32.3
-    # via docker-py
-six==1.16.0
-    # via
-    #   docker-py
-    #   docker-pycreds
+    # via docker
 sqlparse==0.5.1
     # via django
 urllib3==2.2.3
-    # via requests
-websocket-client==1.8.0
-    # via docker-py
+    # via
+    #   docker
+    #   requests

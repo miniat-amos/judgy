@@ -3,8 +3,6 @@ services:
     image: mysql/mysql-server:8.0
     container_name: judgy_mysql_prod
     restart: always
-    volumes:
-      - prod_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -12,51 +10,34 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "${MYSQL_PORT}:${MYSQL_PORT}"
+    volumes:
+      - prod_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
       interval: 30s
       timeout: 10s
       retries: 5
     networks:
       - prod
 
-  django_gunicorn:
-    container_name: judgy_app
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - static:/app/staticfiles
-    env_file:
-      - .env
-    build:
-      context: .
-    ports:
-      - "8000:8000"
-    networks:
-      - prod
-
   nginx:
     container_name: judgy_nginx
     build: ./nginx
+    restart: always
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
     env_file:
       - .env
     volumes:
-      - static:/app/staticfiles
+      - ./django_project/staticfiles:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - django_gunicorn
-    networks:
-      - prod
-    entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
+      - acme-challenge:/app/acme-challenges
+    network_mode: "host"
+
 
 networks:
   prod:
     driver: bridge
 
 volumes:
-  static:
   prod_data:
+  acme-challenge:

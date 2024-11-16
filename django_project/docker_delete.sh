@@ -1,11 +1,18 @@
 #!/bin/bash
-# Author - Slava Borysyuk
-# Date Created - 10/25/2024
-# Creates Docker images based on the competition
-# code passed in by Admin. It will create images
-# with all of the problems associated with that
-# competition code. All images will come preloaded
-# with judging programs and test files.
+# ==============================================
+# Script Name  : docker_delete.sh
+# Author       : Slava Borysyuk
+# Date Created : 10/25/2024
+# Description  : Deletes Docker images for a specific competition code.
+#                Images are identified by the prefix `judgy-<COMP_CODE>-`.
+# Usage        : ./docker_delete.sh COMP_CODE
+# Arguments    : 
+#                - COMP_CODE: The competition code used to identify images for deletion.
+# Notes        : 
+#  - Ensure Docker is installed and running before executing this script.
+#  - This script forcibly removes images (`docker rmi -f`), so use with caution.
+# ==============================================
+
 
 if [ $# -ne 1 ]; then
     echo "Usage: $0 COMP_CODE"
