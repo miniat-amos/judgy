@@ -24,6 +24,7 @@
 
 echo "Entrypoint script is running"
 
+# Creates a python virtual env
 create_virtualenv() {
 
     sudo apt update
@@ -46,14 +47,6 @@ create_virtualenv() {
     pip install -r requirements.txt
 
 }
-
-
-# Run virtual env function
-create_virtualenv
-
-echo "Exporting .env variables"
-
-export $(grep -v '^#' .env | xargs)
 
 python_commands() {
     echo "Running python commands"
@@ -79,6 +72,15 @@ start_server() {
     nohup gunicorn progcomp.wsgi:application --bind 0.0.0.0:8000 --workers 17 > logs/server_$(date +%F_%T).log 2>&1 &
 }
 
+# Run virtual env function
+create_virtualenv
+
+echo "Exporting .env variables"
+
+# Export the .env vars so script has them
+export $(grep -v '^#' .env | xargs)
+
+
 echo "Entering django project directory"
 
 cd ./django_project
@@ -100,8 +102,7 @@ python_commands
 chmod +x ./docker_setup.sh ./docker_delete.sh
 
 echo "Starting django web app in the background on port 8000"
-
-
+# Start django app
 start_server
 
 echo "Starting nginx"
