@@ -15,14 +15,31 @@
       if (step == 2) {
         $('.step').hide();
         $(`.step-${--step}`).show();
+
         $('#back').hide();
+      }
+      
+      if (step == 3) {
+        $('.step').hide();
+        $(`.step-${--step}`).show();
+
+        $('#next').show();
+        $('#save').hide();
       }
     }).hide();
 
     $('#next').on('click', () => {
       if (step == 2) {
-        $('#manage-problems').closest('form').submit();
+        $('.step').hide();
+        $(`.step-${++step}`).show();
+
+        $('.step-3').empty();
+        $('.step-3').append(`<h5>${problem_number}. ${$('#manage-problems #name').val()}</h5>`);
+
+        $('#next').hide();
+        $('#save').show();
       }
+
       if (step == 1) {
         if ($('#manage-problems').closest('form')[0].checkValidity()) {
           $('.step').hide();
@@ -59,7 +76,6 @@
       }
     }).show();
 
-    $('#done').hide();
     $('#save').hide();
   });
 </script>
@@ -74,9 +90,9 @@
             <button class="btn btn-close" data-bs-dismiss="modal" type="button"></button>
           </div>
           <div class="modal-body">
-            <h5 class="title"></h5>
-
             <div class="step step-1">
+              <h5 class="title"></h5>
+
               <div class="my-3">
                 <div class="row">
                   <div class="col">
@@ -99,7 +115,7 @@
                   </div>
 
                   <div class="col">
-                    <label for="score_preference" class="form-label">Score Preference</label>
+                    <label for="score-preference" class="form-label">Score Preference</label>
                     {{ problem_form.score_preference }}
                   </div>
                 </div>
@@ -112,6 +128,8 @@
             </div>
 
             <div class="step step-2">
+              <h5 class="title"></h5>
+
               <div class="table-responsive">
                 <table class="table table-hover">
                   <thead>
@@ -125,11 +143,13 @@
                 </table>
               </div>
             </div>
+
+            <div class="step step-3">
+            </div>
           </div>
           <div class="modal-footer">
             <button id="back" class="btn btn-secondary" type="button">Back</button>
             <button id="next" class="btn btn-primary" type="button">Next</button>
-            <button id="done" class="btn btn-success" type="submit">Done</button>
             <button id="save" class="btn btn-success" type="submit">Save</button>
           </div>
         </div>

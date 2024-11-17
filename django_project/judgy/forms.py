@@ -336,7 +336,7 @@ class ProblemForm(forms.ModelForm):
         )
         self.fields['score_preference'].widget.attrs.update(
             {
-                'id': 'score_preference',
+                'id': 'score-preference',
                 'class': 'form-select',
                 'placeholder': 'Score Preference'
             }
