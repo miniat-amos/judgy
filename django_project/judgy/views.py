@@ -13,9 +13,9 @@ from .forms import (
     AuthenticationForm,
     AccountVerificationForm,
     CompetitionCreationForm,
+    ProblemForm,
     TeamEnrollForm,
     TeamInviteForm,
-    ProblemCreationForm,
     UploadFileForm
 )
 from .functions import (
@@ -32,8 +32,7 @@ from .models import (
 )
 from .utils import (
     create_comp_dir,
-    create_problem_dir,
-    save_problem_files
+    create_problem
 )
 
 def home_view(request):
@@ -57,7 +56,7 @@ def home_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
+        form = AuthenticationForm(request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect('judgy:home')
@@ -71,7 +70,7 @@ def logout_view(request):
 
 def register_view(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(data=request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
@@ -118,7 +117,7 @@ def set_timezone_view(request):
 @user_passes_test(lambda u: u.is_superuser)
 def competition_create_view(request):
     if request.method == 'POST':
-        form = CompetitionCreationForm(data=request.POST)
+        form = CompetitionCreationForm(request.POST)
         if form.is_valid():
             competition = form.save()
             create_comp_dir(str(competition.code))
@@ -133,65 +132,48 @@ def competition_code_view(request, code):
     teams = Team.objects.filter(competition=competition)
 
     if request.method == 'GET':
+        problem_form = ProblemForm()
         team_enroll_form = TeamEnrollForm()
         team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
         team_invite_form = TeamInviteForm(team_invite_limit=team_invite_limit) if team_invite_limit != 0 else None
-        problem_creation_form = ProblemCreationForm()
         return render(request, 'judgy/competition_code.html', {
             'competition': competition,
             'user_team': user_team,
             'teams': teams,
+            'problem_form': problem_form,
             'team_enroll_form': team_enroll_form,
-            'team_invite_form': team_invite_form,
-            'problem_creation_form': problem_creation_form
+            'team_invite_form': team_invite_form
         })
-
-    if request.method == 'POST':
-        problem_creation_form = ProblemCreationForm(request.POST, request.FILES)
-        if problem_creation_form.is_valid():
-            row_numbers = request.POST.getlist('row_number')
-            problem_names = request.POST.getlist('name')
-            zip_files = request.FILES.getlist('zip')
-            input_files = request.FILES.getlist('input_files')
-            judging_programs = request.FILES.getlist('judging_program')
-
-            for i, row in enumerate(row_numbers):
-                name = problem_names[i]
-                zip_file = zip_files[i]
-                input_file = input_files[i]
-                judging_program = judging_programs[i]
-                problem_dir = create_problem_dir(name, code)
-
-                directories = [
-                    f'{name}_zip',
-                    f'{name}_input_file',
-                    f'{name}_judging_program'
-                ]
-
-                file_names = [
-                    f'{name}.zip',
-                    f'{name}-{input_file.name}',
-                    f'{name}-judge.py'
-                ]
-
-                files = [zip_file, input_file, judging_program]
-
-                save_problem_files(problem_dir, directories, file_names, files)
-                create_images(code)
-
-            return redirect('judgy:competition_code', code=code)
-        return render(request, 'judgy/competition_code.html', {
-            'competition': competition,
-            'problem_creation_form': problem_creation_form
-        })
-    
-    if request.method == 'PUT':
-        pass
 
     if request.method == 'DELETE':
         if request.user.is_authenticated and request.user.is_superuser:
             competition.delete()
             return JsonResponse({})
+
+@user_passes_test(lambda u: u.is_superuser)
+def problems_update_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+
+    if request.method == 'POST':
+        problem_form = ProblemForm(request.POST, request.FILES)
+        if (problem_form.is_valid()):
+            problem = problem_form.save(commit=False)
+            problem.number = 1
+            problem.save()
+
+            description = request.FILES.get('description')
+            judge_py = request.FILES.get('judge_py')
+            other_files = request.FILES.getlist('other_files')
+
+            dist = [
+                key[len('distribute['):-1]
+                for key, val in request.POST.items()
+                if key.startswith('distribute[')
+            ]
+
+            create_problem(code, problem.name, description, judge_py, other_files, dist)
+
+            return redirect('judgy:competition_code', code=competition.code)
 
 @verified_required
 def team_enroll_view(request, code):
@@ -199,7 +181,7 @@ def team_enroll_view(request, code):
 
     if request.method == 'POST':
         if competition.enroll_start <= timezone.now() < competition.enroll_end:
-            form = TeamEnrollForm(data=request.POST)
+            form = TeamEnrollForm(request.POST)
             if form.is_valid():
                 name = form.cleaned_data.get('name')
                 team, created = Team.objects.get_or_create(
@@ -287,7 +269,7 @@ def team_invite_view(request, code):
         if competition.enroll_start <= timezone.now() < competition.enroll_end:
             team = Team.objects.filter(competition=competition, members=request.user).first()
             team_invite_limit = competition.team_size_limit - (team.members.count() if team else 0)
-            form = TeamInviteForm(data=request.POST, team_invite_limit=team_invite_limit)
+            form = TeamInviteForm(request.POST, team_invite_limit=team_invite_limit)
             if form.is_valid():
                 for field in form.fields:
                     email = form.cleaned_data[field]

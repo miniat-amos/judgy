@@ -1,0 +1,138 @@
+<script>
+  $(() => {
+    let problem_number = 1;
+    let step = 1;
+
+    $('#manage-problems').closest('form')[0].reset();
+
+    $('.step-1').show();
+    $('.step-2').hide();
+
+    $('#manage-problems .title').text(`${problem_number}. ${$('#manage-problems #name').val()}`);
+    $('#manage-problems #name').on('input', () => $('#manage-problems .title').text(`${problem_number}. ${$('#manage-problems #name').val()}`));
+    
+    $('#back').on('click', () => {
+      if (step == 2) {
+        $('.step').hide();
+        $(`.step-${--step}`).show();
+        $('#back').hide();
+      }
+    }).hide();
+
+    $('#next').on('click', () => {
+      if (step == 2) {
+        $('#manage-problems').closest('form').submit();
+      }
+      if (step == 1) {
+        if ($('#manage-problems').closest('form')[0].checkValidity()) {
+          $('.step').hide();
+          $(`.step-${++step}`).show();
+
+          $('.step-2 tbody').empty();
+          const description = $('#description')[0].files[0];
+          $('.step-2 tbody').append(`
+            <tr>
+              <th scope="row">${description.name}</th>
+              <td class="text-center"><input name="distribute[${description.name}]" type="checkbox" checked></td>
+            </tr>
+          `);
+          const judge_py = $('#judge-py')[0].files[0];
+          $('.step-2 tbody').append(`
+            <tr>
+              <th scope="row">${judge_py.name}</th>
+              <td class="text-center"><input name="distribute[${judge_py.name}]" type="checkbox" checked></td>
+            </tr>
+          `);
+          for (const file of $('#other-files')[0].files) {
+            $('.step-2 tbody').append(`
+              <tr>
+                <th scope="row">${file.name}</th>
+                <td class="text-center"><input name="distribute[${file.name}]" type="checkbox"></td>
+              </tr>
+            `);
+          }
+
+          $('#back').show();
+        } else {
+          $('#manage-problems').closest('form')[0].reportValidity();
+        }
+      }
+    }).show();
+
+    $('#done').hide();
+    $('#save').hide();
+  });
+</script>
+
+<form action="{% url 'judgy:problems_update' competition.code %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+    <div id="manage-problems" class="modal fade">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">Manage Problems</h1>
+            <button class="btn btn-close" data-bs-dismiss="modal" type="button"></button>
+          </div>
+          <div class="modal-body">
+            <h5 class="title"></h5>
+
+            <div class="step step-1">
+              <div class="my-3">
+                <div class="row">
+                  <div class="col">
+                    <label for="name" class="form-label">Problem Name</label>
+                    {{ problem_form.name }}
+                  </div>
+
+                  <div class="col">
+                    <label for="description" class="form-label">Problem Description</label>
+                    {{ problem_form.description }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="my-3">
+                <div class="row">
+                  <div class="col">
+                    <label for="judge-py" class="form-label">judge.py</label>
+                    {{ problem_form.judge_py }}
+                  </div>
+
+                  <div class="col">
+                    <label for="score_preference" class="form-label">Score Preference</label>
+                    {{ problem_form.score_preference }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="my-3">
+                <label for="other-files" class="form-label">Other Files</label>
+                {{ problem_form.other_files }}
+              </div>
+            </div>
+
+            <div class="step step-2">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">File</th>
+                      <th scope="col" class="text-center">Distribute</th>
+                    </tr>
+                  </thead>
+                  <tbody class="table-group-divider">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="back" class="btn btn-secondary" type="button">Back</button>
+            <button id="next" class="btn btn-primary" type="button">Next</button>
+            <button id="done" class="btn btn-success" type="submit">Done</button>
+            <button id="save" class="btn btn-success" type="submit">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</form>

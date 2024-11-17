@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
-from .models import User, Competition, Team
+from .models import User, Competition, Problem, Team
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -286,6 +286,69 @@ class CompetitionCreationForm(forms.ModelForm):
 
         return cleaned_data
 
+class ProblemForm(forms.ModelForm):
+    description = forms.FileField()
+    judge_py = forms.FileField()
+    score_preference = forms.ChoiceField(
+        choices=[
+            (True, 'Higher Score is Better'),
+            (False, 'Lower Score is Better')
+        ]
+    )
+    other_files = forms.FileField()
+
+    class Meta:
+        model = Problem
+        fields = [
+            'name',
+            'score_preference'
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['name'].required = True
+        self.fields['description'].required = True
+        self.fields['judge_py'].required = True
+        self.fields['score_preference'].required = True
+        self.fields['other_files'].required = False
+
+        self.fields['name'].widget.attrs.update(
+            {
+                'id': 'name',
+                'class': 'form-control',
+                'placeholder': 'Problem Name'
+            }
+        )
+        self.fields['description'].widget.attrs.update(
+            {
+                'id': 'description',
+                'class': 'form-control',
+                'multiple': False
+            }
+        )
+        self.fields['judge_py'].widget.attrs.update(
+            {
+                'id': 'judge-py',
+                'class': 'form-control',
+                'multiple': False
+            }
+        )
+        self.fields['score_preference'].widget.attrs.update(
+            {
+                'id': 'score_preference',
+                'class': 'form-select',
+                'placeholder': 'Score Preference'
+            }
+        )
+        self.fields['other_files'].widget.attrs.update(
+            {
+                'id': 'other-files',
+                'class': 'form-control',
+                'multiple': True
+            }
+        )
+
 class TeamEnrollForm(forms.ModelForm):
     class Meta:
         model = Team
@@ -321,41 +384,6 @@ class TeamInviteForm(forms.Form):
                     }
                 )
             )
-
-class ProblemCreationForm(forms.Form):
-    name = forms.CharField(
-        label='Problem Name',
-        max_length=100,
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'Problem Name',
-                'autofocus': True,
-            }
-        ),
-    )
-    zip = forms.FileField(
-        label='Problem Zip',
-        widget=forms.ClearableFileInput(
-            attrs={
-                'class': 'form-control',
-                'accept': '.zip',
-            }
-        ),
-    )
-    input_files = forms.FileField(
-        label='Problem Test File(s)',
-        widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
-    )
-    judging_program = forms.FileField(
-        label='Judging Program',
-        widget=forms.ClearableFileInput(
-            attrs={
-                'class': 'form-control',
-                'accept': '.py, .cpp, .java',
-            }
-        ),
-    )
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()

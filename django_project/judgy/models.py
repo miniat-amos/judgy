@@ -46,6 +46,11 @@ class Competition(models.Model):
     def __str__(self):
         return self.name
 
+class Problem(models.Model):
+    number = models.PositiveIntegerField()
+    name = models.CharField(max_length=255, primary_key=True)
+    score_preference = models.BooleanField(default=True)
+
 class Team(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)

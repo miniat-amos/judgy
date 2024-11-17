@@ -61,6 +61,13 @@
       </div>
     </div>
   </div>
+  {% if user.is_superuser %}
+    <div class="text-center">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
+    </div>
+  {% endif %}
 </div>
+
+{% include 'judgy/includes/manage_problems.html' %}
 
 {% endblock %}
