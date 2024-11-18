@@ -172,7 +172,8 @@ def problems_update_view(request, code):
             ]
 
             create_problem(code, problem.name, description, judge_py, other_files, dist)
-
+            
+            
             return redirect('judgy:competition_code', code=competition.code)
 
 @verified_required

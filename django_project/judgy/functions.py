@@ -35,10 +35,10 @@ def start_containers(f, current_user):
     client = docker.from_env()
 
     # Variables for container
-    docker_image = f"judgy-0012-{submitted_image}_app"
+    docker_image = f"judgy-1665-{submitted_image}_app"
     container_name = f"{submitted_image}_{current_user.first_name}_container"
     container_main_directory = Path("/app")
-    container_user_file = container_main_directory / f.name
+    container_user_file = container_main_directory / "digit_chain" / f.name
     
     container_output_path = container_main_directory / "outputs" / "output.txt"
     container_score_path = container_main_directory / "outputs" / "score.txt"
@@ -61,7 +61,7 @@ def start_containers(f, current_user):
         interpreter = languages[file_extension]["interpreter"]
         container = client.containers.run(
             docker_image,
-            command=f'bash -c "{interpreter} {container_user_file} < /app/golddigger-mine.dat > {container_output_path} && python3 golddigger-judge.py golddigger-mine.dat {interpreter} {container_user_file} > {container_score_path}"',
+            command=f'bash -c "cd /app/digit_chain/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"',
             volumes=volumes,
             detach=True,
             name=container_name,
@@ -70,14 +70,14 @@ def start_containers(f, current_user):
         compiler = languages[file_extension]["compiler"]
         container = client.containers.run(
             docker_image,
-            command=f'bash -c "{compiler} {container_user_file} -o {container_main_directory}/a.out && ({container_main_directory}/a.out) < mine.dat > {container_output_path} && python3 judge.py mine.dat {container_main_directory}/a.out > {container_score_path}"',
+            command=f'bash -c "cd /app/digit_chain/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"',
             volumes=volumes,
             detach=True,
             name=container_name,
         )
 
     container.stop()
-    container.remove()
+    # container.remove()
 
     return output_file, score_file
 
