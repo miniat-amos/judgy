@@ -57,27 +57,27 @@ def start_containers(f, current_user):
     }
 
 
+
     if languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
-        container = client.containers.run(
-            docker_image,
-            command=f'bash -c "cd /app/digit_chain/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"',
-            volumes=volumes,
-            detach=True,
-            name=container_name,
-        )
+        command=f'bash -c "cd /app/digit_chain/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"'
+
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
-        container = client.containers.run(
-            docker_image,
-            command=f'bash -c "cd /app/digit_chain/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"',
-            volumes=volumes,
-            detach=True,
-            name=container_name,
-        )
-
+        command=f'bash -c "cd /app/digit_chain/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"'
+    
+    container = client.containers.run(
+        docker_image,
+        command=command,
+        volumes=volumes,
+        detach=True,
+        name=container_name,
+    )
+    
+        
+    
     container.stop()
-    # container.remove()
+    container.remove()
 
     return output_file, score_file
 
