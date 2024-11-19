@@ -20,7 +20,6 @@ languages = {
 
 def start_containers(f, current_user):
     # Variables for local machine
-
     # Get file extension
     file_extension = os.path.splitext(f[0].name)[1]
     submitted_image = languages[file_extension]["image"]
@@ -49,40 +48,19 @@ def start_containers(f, current_user):
     docker_image = f"judgy-92f5-{submitted_image}_app"
     container_name = f"{submitted_image}_{current_user.first_name}_container"
     container_main_directory = Path("/app")
-    # container_user_file = container_main_directory / f.name
     
     container_output_path = container_main_directory / "outputs" / "output.txt"
     container_score_path = container_main_directory / "outputs" / "score.txt"
-    # docker_image = f"judgy-ed68-{submitted_image}_app"
-    # container_name = f"{submitted_image}_container"
-    # container_main_directory = Path("/usr/app")
-    # # container_user_file = container_main_directory / submitted_files[0].name
-    # container_output_directory = container_main_directory / "outputs"
-    # container_output_path = container_output_directory / "output.txt"
-    # container_score_path = container_output_directory / "score.txt"
 
-
-    # Debugging prints
-    # print(f"Submitted file path: {submitted_file}")
-    # print(f"Output file path: {output_file}")
-    # print(f"Score file path: {score_file}")
-
-     # Volumes for file-to-file binding
+    # Volumes for file-to-file binding
     volumes = {
-        # str(submitted_file): {"bind": str(container_user_file), "mode": "rw"},
         str(output_file): {"bind": str(container_output_path), "mode": "rw"},
         str(score_file): {"bind": str(container_score_path), "mode": "rw"},
     }
-    
-    # Add all submitted files to volumes
+
     for submitted_file in submitted_files:
-        # file_extension = os.path.splitext(submitted_file.name)[1]
-        submitted_image = languages[file_extension]["image"]
-        docker_image = f"judgy-92f5-{submitted_image}_app"
-        container_name = f"{submitted_image}_container"
         container_main_directory = Path("/usr/app")
         container_user_file = container_main_directory / submitted_file.name
-
         volumes[str(submitted_file)] = {"bind": str(container_user_file), "mode": "rw"}
     
     if languages[file_extension]["type"] == "compiled-and-interpreted":
@@ -140,7 +118,7 @@ def start_containers(f, current_user):
 
     container.stop()    
     container.remove()
-
+        
     return output_file, score_file
 
 # Create Docker images based on the competition code
