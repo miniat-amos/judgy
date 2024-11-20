@@ -441,11 +441,7 @@ def submit_view(request, code, problem_name):
                     body=f'Score: {user_score}'
                 )
 
-<<<<<<< HEAD
                 return redirect('judgy:competition_code', code=code)
-=======
-            return redirect('judgy:competition_code', code=code)
-        else:
-            print("Some field was incorrectly filled out.")
-            print("form.errors:\n", form.errors)
->>>>>>> 51a58c7d33ed25f5bd7a6e4538b42d42fed6a741
+            else:
+                print("Some field was incorrectly filled out.")
+                print("form.errors:\n", form.errors)
