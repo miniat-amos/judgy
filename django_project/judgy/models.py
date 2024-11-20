@@ -49,8 +49,16 @@ class Competition(models.Model):
 class Problem(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     number = models.PositiveIntegerField()
-    name = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
     score_preference = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['competition', 'name'], name='unique_competition_problem_name')
+        ]
+
+    def __str__(self):
+        return self.name
 
 class Team(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)

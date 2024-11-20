@@ -1,6 +1,5 @@
 <script>
   $(() => {
-    let problem_number = 1;
     let step = 1;
 
     $('#manage-problems').closest('form')[0].reset();
@@ -8,8 +7,8 @@
     $('.step-1').show();
     $('.step-2').hide();
 
-    $('#manage-problems .title').text(`${problem_number}. ${$('#manage-problems #name').val()}`);
-    $('#manage-problems #name').on('input', () => $('#manage-problems .title').text(`${problem_number}. ${$('#manage-problems #name').val()}`));
+    $('#manage-problems .title').text(`${$('#manage-problems #number').val()}. ${$('#manage-problems #name').val()}`);
+    $('#manage-problems #number, #manage-problems #name').on('input', () => $('#manage-problems .title').text(`${$('#manage-problems #number').val()}. ${$('#manage-problems #name').val()}`));
     
     $('#back').on('click', () => {
       if (step == 2) {
@@ -17,29 +16,12 @@
         $(`.step-${--step}`).show();
 
         $('#back').hide();
-      }
-      
-      if (step == 3) {
-        $('.step').hide();
-        $(`.step-${--step}`).show();
-
         $('#next').show();
         $('#save').hide();
       }
     }).hide();
 
     $('#next').on('click', () => {
-      if (step == 2) {
-        $('.step').hide();
-        $(`.step-${++step}`).show();
-
-        $('.step-3').empty();
-        $('.step-3').append(`<h5>${problem_number}. ${$('#manage-problems #name').val()}</h5>`);
-
-        $('#next').hide();
-        $('#save').show();
-      }
-
       if (step == 1) {
         if ($('#manage-problems').closest('form')[0].checkValidity()) {
           $('.step').hide();
@@ -70,6 +52,8 @@
           }
 
           $('#back').show();
+          $('#next').hide();
+          $('#save').show();
         } else {
           $('#manage-problems').closest('form')[0].reportValidity();
         }
@@ -96,13 +80,13 @@
               <div class="my-3">
                 <div class="row">
                   <div class="col">
-                    <label for="name" class="form-label">Problem Name</label>
-                    {{ problem_form.name }}
+                    <label for="number" class="form-label">Problem Number</label>
+                    {{ problem_form.number }}
                   </div>
 
                   <div class="col">
-                    <label for="description" class="form-label">Problem Description</label>
-                    {{ problem_form.description }}
+                    <label for="name" class="form-label">Problem Name</label>
+                    {{ problem_form.name }}
                   </div>
                 </div>
               </div>
@@ -110,8 +94,22 @@
               <div class="my-3">
                 <div class="row">
                   <div class="col">
+                    <label for="description" class="form-label">Problem Description</label>
+                    {{ problem_form.description }}
+                  </div>
+
+                  <div class="col">
                     <label for="judge-py" class="form-label">judge.py</label>
                     {{ problem_form.judge_py }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="my-3">
+                <div class="row">
+                  <div class="col">
+                    <label for="other-files" class="form-label">Other Files</label>
+                    {{ problem_form.other_files }}
                   </div>
 
                   <div class="col">
@@ -119,11 +117,6 @@
                     {{ problem_form.score_preference }}
                   </div>
                 </div>
-              </div>
-
-              <div class="my-3">
-                <label for="other-files" class="form-label">Other Files</label>
-                {{ problem_form.other_files }}
               </div>
             </div>
 
@@ -142,9 +135,6 @@
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            <div class="step step-3">
             </div>
           </div>
           <div class="modal-footer">

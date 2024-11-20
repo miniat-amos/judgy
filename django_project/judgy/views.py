@@ -136,20 +136,27 @@ def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     teams = Team.objects.filter(competition=competition)
-    problems = Problem.objects.filter(competition=competition)
-    
-    
-    # Fetch best scores using Python logic for each problem and team
-    for problem in problems:        
-        submissions = Submission.objects.filter(problem=problem, user=request.user)
-        if problem.score_preference:  # Higher score is better
-            best_score = submissions.aggregate(Max('score'))['score__max']
-        else:  # Lower score is better
-            best_score = submissions.aggregate(Min('score'))['score__min']
-        problem.best_score = best_score or 0
+    problems = Problem.objects.filter(competition=competition).order_by('number')
+
+    for problem in problems:
+        competition_submissions = Submission.objects.filter(problem=problem)
+        team_submissions = Submission.objects.filter(problem=problem, team=user_team)
+        user_submissions = Submission.objects.filter(problem=problem, team=user_team, user=request.user if request.user.is_authenticated else None)
+        if problem.score_preference: # Higher Score is Better
+            competition_best_score = competition_submissions.aggregate(Max('score'))['score__max']
+            team_best_score = team_submissions.aggregate(Max('score'))['score__max']
+            user_best_score = user_submissions.aggregate(Max('score'))['score__max']
+        else: # Lower Score is Better
+            competition_best_score = competition_submissions.aggregate(Min('score'))['score__min']
+            team_best_score = team_submissions.aggregate(Min('score'))['score__min']
+            user_best_score = user_submissions.aggregate(Min('score'))['score__min']
+        problem.competition_best_score = competition_best_score or 0
+        problem.team_best_score = team_best_score or 0
+        problem.user_best_score = user_best_score or 0
 
     if request.method == 'GET':
         problem_form = ProblemForm()
+        submission_form = SubmissionForm()
         team_enroll_form = TeamEnrollForm()
         team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
         team_invite_form = TeamInviteForm(team_invite_limit=team_invite_limit) if team_invite_limit != 0 else None
@@ -158,13 +165,17 @@ def competition_code_view(request, code):
             'user_team': user_team,
             'teams': teams,
             'problem_form': problem_form,
+            'submission_form': submission_form,
             'team_enroll_form': team_enroll_form,
             'team_invite_form': team_invite_form,
             'problems': problems,
+            'download': competition.start <= timezone.now(),
+            'upload': competition.start <= timezone.now() < competition.end and user_team,
+            'enroll': competition.enroll_start <= timezone.now() < competition.enroll_end
         })
 
     if request.method == 'DELETE':
-        if request.user.is_authenticated and request.user.is_superuser:
+        if request.user.is_superuser:
             competition.delete()
             return JsonResponse({})
 
@@ -176,7 +187,6 @@ def problems_update_view(request, code):
         problem_form = ProblemForm(request.POST, request.FILES)
         if (problem_form.is_valid()):
             problem = problem_form.save(commit=False)
-            problem.number = 1
             problem.competition = competition
             problem.save()
 
@@ -191,8 +201,7 @@ def problems_update_view(request, code):
             ]
 
             create_problem(code, problem.name, description, judge_py, other_files, dist)
-            
-            
+
             return redirect('judgy:competition_code', code=competition.code)
 
 @verified_required
@@ -352,6 +361,28 @@ def team_name_view(request, code, name):
 def competitions_view(request):
     return JsonResponse(list(Competition.objects.all().values()), safe=False)
 
+def download_view(request, code, problem_name):
+    dist_dir = get_dist_dir(code, problem_name)
+
+    problem_zip = f'/tmp/{problem_name}.zip'
+
+     # Create a zip file
+    with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(dist_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, dist_dir))
+
+     # Read the zip file and return it in an HTTP response
+    with open(problem_zip, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/zip')
+        # Set the Content-Disposition header to prompt the user to download the file
+        response['Content-Disposition'] = f'attachment; filename="{problem_name}.zip"'
+
+    os.remove(problem_zip)
+
+    return response
+
 @verified_required
 def submit_view(request, code, problem_name):
     if request.method == 'POST':
@@ -379,25 +410,3 @@ def submit_view(request, code, problem_name):
             )
 
             return redirect('judgy:competition_code', code=code)
-
-def download_view(request, code, problem_name):
-    dist_dir = get_dist_dir(code, problem_name)
-
-    problem_zip = f'/tmp/{problem_name}.zip'
-
-     # Create a zip file
-    with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(dist_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zipf.write(file_path, os.path.relpath(file_path, dist_dir))
-
-     # Read the zip file and return it in an HTTP response
-    with open(problem_zip, 'rb') as f:
-        response = HttpResponse(f.read(), content_type='application/zip')
-        # Set the Content-Disposition header to prompt the user to download the file
-        response['Content-Disposition'] = f'attachment; filename="{problem_name}.zip"'
-
-    os.remove(problem_zip)
-
-    return response

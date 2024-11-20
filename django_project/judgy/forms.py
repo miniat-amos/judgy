@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils import timezone
-from .models import User, Competition, Problem, Team
+from .models import User, Competition, Problem, Team, Submission
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -300,6 +300,7 @@ class ProblemForm(forms.ModelForm):
     class Meta:
         model = Problem
         fields = [
+            'number',
             'name',
             'score_preference'
         ]
@@ -307,12 +308,20 @@ class ProblemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields['number'].required = True
         self.fields['name'].required = True
         self.fields['description'].required = True
         self.fields['judge_py'].required = True
         self.fields['score_preference'].required = True
         self.fields['other_files'].required = False
 
+        self.fields['number'].widget.attrs.update(
+            {
+                'id': 'number',
+                'class': 'form-control',
+                'placeholder': 'Problem Number'
+            }
+        )
         self.fields['name'].widget.attrs.update(
             {
                 'id': 'name',
@@ -349,8 +358,25 @@ class ProblemForm(forms.ModelForm):
             }
         )
 
-class SubmissionForm(forms.Form):
-    file = forms.FileField()
+class SubmissionForm(forms.ModelForm):
+    files = forms.FileField()
+
+    class Meta:
+        model = Submission
+        fields = []
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['files'].required = True
+
+        self.fields['files'].widget.attrs.update(
+            {
+                'id': 'files',
+                'class': 'form-control',
+                'multiple': True
+            }
+        )
 
 class TeamEnrollForm(forms.ModelForm):
     class Meta:

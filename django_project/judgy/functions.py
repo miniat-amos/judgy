@@ -1,9 +1,9 @@
-import os
 import docker
+import os
 import subprocess
-from .utils import make_file, create_user_dir
 from django.conf import settings
 from pathlib import Path
+from .utils import make_file, create_user_dir
 
 from docker.errors import ContainerError
 
@@ -13,10 +13,8 @@ languages = {
     ".rb": {"image": "ruby", "type": "interpreted", "interpreter": "ruby"},
     ".c": {"image": "gcc", "type": "compiled", "compiler": "gcc"},
     ".cpp": {"image": "gcc", "type": "compiled", "compiler": "g++"},
-    ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java",
+    ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java"}
 }
-}
-
 
 def start_containers(f, current_user, team, code, problem):
     # Variables for local machine
@@ -35,7 +33,6 @@ def start_containers(f, current_user, team, code, problem):
             for chunk in file.chunks():
                 destination.write(chunk)
         submitted_files.append(file_path)  # Track all file paths
-
 
     # Create output directory
     output_file = make_file(outputs_dir, "output.txt")
@@ -111,9 +108,7 @@ def start_containers(f, current_user, team, code, problem):
         detach=True,
         name=container_name,
     )
-    
-        
-    
+
     container.stop()
     container.remove()
         

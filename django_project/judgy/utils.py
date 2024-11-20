@@ -1,4 +1,3 @@
-import logging
 from django.conf import settings
 from pathlib import Path
 
@@ -24,11 +23,9 @@ def get_dist_dir(code, problem_name):
     
     problem_directory = comp_directory / problem_name
     
-    distributed_directory = problem_directory / "dist"
+    distributed_directory = problem_directory / 'dist'
     
     return distributed_directory.resolve()
-
-
 
 def create_problem(code, name, description, judge_py, other_files, dist):
     main_directory = parent_dir / 'competitions'
@@ -78,20 +75,18 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                     f.write(chunk)
 
 def create_user_dir(current_user, code, problem_name, team):
-
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
     
-    problem_directory = comp_directory / "problems" / problem_name
+    problem_directory = comp_directory / 'problems' / problem_name
         
     user_directory = problem_directory / str(team.name) / str(current_user.email) 
     
     user_directory.mkdir(parents=True, exist_ok=True)
-    submissions_directory = user_directory / "submissions"
+    submissions_directory = user_directory / 'submissions'
     submissions_directory.mkdir(exist_ok=True)
     
-    outputs_directory = user_directory / "outputs"
+    outputs_directory = user_directory / 'outputs'
     outputs_directory.mkdir(exist_ok=True)
 
     return submissions_directory.resolve(), outputs_directory.resolve()
-   

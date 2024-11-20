@@ -1,0 +1,24 @@
+<form action="{% url 'judgy:submit' competition.code 'problem.name' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div id="submission" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Upload Submission</h1>
+        <button class="btn btn-close" data-bs-dismiss="modal" type="button"></button>
+      </div>
+      <div class="modal-body">
+        <h5 class="title"></h5>
+
+        <div class="my-3">
+          {{ submission_form.files }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+        <button class="btn btn-success" type="submit">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>

@@ -4,6 +4,19 @@
 
 {% block main_competition %}
 
+<script>
+  $(() => {
+    '{% if submission_form %}'
+      $('#submission').on('show.bs.modal', event => {
+        $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
+      });
+    '{% else %}'
+      $('[data-bs-target="#submission"]').remove();
+      $('#submission').closest('form').remove();
+    '{% endif %}'
+  });
+</script>
+
 <div class="container py-5">
   <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
     <li class="nav-item" role="presentation">
@@ -35,69 +48,106 @@
   </ul>
   <div class="py-5 tab-content">
     <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Name</th>
-              <th scope="col">Download</th>
-              <th scope="col">Submit</th>
-              <th scope="col">Best Score</th>
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            {% for problem in problems %}
+      {% if user.is_superuser %}
+        <div class="pb-5 text-center">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
+        </div>
+      {% endif %}
+      {% if problems %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <th scope="row">{{ problem.number }}</th>
-                <td>{{ problem.name }}</td>
-                <td><a href="{% url 'judgy:download' competition.code problem.name  %}" download>Download Zip</a></td>
-                <td>
-                  <form action="{% url 'judgy:submit' competition.code problem.name %}" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="file" name="file" multiple>
-                    <input type="submit" value="Upload" style="margin-top: 10px;">
-                  </form>
-                </td>
-                <td>{{ problem.best_score }}</td>
+                <th scope="col">Problem</th>
+                {% if download %}
+                  <th scope="col" class="text-center">Download</th>
+                {% endif %}
+                {% if upload %}
+                  <th scope="col" class="text-center">Upload</th>
+                {% endif %}
+                <th scope="col" class="text-center">Competition Best Score</th>
+                {% if user_team %}
+                  <th scope="col" class="text-center">Team Best Score</th>
+                  <th scope="col" class="text-center">Your Best Score</th>
+                {% endif %}
+                <th scope="col" class="text-center">Score Preference</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody class="table-group-divider">
+              {% for problem in problems %}
+                <tr style="height: 3.4375rem;">
+                  <th scope="row">{{ problem.number }}. {{ problem.name }}</th>
+                  {% if download %}
+                    <td class="text-center">
+                      <a class="btn" href="{% url 'judgy:download' competition.code problem.name %}">
+                        <i class="bi bi-download"></i>
+                      </a>
+                    </td>
+                  {% endif %}
+                  {% if upload %}
+                    <td class="text-center">
+                      <button class="btn" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
+                        <i class="bi bi-upload"></i>
+                      </button>
+                    </td>
+                  {% endif %}
+                  <td class="text-center">{{ problem.competition_best_score }}</td>
+                  {% if user_team %}
+                    <td class="text-center">{{ problem.team_best_score }}</td>
+                    <td class="text-center">{{ problem.user_best_score }}</td>
+                  {% endif %}
+                  <td class="text-center">
+                    {% if problem.score_preference %}
+                      Higher Score is Better
+                    {% else %}
+                      Lower Score is Better
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center">
+          No Problems
+        </div>
+      {% endif %}
     </div>
     <div id="rankings-tab-pane" class="tab-pane fade" role="tabpanel">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Team</th>
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            {% for team in teams %}
+      {% if teams %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>
-                  <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
-                    {{ team.name }}
-                  </a>
-                </td>
+                <th scope="col">#</th>
+                <th scope="col">Team</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody class="table-group-divider">
+              {% for team in teams %}
+                <tr style="height: 3.4375rem;">
+                  <th scope="row">{{ forloop.counter }}</th>
+                  <td>
+                    <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
+                      {{ team.name }}
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center">
+          No Teams
+        </div>
+      {% endif %}
     </div>
   </div>
-  {% if user.is_superuser %}
-    <div class="text-center">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
-    </div>
-  {% endif %}
 </div>
 
 {% include 'judgy/includes/manage_problems.html' %}
+{% include 'judgy/includes/submission.html' %}
 
 {% endblock %}
