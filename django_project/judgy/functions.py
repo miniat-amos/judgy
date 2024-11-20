@@ -18,14 +18,14 @@ languages = {
 }
 
 
-def start_containers(f, current_user, code, problem):
+def start_containers(f, current_user, team, code, problem):
     # Variables for local machine
     # Get file extension
     file_extension = os.path.splitext(f[0].name)[1]
     submitted_image = languages[file_extension]["image"]
 
     # Make submissions dir
-    submissions_dir = create_user_dir("submissions", current_user)
+    submissions_dir, outputs_dir = create_user_dir(current_user, code, problem, team)
 
     # Store file in submissions dir
     submitted_files = []
@@ -38,9 +38,8 @@ def start_containers(f, current_user, code, problem):
 
 
     # Create output directory
-    output_dir = create_user_dir("outputs", current_user)
-    output_file = make_file(output_dir, "output.txt")
-    score_file = make_file(output_dir, "score.txt")
+    output_file = make_file(outputs_dir, "output.txt")
+    score_file = make_file(outputs_dir, "score.txt")
 
     client = docker.from_env()
 

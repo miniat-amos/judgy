@@ -358,20 +358,18 @@ def submit_view(request, code, problem_name):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             current_user = request.user
+            competition = Competition.objects.get(code=code)
+            user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
+            problem = Problem.objects.get(name=problem_name, competition=competition)
             # submitted_file = request.FILES['file']
             submitted_files = request.FILES.getlist('file')
-            output_file, score_file = start_containers(submitted_files, current_user, code, problem_name)
+            output_file, score_file = start_containers(submitted_files, current_user, user_team, code, problem_name)
         
             with open(score_file, 'r') as f:
                 user_score = f.read()
                 
             user_score = user_score.split(' ')[0]
             
-            competition = Competition.objects.get(code=code)
-            
-            user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
-
-            problem = Problem.objects.get(name=problem_name, competition=competition)
             
             Submissions.objects.create(score=user_score, problem=problem, team=user_team, user=current_user)
             

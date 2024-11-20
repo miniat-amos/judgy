@@ -77,20 +77,21 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                 for chunk in file.chunks():
                     f.write(chunk)
 
-def create_user_dir(passed_in_dir, current_user):
-    if not hasattr(current_user, 'id') or not current_user.id:
-        raise ValueError('The current user must have a valid ID.')
+def create_user_dir(current_user, code, problem_name, team):
 
-    main_directory = Path(settings.BASE_DIR) / passed_in_dir
+    main_directory = parent_dir / 'competitions'
+    comp_directory = main_directory / code.lower()
+    
+    problem_directory = comp_directory / "problems" / problem_name
+        
+    user_directory = problem_directory / str(team.name) / str(current_user.email) 
+    
+    user_directory.mkdir(parents=True, exist_ok=True)
+    submissions_directory = user_directory / "submissions"
+    submissions_directory.mkdir(exist_ok=True)
+    
+    outputs_directory = user_directory / "outputs"
+    outputs_directory.mkdir(exist_ok=True)
 
-    try:
-        main_directory.mkdir(exist_ok=True)
-
-        user_directory = main_directory / str(current_user.email)
-        user_directory.mkdir(exist_ok=True)
-
-        logging.info(f'Created directory: {user_directory}')
-        return str(user_directory)
-    except OSError as e:
-        logging.error(f'Error creating directory {user_directory}: {e}')
-        raise
+    return submissions_directory.resolve(), outputs_directory.resolve()
+   
