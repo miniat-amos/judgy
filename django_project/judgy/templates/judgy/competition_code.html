@@ -9,9 +9,10 @@
     '{% if submission_form %}'
       $('#submission').on('show.bs.modal', event => {
         $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
+        $('#submission').closest('form').attr('action', "{% url 'judgy:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
       });
     '{% else %}'
-      $('[data-bs-target="#submission"]').remove();
+      $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
       $('#submission').closest('form').remove();
     '{% endif %}'
   });

@@ -41,6 +41,7 @@ def start_containers(f, current_user, team, code, problem):
     client = docker.from_env()
 
     # Variables for container
+    code = code.lower()
     docker_image = f"judgy-{code}-{submitted_image}_app"
     container_name = f"{submitted_image}_{current_user.first_name}_container"
     container_main_directory = Path("/app")
