@@ -44,26 +44,22 @@
               <th scope="col">Download</th>
               <th scope="col">Submit</th>
               <th scope="col">Best Score</th>
-    
             </tr>
           </thead>
           <tbody class="table-group-divider">
             {% for problem in problems %}
               <tr>
                 <th scope="row">{{ problem.number }}</th>
+                <td>{{ problem.name }}</td>
+                <td><a href="{% url 'judgy:download' competition.code problem.name  %}" download>Download Zip</a></td>
                 <td>
-                    {{ problem.name }}
-                </td>
-                <td> <a href="{% url 'judgy:download' competition.code problem.name  %}" download="">Download Zip</a></td>
-                <td>
-                  <form id="code-submit" method="POST" enctype="multipart/form-data" action="{% url 'judgy:submit' competition.code problem.name %}">
+                  <form action="{% url 'judgy:submit' competition.code problem.name %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <!-- {{ form.file }} -->
                     <input type="file" name="file" multiple>
-                    <input type="submit" value="Upload" style="margin-top: 10px;" />
+                    <input type="submit" value="Upload" style="margin-top: 10px;">
                   </form>
                 </td>
-                <td>{{ problem.best_score  }}</td>
+                <td>{{ problem.best_score }}</td>
               </tr>
             {% endfor %}
           </tbody>

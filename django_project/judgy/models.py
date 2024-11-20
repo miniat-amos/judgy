@@ -47,13 +47,10 @@ class Competition(models.Model):
         return self.name
 
 class Problem(models.Model):
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     number = models.PositiveIntegerField()
     name = models.CharField(max_length=255, primary_key=True)
     score_preference = models.BooleanField(default=True)
-    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
-    
-
-
 
 class Team(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
@@ -67,6 +64,12 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+
+class Submission(models.Model):
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -99,14 +102,3 @@ class TeamInviteNotification(Notification):
             team=self.team
         ).delete()
         super().save(*args, **kwargs)
-        
-
-class Submissions(models.Model):
-    score = models.IntegerField(default=0)
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-
-
-    

@@ -349,6 +349,9 @@ class ProblemForm(forms.ModelForm):
             }
         )
 
+class SubmissionForm(forms.Form):
+    file = forms.FileField()
+
 class TeamEnrollForm(forms.ModelForm):
     class Meta:
         model = Team
@@ -384,6 +387,3 @@ class TeamInviteForm(forms.Form):
                     }
                 )
             )
-
-class UploadFileForm(forms.Form):
-    file = forms.FileField()
