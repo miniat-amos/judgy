@@ -1,9 +1,12 @@
 import json
+import zipfile
+import os
 from django.conf import settings
+from django.db.models import Max, Min
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -28,11 +31,14 @@ from .models import (
   Team,
   Notification,
   TeamJoinNotification,
-  TeamInviteNotification
+  TeamInviteNotification,
+  Problem,
+  Submissions
 )
 from .utils import (
     create_comp_dir,
-    create_problem
+    create_problem,
+    get_dist_dir
 )
 
 def home_view(request):
@@ -56,7 +62,7 @@ def home_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request.POST)
+        form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect('judgy:home')
@@ -130,6 +136,17 @@ def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     teams = Team.objects.filter(competition=competition)
+    problems = Problem.objects.filter(competition=competition)
+    
+    
+    # Fetch best scores using Python logic for each problem and team
+    for problem in problems:        
+        submissions = Submissions.objects.filter(problem=problem, user=request.user)
+        if problem.score_preference:  # Higher score is better
+            best_score = submissions.aggregate(Max('score'))['score__max']
+        else:  # Lower score is better
+            best_score = submissions.aggregate(Min('score'))['score__min']
+        problem.best_score = best_score or 0
 
     if request.method == 'GET':
         problem_form = ProblemForm()
@@ -142,7 +159,8 @@ def competition_code_view(request, code):
             'teams': teams,
             'problem_form': problem_form,
             'team_enroll_form': team_enroll_form,
-            'team_invite_form': team_invite_form
+            'team_invite_form': team_invite_form,
+            'problems': problems,
         })
 
     if request.method == 'DELETE':
@@ -159,6 +177,7 @@ def problems_update_view(request, code):
         if (problem_form.is_valid()):
             problem = problem_form.save(commit=False)
             problem.number = 1
+            problem.competition = competition
             problem.save()
 
             description = request.FILES.get('description')
@@ -334,29 +353,56 @@ def competitions_view(request):
     return JsonResponse(list(Competition.objects.all().values()), safe=False)
 
 @verified_required
-def submissions(request):
+def submit_view(request, code, problem_name):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             current_user = request.user
             # submitted_file = request.FILES['file']
             submitted_files = request.FILES.getlist('file')
-            output_file, score_file = start_containers(submitted_files, current_user)
+            output_file, score_file = start_containers(submitted_files, current_user, code, problem_name)
         
-            with open(output_file, 'r') as f:
-                user_output = f.read()
-
             with open(score_file, 'r') as f:
                 user_score = f.read()
+                
+            user_score = user_score.split(' ')[0]
+            
+            competition = Competition.objects.get(code=code)
+            
+            user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
 
-            return render(
-                request,
-                'judgy/submissions.html',   
-                {'user_output': user_output, 'user_score': user_score},
-            )
-        else:
-            return render(request, 'judgy/submissions.html', {'form': form})
-    else:
-        form = UploadFileForm()
-    return render(request, 'judgy/submissions.html', {'form': form})
+            problem = Problem.objects.get(name=problem_name, competition=competition)
+            
+            Submissions.objects.create(score=user_score, problem=problem, team=user_team, user=current_user)
+            
+            Notification.objects.create(
+                user=request.user,
+                header='Update',
+                body=f'score is {user_score}')
+            
+            return redirect('judgy:competition_code', code=code)
 
+def download_view(request, code, problem_name):
+    dist_dir = get_dist_dir(code, problem_name)
+    
+    problem_zip = f"/tmp/{problem_name}.zip"
+    
+    
+     # Create a zip file
+    with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(dist_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, dist_dir))
+
+     # Read the zip file and return it in an HTTP response
+    with open(problem_zip, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/zip')
+        # Set the Content-Disposition header to prompt the user to download the file
+        response['Content-Disposition'] = f'attachment; filename="{problem_name}.zip"'
+    
+    os.remove(problem_zip)
+    
+    return response
+
+    

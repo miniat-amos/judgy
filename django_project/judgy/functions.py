@@ -18,7 +18,7 @@ languages = {
 }
 
 
-def start_containers(f, current_user):
+def start_containers(f, current_user, code, problem):
     # Variables for local machine
     # Get file extension
     file_extension = os.path.splitext(f[0].name)[1]
@@ -45,10 +45,10 @@ def start_containers(f, current_user):
     client = docker.from_env()
 
     # Variables for container
-    docker_image = f"judgy-92f5-{submitted_image}_app"
+    docker_image = f"judgy-{code}-{submitted_image}_app"
     container_name = f"{submitted_image}_{current_user.first_name}_container"
     container_main_directory = Path("/app")
-    container_user_file = container_main_directory / "digit_chain" / f.name
+    container_user_file = container_main_directory / problem / f[0].name
     
     container_output_path = container_main_directory / "outputs" / "output.txt"
     container_score_path = container_main_directory / "outputs" / "score.txt"
@@ -60,7 +60,6 @@ def start_containers(f, current_user):
     }
 
     for submitted_file in submitted_files:
-        container_main_directory = Path("/usr/app")
         container_user_file = container_main_directory / submitted_file.name
         volumes[str(submitted_file)] = {"bind": str(container_user_file), "mode": "rw"}
     
@@ -100,11 +99,11 @@ def start_containers(f, current_user):
         
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
-        command=f'bash -c "cd /app/digit_chain/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"'
+        command=f'bash -c "cd /app/{problem}/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"'
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
-        command=f'bash -c "cd /app/digit_chain/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"'
+        command=f'bash -c "cd /app/{problem}/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"'
     
     container = client.containers.run(
         docker_image,

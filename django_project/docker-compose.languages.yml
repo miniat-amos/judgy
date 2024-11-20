@@ -37,8 +37,8 @@ services:
 
   java_app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./django_project/Dockerfile
       args:
         BASE_IMAGE: openjdk:17-jdk-slim
         COMP_CODE: ${COMP_CODE}

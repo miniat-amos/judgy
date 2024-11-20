@@ -35,6 +35,40 @@
   </ul>
   <div class="py-5 tab-content">
     <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Download</th>
+              <th scope="col">Submit</th>
+              <th scope="col">Best Score</th>
+    
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for problem in problems %}
+              <tr>
+                <th scope="row">{{ problem.number }}</th>
+                <td>
+                    {{ problem.name }}
+                </td>
+                <td> <a href="{% url 'judgy:download' competition.code problem.name  %}" download="">Download Zip</a></td>
+                <td>
+                  <form id="code-submit" method="POST" enctype="multipart/form-data" action="{% url 'judgy:submit' competition.code problem.name %}">
+                    {% csrf_token %}
+                    <!-- {{ form.file }} -->
+                    <input type="file" name="file" multiple>
+                    <input type="submit" value="Upload" style="margin-top: 10px;" />
+                  </form>
+                </td>
+                <td>{{ problem.best_score  }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
     <div id="rankings-tab-pane" class="tab-pane fade" role="tabpanel">
       <div class="table-responsive">
