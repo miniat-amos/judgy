@@ -66,6 +66,9 @@ def login_view(request):
         if form.is_valid():
             login(request, form.get_user())
             return redirect('judgy:home')
+        else:
+            print("Incorrect password or email (username)")
+            print("form.errors:\n", form.errors)
     else:
         form = AuthenticationForm()
     return render(request, 'judgy/login.html', {'form': form})
@@ -88,6 +91,9 @@ def register_view(request):
                 html_message=render_to_string('judgy/emails/account_verification.html', { 'user': user })
             )
             return redirect('judgy:verify')
+        else:
+            print("Any field in the registration form was not filled out right.")
+            print("form.errors:\n", form.errors)
     else:
         form = CustomUserCreationForm()
     return render(request, 'judgy/register.html', {'form': form})
@@ -100,6 +106,9 @@ def verify_view(request):
             request.user.is_verified = True
             request.user.save()
             return redirect('judgy:home')
+        else:
+            print("6-digit code provided is incorrect")
+            print("form.errors:\n", form.errors)
     else:
         form = AccountVerificationForm()
     return render(request, 'judgy/verify.html', {'form': form})
@@ -128,6 +137,9 @@ def competition_create_view(request):
             competition = form.save()
             create_comp_dir(str(competition.code))
             return redirect('judgy:competition_code', code=competition.code)
+        else:
+            print("Any field filled out is invalid.")
+            print("form.errors:\n", form.errors)
     else:
         form = CompetitionCreationForm()
     return render(request, 'judgy/competition_create.html', {'form': form})
@@ -178,6 +190,8 @@ def competition_code_view(request, code):
         if request.user.is_superuser:
             competition.delete()
             return JsonResponse({})
+        else:
+            print("User is not authenticated and is not a super user. Competition not deleted.")
 
 @user_passes_test(lambda u: u.is_superuser)
 def problems_update_view(request, code):
@@ -203,6 +217,8 @@ def problems_update_view(request, code):
             create_problem(code, problem.name, description, judge_py, other_files, dist)
 
             return redirect('judgy:competition_code', code=competition.code)
+        else:
+            print("form.errors:\n", problem_form.errors)
 
 @verified_required
 def team_enroll_view(request, code):
@@ -225,6 +241,9 @@ def team_enroll_view(request, code):
                         body = f'Hi {member.first_name}, {request.user} wants to join your team "{team.name}" for the competition "{competition.name}".'
                         TeamJoinNotification.objects.create(user=user, body=body, request_user=request.user, team=team)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+            else:
+                print("Some field was not correctly filled.")
+                print("form.errors:\n", form.errors)
 
 @verified_required
 def team_join_accept_view(request, id):
@@ -240,6 +259,8 @@ def team_join_accept_view(request, id):
                     header='Update',
                     body=f'{request.user} has accepted the request of {notification.request_user} to join the team.'
                 )
+            else:
+                print("Request user is same as member.")
         Notification.objects.create(
             user=notification.request_user,
             header='Update',
@@ -263,6 +284,8 @@ def team_join_decline_view(request, id):
                     header='Update',
                     body=f'{request.user} has declined the request of {notification.request_user} to join the team.'
                 )
+            else:
+                print("Request user is same as member.")
         Notification.objects.create(
             user=notification.request_user,
             header='Update',
@@ -307,6 +330,9 @@ def team_invite_view(request, code):
                         body = f'Hi {user.first_name}, {request.user} has invited you to join the team "{team.name}" for the competition "{competition.name}".'
                         TeamInviteNotification.objects.create(user=user, body=body, team=team)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+            else:
+                print("Some field was incorrectly filled out.")
+                print("form.errors:\n", form.errors)
 
 @verified_required
 def team_invite_accept_view(request, id):
@@ -415,4 +441,11 @@ def submit_view(request, code, problem_name):
                     body=f'Score: {user_score}'
                 )
 
+<<<<<<< HEAD
                 return redirect('judgy:competition_code', code=code)
+=======
+            return redirect('judgy:competition_code', code=code)
+        else:
+            print("Some field was incorrectly filled out.")
+            print("form.errors:\n", form.errors)
+>>>>>>> 51a58c7d33ed25f5bd7a6e4538b42d42fed6a741
