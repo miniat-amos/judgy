@@ -113,7 +113,7 @@ def start_containers(f, current_user, team, code, problem):
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
-        command=f'bash -c "cd /app/{problem}/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path}"'
+        command=f'bash -c "cd /app/{problem}/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path} && cat run_* > {container_output_path}"'
     
     container = client.containers.run(
         docker_image,
