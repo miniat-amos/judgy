@@ -106,15 +106,20 @@
               </div>
 
               <div class="my-3">
-                <div class="row">
-                  <div class="col">
-                    <label for="other-files" class="form-label">Other Files</label>
-                    {{ problem_form.other_files }}
-                  </div>
+                <label for="other-files" class="form-label">Other Files</label>
+                {{ problem_form.other_files }}
+              </div>
 
+              <div class="my-3">
+                <div class="row">
                   <div class="col">
                     <label for="score-preference" class="form-label">Score Preference</label>
                     {{ problem_form.score_preference }}
+                  </div>
+
+                  <div class="col">
+                    <label for="show-output" class="form-label">Show Output</label>
+                    {{ problem_form.show_output }}
                   </div>
                 </div>
               </div>

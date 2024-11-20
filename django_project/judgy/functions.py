@@ -35,8 +35,8 @@ def start_containers(f, current_user, team, code, problem):
         submitted_files.append(file_path)  # Track all file paths
 
     # Create output directory
-    output_file = make_file(outputs_dir, "output.txt")
     score_file = make_file(outputs_dir, "score.txt")
+    output_file = make_file(outputs_dir, "output.txt")
 
     client = docker.from_env()
 
@@ -46,13 +46,13 @@ def start_containers(f, current_user, team, code, problem):
     container_main_directory = Path("/app")
     container_user_file = container_main_directory / problem / f[0].name
     
-    container_output_path = container_main_directory / "outputs" / "output.txt"
     container_score_path = container_main_directory / "outputs" / "score.txt"
+    container_output_path = container_main_directory / "outputs" / "output.txt"
 
     # Volumes for file-to-file binding
     volumes = {
-        str(output_file): {"bind": str(container_output_path), "mode": "rw"},
         str(score_file): {"bind": str(container_score_path), "mode": "rw"},
+        str(output_file): {"bind": str(container_output_path), "mode": "rw"}
     }
 
     for submitted_file in submitted_files:
@@ -112,7 +112,7 @@ def start_containers(f, current_user, team, code, problem):
     container.stop()
     container.remove()
         
-    return output_file, score_file
+    return score_file, output_file
 
 # Create Docker images based on the competition code
 # Preloads all Docker images with problem files

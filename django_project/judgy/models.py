@@ -51,9 +51,11 @@ class Problem(models.Model):
     number = models.PositiveIntegerField()
     name = models.CharField(max_length=255)
     score_preference = models.BooleanField(default=True)
+    show_output = models.BooleanField(default=True)
 
     class Meta:
         constraints = [
+            models.UniqueConstraint(fields=['competition', 'number'], name='unique_competition_problem_number'),
             models.UniqueConstraint(fields=['competition', 'name'], name='unique_competition_problem_name')
         ]
 

@@ -362,51 +362,57 @@ def competitions_view(request):
     return JsonResponse(list(Competition.objects.all().values()), safe=False)
 
 def download_view(request, code, problem_name):
-    dist_dir = get_dist_dir(code, problem_name)
+    competition = get_object_or_404(Competition, code=code)
 
-    problem_zip = f'/tmp/{problem_name}.zip'
+    if competition.start <= timezone.now():
+        dist_dir = get_dist_dir(code, problem_name)
 
-     # Create a zip file
-    with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(dist_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zipf.write(file_path, os.path.relpath(file_path, dist_dir))
+        problem_zip = f'/tmp/{problem_name}.zip'
 
-     # Read the zip file and return it in an HTTP response
-    with open(problem_zip, 'rb') as f:
-        response = HttpResponse(f.read(), content_type='application/zip')
-        # Set the Content-Disposition header to prompt the user to download the file
-        response['Content-Disposition'] = f'attachment; filename="{problem_name}.zip"'
+        # Create a zip file
+        with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(dist_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    zipf.write(file_path, os.path.relpath(file_path, dist_dir))
 
-    os.remove(problem_zip)
+        # Read the zip file and return it in an HTTP response
+        with open(problem_zip, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/zip')
+            # Set the Content-Disposition header to prompt the user to download the file
+            response['Content-Disposition'] = f'attachment; filename="{problem_name}.zip"'
 
-    return response
+        os.remove(problem_zip)
+
+        return response
 
 @verified_required
 def submit_view(request, code, problem_name):
+    competition = get_object_or_404(Competition, code=code)
+    user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
+
     if request.method == 'POST':
-        form = SubmissionForm(request.POST, request.FILES)
-        if form.is_valid():
-            current_user = request.user
-            competition = Competition.objects.get(code=code)
-            user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
-            problem = Problem.objects.get(name=problem_name, competition=competition)
-            # submitted_file = request.FILES['file']
-            submitted_files = request.FILES.getlist('file')
-            output_file, score_file = start_containers(submitted_files, current_user, user_team, code, problem_name)
+        if competition.start <= timezone.now() < competition.end and user_team:
+            form = SubmissionForm(request.POST, request.FILES)
+            if form.is_valid():
+                current_user = request.user
+                competition = Competition.objects.get(code=code)
+                user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
+                problem = Problem.objects.get(name=problem_name, competition=competition)
+                submitted_files = request.FILES.getlist('files')
+                score_file, output_file = start_containers(submitted_files, current_user, user_team, code, problem_name)
 
-            with open(score_file, 'r') as f:
-                user_score = f.read()
+                with open(score_file, 'r') as f:
+                    user_score = f.read()
 
-            user_score = user_score.split(' ')[0]
+                user_score = user_score.split(' ')[0]
 
-            Submission.objects.create(score=user_score, problem=problem, team=user_team, user=current_user)
+                Submission.objects.create(problem=problem, team=user_team, user=current_user, score=user_score)
 
-            Notification.objects.create(
-                user=request.user,
-                header='Update',
-                body=f'score is {user_score}'
-            )
+                Notification.objects.create(
+                    user=request.user,
+                    header='Update',
+                    body=f'Score: {user_score}'
+                )
 
-            return redirect('judgy:competition_code', code=code)
+                return redirect('judgy:competition_code', code=code)

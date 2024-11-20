@@ -289,13 +289,19 @@ class CompetitionCreationForm(forms.ModelForm):
 class ProblemForm(forms.ModelForm):
     description = forms.FileField()
     judge_py = forms.FileField()
+    other_files = forms.FileField()
     score_preference = forms.ChoiceField(
         choices=[
             (True, 'Higher Score is Better'),
             (False, 'Lower Score is Better')
         ]
     )
-    other_files = forms.FileField()
+    show_output = forms.ChoiceField(
+        choices=[
+            (True, 'Yes'),
+            (False, 'No')
+        ]
+    )
 
     class Meta:
         model = Problem
@@ -312,8 +318,9 @@ class ProblemForm(forms.ModelForm):
         self.fields['name'].required = True
         self.fields['description'].required = True
         self.fields['judge_py'].required = True
-        self.fields['score_preference'].required = True
         self.fields['other_files'].required = False
+        self.fields['score_preference'].required = True
+        self.fields['show_output'].required = True
 
         self.fields['number'].widget.attrs.update(
             {
@@ -343,6 +350,13 @@ class ProblemForm(forms.ModelForm):
                 'multiple': False
             }
         )
+        self.fields['other_files'].widget.attrs.update(
+            {
+                'id': 'other-files',
+                'class': 'form-control',
+                'multiple': True
+            }
+        )
         self.fields['score_preference'].widget.attrs.update(
             {
                 'id': 'score-preference',
@@ -350,11 +364,11 @@ class ProblemForm(forms.ModelForm):
                 'placeholder': 'Score Preference'
             }
         )
-        self.fields['other_files'].widget.attrs.update(
+        self.fields['show_output'].widget.attrs.update(
             {
-                'id': 'other-files',
-                'class': 'form-control',
-                'multiple': True
+                'id': 'show-output',
+                'class': 'form-select',
+                'placeholder': 'Show Output'
             }
         )
 
