@@ -1,6 +1,7 @@
 import docker
 import os
 import subprocess
+import shutil
 from django.conf import settings
 from pathlib import Path
 from .utils import make_file, create_user_dir
@@ -24,6 +25,18 @@ def start_containers(f, current_user, team, code, problem):
 
     # Make submissions dir
     submissions_dir, outputs_dir = create_user_dir(current_user, code, problem, team)
+
+
+    if os.path.exists(submissions_dir):
+    # Loop through each item in the directory
+        for item in os.listdir(submissions_dir):
+            item_path = os.path.join(submissions_dir, item)
+            # Check if it's a file or directory and remove accordingly
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.unlink(item_path)  # Remove file or symbolic link
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)  
+
 
     # Store file in submissions dir
     submitted_files = []
@@ -96,7 +109,7 @@ def start_containers(f, current_user, team, code, problem):
         
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
-        command=f'bash -c "cd /app/{problem}/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path}"'
+        command=f'bash -c "cd /app/{problem}/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path} && cat run_* > {container_output_path}"'
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]

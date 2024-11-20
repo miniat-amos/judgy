@@ -36,7 +36,10 @@ def create_problem(code, name, description, judge_py, other_files, dist):
 
     problem = problems_directory / name
     problem.mkdir(exist_ok=True)
-
+    
+    submissions = problem / "submissions"
+    submissions.mkdir(exist_ok=True)
+    
     dist_dir = problem / 'dist'
     dist_dir.mkdir(exist_ok=True)
 
@@ -78,12 +81,12 @@ def create_user_dir(current_user, code, problem_name, team):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
     
-    problem_directory = comp_directory / 'problems' / problem_name
+    problem_directory = comp_directory / 'problems' / problem_name / 'submissions'
         
     user_directory = problem_directory / str(team.name) / str(current_user.email) 
     
     user_directory.mkdir(parents=True, exist_ok=True)
-    submissions_directory = user_directory / 'submissions'
+    submissions_directory = user_directory / 'submission'
     submissions_directory.mkdir(exist_ok=True)
     
     outputs_directory = user_directory / 'outputs'
