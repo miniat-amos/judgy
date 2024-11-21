@@ -81,7 +81,7 @@
           for (const notification of updated_notifications) {
             if (!notifications.some(n => n.id == notification.id)) {
               $('.toast-container').append(`
-                <div class="toast" role="alert" data-bs-autohide="false" data-id="${notification.id}" data-header="${notification.header}">
+                <div class="toast" role="alert" data-bs-autohide="false" data-id="${notification.id}" data-type="${notification.type}" data-header="${notification.header}">
                   <div class="toast-header">
                     <i class="bi bi-bell me-2"></i>
                     <strong class="me-auto">${notification.header}</strong>
@@ -89,22 +89,25 @@
                   </div>
                   <div class="toast-body">
                     ${notification.body}
-                    ${notification.header == 'Update' ? '' : `
-                      <div class="border-top mt-2 pt-2">
-                        <div class='row'>
-                          <div class='col'>
-                            <button class="accept btn btn-success w-100" data-bs-dismiss="toast">
-                              Accept
-                            </button>
-                          </div>
-                          <div class='col'>
-                            <button class="decline btn btn-danger w-100" data-bs-dismiss="toast">
-                              Decline
-                            </button>
+                    ${{
+                      0: '',
+                      1: `
+                        <div class="border-top mt-2 pt-2">
+                          <div class='row'>
+                            <div class='col'>
+                              <button class="accept btn btn-success w-100" data-bs-dismiss="toast">
+                                Accept
+                              </button>
+                            </div>
+                            <div class='col'>
+                              <button class="decline btn btn-danger w-100" data-bs-dismiss="toast">
+                                Decline
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    `}
+                      `
+                    }[notification.type]}
                   </div>
                 </div>
               `);
@@ -114,7 +117,7 @@
           }
 
           $('.toast .btn-close').on('click', function () {
-            if ($(this).closest('.toast').data('header') == 'Update') {
+            if ($(this).closest('.toast').data('type') == 0) {
               fetch("{% url 'judgy:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'

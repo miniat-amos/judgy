@@ -82,6 +82,7 @@ class Submission(models.Model):
     score = models.IntegerField(default=0)
 
 class Notification(models.Model):
+    type = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     header = models.CharField(max_length=255)
     body = models.TextField()
@@ -94,6 +95,7 @@ class TeamJoinNotification(Notification):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
+        self.type = 1
         self.header = 'Join Request'
         TeamJoinNotification.objects.filter(
             user=self.user,
@@ -106,6 +108,7 @@ class TeamInviteNotification(Notification):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
+        self.type = 1
         self.header = 'Team Invite'
         TeamInviteNotification.objects.filter(
             user=self.user,

@@ -424,16 +424,39 @@ def submit_view(request, code, problem_name):
 
                 with open(score_file, 'r') as f:
                     score = f.read()
-
                 score = score.split(' ')[0]
-
-                Submission.objects.create(problem=problem, team=user_team, user=request.user, score=score)
 
                 Notification.objects.create(
                     user=request.user,
-                    header='Update',
-                    body=f'Score: {score}'
+                    header='Your Score',
+                    body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
                 )
+
+                competition_submissions = Submission.objects.filter(problem=problem)
+                if problem.score_preference: # Higher Score is Better
+                    competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or 0
+                    if score > competition_best_score:
+                        superusers = User.objects.filter(is_superuser=True)
+                        participants = User.objects.filter(teams__competition=competition)
+                        header = 'New Best Score'
+                        body = f'{request.user.first_name} from team "{user_team}" has achieved a new best score of {score} in the problem "{problem.name}" for the competition "{competition.name}"!'
+                        for user in superusers:
+                            Notification.objects.create(user=user, header=header, body=body)
+                        for user in participants:
+                            Notification.objects.create(user=user, header=header, body=body)
+                else: # Lower Score is Better
+                    competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or 0
+                    if score < competition_best_score:
+                        superusers = User.objects.filter(is_superuser=True)
+                        participants = User.objects.filter(teams__competition=competition)
+                        header = 'New Best Score',
+                        body = f'{request.user.first_name} from team "{user_team}" has achieved a new best score of {score} in the problem "{problem.name}" for the competition "{competition.name}"!'
+                        for user in superusers:
+                            Notification.objects.create(user=user, header=header, body=body)
+                        for user in participants:
+                            Notification.objects.create(user=user, header=header, body=body)
+
+                Submission.objects.create(problem=problem, team=user_team, user=request.user, score=score)
 
                 return redirect('judgy:competition_code', code=code)
             else:
