@@ -421,10 +421,11 @@ def submit_view(request, code, problem_name):
             if form.is_valid():
                 files = request.FILES.getlist('files')
                 score_file, output_file = run_submission(code, problem_name, user_team, request.user, files)
-
+                
                 with open(score_file, 'r') as f:
                     score = f.read()
                 score = score.split(' ')[0]
+                
 
                 Notification.objects.create(
                     user=request.user,
@@ -435,7 +436,7 @@ def submit_view(request, code, problem_name):
                 competition_submissions = Submission.objects.filter(problem=problem)
                 if problem.score_preference: # Higher Score is Better
                     competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or 0
-                    if score > competition_best_score:
+                    if int(score) > competition_best_score:
                         superusers = User.objects.filter(is_superuser=True)
                         participants = User.objects.filter(teams__competition=competition)
                         header = 'New Best Score'
@@ -446,7 +447,7 @@ def submit_view(request, code, problem_name):
                             Notification.objects.create(user=user, header=header, body=body)
                 else: # Lower Score is Better
                     competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or 0
-                    if score < competition_best_score:
+                    if int(score) < competition_best_score:
                         superusers = User.objects.filter(is_superuser=True)
                         participants = User.objects.filter(teams__competition=competition)
                         header = 'New Best Score',

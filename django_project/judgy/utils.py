@@ -81,7 +81,7 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                 for chunk in file.chunks():
                     f.write(chunk)
 
-def create_user_dir(code, problem, team, user):
+def create_user_dir(code, user, problem, team):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
     submissions_directory = comp_directory / 'problems' / problem / 'submissions'
