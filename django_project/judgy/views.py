@@ -23,7 +23,7 @@ from .forms import (
 )
 from .functions import (
     create_images,
-    start_containers
+    run_submission
 )
 from .models import (
   User,
@@ -38,7 +38,8 @@ from .models import (
 from .utils import (
     create_comp_dir,
     create_problem,
-    get_dist_dir
+    get_dist_dir,
+    team_add_user
 )
 
 def home_view(request):
@@ -233,7 +234,7 @@ def team_enroll_view(request, code):
                     name=name
                 )
                 if created:
-                    team.members.add(request.user)
+                    team_add_user(competition, team, request.user)
                 else:
                     for member in team.members.all():
                         user = member
@@ -263,7 +264,7 @@ def team_join_accept_view(request, id):
             header='Update',
             body=f'"{team.name}" has accepted your request to join the team.'
         )
-        team.members.add(notification.request_user)
+        team_add_user(competition, team, notification.request_user)
         TeamJoinNotification.objects.filter(request_user=notification.request_user, team=team).delete()
         return JsonResponse({})
 
@@ -321,9 +322,10 @@ def team_invite_view(request, code):
                 for field in form.fields:
                     email = form.cleaned_data[field]
                     if email:
-                        user = User.objects.get(email=email)
-                        body = f'Hi {user.first_name}, {request.user} has invited you to join the team "{team.name}" for the competition "{competition.name}".'
-                        TeamInviteNotification.objects.create(user=user, body=body, team=team)
+                        user = User.objects.filter(email=email).first()
+                        if user:
+                            body = f'Hi {user.first_name}, {request.user} has invited you to join the team "{team.name}" for the competition "{competition.name}".'
+                            TeamInviteNotification.objects.create(user=user, body=body, team=team)
                 return redirect('judgy:team_name', code=team.competition.code, name=team.name)
             else:
                 print('Some field was incorrectly filled out.')
@@ -342,7 +344,7 @@ def team_invite_accept_view(request, id):
                 header='Update',
                 body=f'{request.user} has accepted the invitation to join the team.'
             )
-        team.members.add(request.user)
+        team_add_user(competition, team, request.user)
         notification.delete()
         return JsonResponse({})
 
@@ -410,30 +412,27 @@ def download_view(request, code, problem_name):
 @verified_required
 def submit_view(request, code, problem_name):
     competition = get_object_or_404(Competition, code=code)
+    problem = get_object_or_404(Problem, competition=competition, name=problem_name)
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
 
     if request.method == 'POST':
         if competition.start <= timezone.now() < competition.end and user_team:
             form = SubmissionForm(request.POST, request.FILES)
             if form.is_valid():
-                current_user = request.user
-                competition = Competition.objects.get(code=code)
-                user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
-                problem = Problem.objects.get(name=problem_name, competition=competition)
-                submitted_files = request.FILES.getlist('files')
-                score_file, output_file = start_containers(submitted_files, current_user, user_team, code, problem_name)
+                files = request.FILES.getlist('files')
+                score_file, output_file = run_submission(code, problem_name, user_team, request.user, files)
 
                 with open(score_file, 'r') as f:
-                    user_score = f.read()
+                    score = f.read()
 
-                user_score = user_score.split(' ')[0]
+                score = score.split(' ')[0]
 
-                Submission.objects.create(problem=problem, team=user_team, user=current_user, score=user_score)
+                Submission.objects.create(problem=problem, team=user_team, user=request.user, score=score)
 
                 Notification.objects.create(
                     user=request.user,
                     header='Update',
-                    body=f'Score: {user_score}'
+                    body=f'Score: {score}'
                 )
 
                 return redirect('judgy:competition_code', code=code)

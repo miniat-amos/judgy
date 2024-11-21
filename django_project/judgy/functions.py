@@ -17,48 +17,46 @@ languages = {
     ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java"}
 }
 
-def start_containers(f, current_user, team, code, problem):
+def run_submission(code, problem, team, user, files):
     # Variables for local machine
     # Get file extension
-    file_extension = os.path.splitext(f[0].name)[1]
+    file_extension = os.path.splitext(files[0].name)[1]
     submitted_image = languages[file_extension]["image"]
 
     # Make submissions dir
-    submissions_dir, outputs_dir = create_user_dir(current_user, code, problem, team)
+    submission_dir, output_dir = create_user_dir(user, code, problem, team)
 
-
-    if os.path.exists(submissions_dir):
+    if os.path.exists(submission_dir):
     # Loop through each item in the directory
-        for item in os.listdir(submissions_dir):
-            item_path = os.path.join(submissions_dir, item)
+        for item in os.listdir(submission_dir):
+            item_path = os.path.join(submission_dir, item)
             # Check if it's a file or directory and remove accordingly
             if os.path.isfile(item_path) or os.path.islink(item_path):
                 os.unlink(item_path)  # Remove file or symbolic link
             elif os.path.isdir(item_path):
                 shutil.rmtree(item_path)  
 
-
     # Store file in submissions dir
     submitted_files = []
-    for file in f:
-        file_path = Path(submissions_dir) / file.name
+    for file in files:
+        file_path = Path(submission_dir) / file.name
         with open(file_path, "wb+") as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
         submitted_files.append(file_path)  # Track all file paths
 
     # Create output directory
-    score_file = make_file(outputs_dir, "score.txt")
-    output_file = make_file(outputs_dir, "output.txt")
+    score_file = make_file(output_dir, "score.txt")
+    output_file = make_file(output_dir, "output.txt")
 
     client = docker.from_env()
 
     # Variables for container
     code = code.lower()
     docker_image = f"judgy-{code}-{submitted_image}_app"
-    container_name = f"{submitted_image}_{current_user.first_name}_container"
+    container_name = f"{submitted_image}_{user.first_name}_container"
     container_main_directory = Path("/app")
-    container_user_file = container_main_directory / problem / f[0].name
+    container_user_file = container_main_directory / problem / files[0].name
     
     container_score_path = container_main_directory / "outputs" / "score.txt"
     container_output_path = container_main_directory / "outputs" / "output.txt"

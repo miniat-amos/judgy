@@ -1,10 +1,14 @@
 from django.conf import settings
 from pathlib import Path
+from .models import (
+  Team,
+  Notification
+)
 
 parent_dir = Path(settings.BASE_DIR).parent
 
-def make_file(passed_in_dir, file_name):
-    new_file = Path(passed_in_dir) / file_name
+def make_file(dir, file):
+    new_file = Path(dir) / file
     new_file.touch(exist_ok=True)
     new_file.open('w').close()
     return new_file
@@ -16,12 +20,12 @@ def create_comp_dir(code):
     comp_directory = main_directory / code.lower()
     comp_directory.mkdir(exist_ok=True)
     
-def get_dist_dir(code, problem_name):
+def get_dist_dir(code, problem):
     main_directory = parent_dir / 'competitions'
     
     comp_directory = main_directory / code.lower()
     
-    problem_directory = comp_directory / problem_name
+    problem_directory = comp_directory / problem
     
     distributed_directory = problem_directory / 'dist'
     
@@ -77,19 +81,33 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                 for chunk in file.chunks():
                     f.write(chunk)
 
-def create_user_dir(current_user, code, problem_name, team):
+def create_user_dir(code, problem, team, user):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
-    
-    problem_directory = comp_directory / 'problems' / problem_name / 'submissions'
-        
-    user_directory = problem_directory / str(team.name) / str(current_user.email) 
-    
-    user_directory.mkdir(parents=True, exist_ok=True)
-    submissions_directory = user_directory / 'submission'
-    submissions_directory.mkdir(exist_ok=True)
-    
-    outputs_directory = user_directory / 'outputs'
-    outputs_directory.mkdir(exist_ok=True)
+    submissions_directory = comp_directory / 'problems' / problem / 'submissions'
 
-    return submissions_directory.resolve(), outputs_directory.resolve()
+    user_directory = submissions_directory / str(team.name) / str(user.email) 
+    user_directory.mkdir(parents=True, exist_ok=True)
+
+    submission_directory = user_directory / 'submission'
+    submission_directory.mkdir(exist_ok=True)
+
+    output_directory = user_directory / 'output'
+    output_directory.mkdir(exist_ok=True)
+
+    return submission_directory.resolve(), output_directory.resolve()
+
+def team_add_user(competition, team, user):
+    current_team = Team.objects.filter(competition=competition, members=user).first()
+    if current_team:
+        current_team.members.remove(user)
+        if current_team.members.count():
+            for member in current_team.members.all():
+                Notification.objects.create(
+                    user=member,
+                    header='Update',
+                    body=f'{user} left the team.'
+                )
+        else:
+            current_team.delete()
+    team.members.add(user)
