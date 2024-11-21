@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: ./django_project/Dockerfile
       args:
-        BASE_IMAGE: python:stable
+        BASE_IMAGE: python:latest
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-python_app
 
@@ -13,7 +13,7 @@ services:
       context: ..
       dockerfile: ./django_project/Dockerfile
       args:
-        BASE_IMAGE: ruby:stable
+        BASE_IMAGE: ruby:latest
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-ruby_app
 
@@ -22,7 +22,7 @@ services:
       context: ..
       dockerfile: ./django_project/Dockerfile
       args:
-        BASE_IMAGE: gcc:stable
+        BASE_IMAGE: gcc:latest
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-gcc_app
 
@@ -31,7 +31,7 @@ services:
       context: ..
       dockerfile: ./django_project/Dockerfile
       args:
-        BASE_IMAGE: node:stable
+        BASE_IMAGE: node:latest
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-node_app
 
