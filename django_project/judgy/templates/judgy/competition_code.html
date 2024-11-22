@@ -121,15 +121,15 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">Team</th>
+                <th scope="col" class="text-center">Rank</th>
+                <th scope="col" class="text-center">Team</th>
               </tr>
             </thead>
             <tbody class="table-group-divider">
               {% for team in teams %}
                 <tr style="height: 3.4375rem;">
-                  <th scope="row">{{ forloop.counter }}</th>
-                  <td>
+                  <th scope="row" class="text-center">{{ forloop.counter }}</th>
+                  <td class="text-center">
                     <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
                       {{ team.name }}
                     </a>

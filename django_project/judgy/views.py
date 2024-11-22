@@ -1,6 +1,8 @@
 import json
+import math
 import os
 import zipfile
+from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import user_passes_test
@@ -153,16 +155,13 @@ def competition_code_view(request, code):
         team_submissions = Submission.objects.filter(problem=problem, team=user_team)
         user_submissions = Submission.objects.filter(problem=problem, team=user_team, user=request.user if request.user.is_authenticated else None)
         if problem.score_preference: # Higher Score is Better
-            competition_best_score = competition_submissions.aggregate(Max('score'))['score__max']
-            team_best_score = team_submissions.aggregate(Max('score'))['score__max']
-            user_best_score = user_submissions.aggregate(Max('score'))['score__max']
+            problem.competition_best_score = competition_submissions.aggregate(Max('score'))['score__max']
+            problem.team_best_score = team_submissions.aggregate(Max('score'))['score__max']
+            problem.user_best_score = user_submissions.aggregate(Max('score'))['score__max']
         else: # Lower Score is Better
-            competition_best_score = competition_submissions.aggregate(Min('score'))['score__min']
-            team_best_score = team_submissions.aggregate(Min('score'))['score__min']
-            user_best_score = user_submissions.aggregate(Min('score'))['score__min']
-        problem.competition_best_score = competition_best_score or 0
-        problem.team_best_score = team_best_score or 0
-        problem.user_best_score = user_best_score or 0
+            problem.competition_best_score = competition_submissions.aggregate(Min('score'))['score__min']
+            problem.team_best_score = team_submissions.aggregate(Min('score'))['score__min']
+            problem.user_best_score = user_submissions.aggregate(Min('score'))['score__min']
 
     if request.method == 'GET':
         problem_form = ProblemForm()
@@ -425,7 +424,6 @@ def submit_view(request, code, problem_name):
                 with open(score_file, 'r') as f:
                     score = f.read()
                 score = score.split(' ')[0]
-                
 
                 Notification.objects.create(
                     user=request.user,
@@ -435,7 +433,7 @@ def submit_view(request, code, problem_name):
 
                 competition_submissions = Submission.objects.filter(problem=problem)
                 if problem.score_preference: # Higher Score is Better
-                    competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or 0
+                    competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
                     if int(score) > competition_best_score:
                         superusers = User.objects.filter(is_superuser=True)
                         participants = User.objects.filter(teams__competition=competition)
@@ -446,7 +444,7 @@ def submit_view(request, code, problem_name):
                         for user in participants:
                             Notification.objects.create(user=user, header=header, body=body)
                 else: # Lower Score is Better
-                    competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or 0
+                    competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
                     if int(score) < competition_best_score:
                         superusers = User.objects.filter(is_superuser=True)
                         participants = User.objects.filter(teams__competition=competition)
@@ -463,3 +461,119 @@ def submit_view(request, code, problem_name):
             else:
                 print('Some field was incorrectly filled out.')
                 print('form.errors:\n', form.errors)
+
+def rankings_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+    problems = Problem.objects.filter(competition=competition)
+    teams = Team.objects.filter(competition=competition)
+
+    rankings = []
+    score_map = {problem.name: [] for problem in problems}
+    time_list = []
+
+    for team in teams:
+        team_data = {
+            'team_name': team.name,
+            'total_attempt': 0,
+            'total_time': timedelta(0)
+        }
+        
+        for problem in problems:
+            # Get submissions for the current problem and team
+            submissions = Submission.objects.filter(problem=problem, team=team)
+            
+            # Determine the best submission based on score preference
+            if problem.score_preference: # Higher Score is better
+                best_submission = submissions.order_by('-score', 'time').first()
+            else: # Lower Score is better
+                best_submission = submissions.order_by('score', 'time').first()
+            
+            if best_submission:
+                best_score = best_submission.score
+                best_time = best_submission.time - competition.start
+                team_data['total_attempt'] += 1
+            else:
+                # Assign default values for no submissions
+                best_score = -math.inf if problem.score_preference else +math.inf
+                best_time = competition.end - competition.start
+            
+            team_data[problem.name] = {'best_score': best_score, 'best_time': best_time}
+            score_map[problem.name].append(best_score)
+            team_data['total_time'] += best_time
+
+        rankings.append(team_data)
+        time_list.append(team_data['total_time'])
+
+    # Assign ranks for each problem based on best score
+    for problem in problems:
+        scores = score_map[problem.name]
+        ranked_scores = sorted(set(scores), reverse=problem.score_preference)
+        
+        for team in rankings:
+            team[problem.name]['score_rank'] = ranked_scores.index(team[problem.name]['best_score']) + 1
+    
+    for team in rankings:
+        team['total_score'] = sum(
+            team[problem.name]['score_rank'] for problem in problems
+        )
+
+    # Clean up infinite scores
+    for team in rankings:
+        for problem in problems:
+            score = team[problem.name]['best_score']
+            team[problem.name]['best_score'] = score if math.isfinite(score) else None
+
+    # Assign ranks based on total attempt
+    ranked_attempts = sorted(set(team['total_attempt'] for team in rankings), reverse=True)
+    
+    for team in rankings:
+        team['attempt_rank'] = ranked_attempts.index(team['total_attempt']) + 1
+
+    # Assign ranks based on total score
+    ranked_scores = sorted(set(team['total_score'] for team in rankings))
+    
+    for team in rankings:
+        team['score_rank'] = ranked_scores.index(team['total_score']) + 1
+
+    # Assign ranks based on total time
+    ranked_times = sorted(set(time_list))
+
+    for team in rankings:
+        team['time_rank'] = ranked_times.index(team['total_time']) + 1
+
+    # Finalize team rankings
+    rankings.sort(key=lambda team: (
+        team['attempt_rank'],
+        team['score_rank'],
+        team['time_rank'],
+        team['team_name']
+    ))
+
+    rank = 1
+    for i, team in enumerate(rankings):
+        if i > 0:
+            prev_team = rankings[i - 1]
+            is_tied = (
+                team['attempt_rank'] == prev_team['attempt_rank'] and
+                team['score_rank'] == prev_team['score_rank'] and
+                team['time_rank'] == prev_team['time_rank']
+            )
+            if not is_tied:
+                rank = i + 1
+        team['rank'] = rank
+
+    return JsonResponse([{
+        'rank': team['rank'],
+        'team_name': team['team_name'],
+        'attempt_rank': team['attempt_rank'],
+        'score_rank': team['score_rank'],
+        'time_rank': team['time_rank'],
+        'total_attempt': team['total_attempt'],
+        'total_score': team['total_score'],
+        'total_time': team['total_time'],
+        **{f'{problem.name}': {
+            'score_rank': team[problem.name]['score_rank'],
+            'best_score': team[problem.name]['best_score'],
+            'best_time': team[problem.name]['best_time']
+        } for problem in problems}
+    } for team in rankings], safe=False)

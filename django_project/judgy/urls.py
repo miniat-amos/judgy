@@ -21,7 +21,8 @@ from .views import (
     team_name_view,
     competitions_view,
     download_view,
-    submit_view
+    submit_view,
+    rankings_view
 )
 
 app_name = 'judgy'
@@ -48,5 +49,6 @@ urlpatterns = [
     path('competition/<str:code>/team/<str:name>', team_name_view, name='team_name'),
     path('competitions', competitions_view, name='competitions'),
     path('competition/<str:code>/<str:problem_name>/download', download_view, name='download'),
-    path('competition/<str:code>/<str:problem_name>/submit', submit_view, name='submit')
+    path('competition/<str:code>/<str:problem_name>/submit', submit_view, name='submit'),
+    path('competition/<str:code>/rankings', rankings_view, name='rankings')
 ]
