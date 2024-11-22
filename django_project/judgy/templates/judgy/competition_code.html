@@ -5,7 +5,7 @@
 {% block main_competition %}
 
 <script>
-  $(() => {
+  $(async () => {
     '{% if submission_form %}'
       $('#submission').on('show.bs.modal', event => {
         $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
@@ -14,6 +14,25 @@
     '{% else %}'
       $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
       $('#submission').closest('form').remove();
+    '{% endif %}'
+
+    '{% if teams %}'
+      const response = await fetch("{% url 'judgy:rankings' competition.code %}");
+      const rankings = await response.json();
+
+      $('#rankings-tab-pane tbody').empty();
+      for (const team of rankings) {
+        $('#rankings-tab-pane tbody').append(`
+          <tr style="height: 3.4375rem;">
+            <th scope="row" class="text-center">${team.rank}</th>
+            <td class="text-center">
+              <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+                ${team.team_name}
+              </a>
+            </td>
+          </tr>
+        `);
+      }
     '{% endif %}'
   });
 </script>
@@ -126,16 +145,6 @@
               </tr>
             </thead>
             <tbody class="table-group-divider">
-              {% for team in teams %}
-                <tr style="height: 3.4375rem;">
-                  <th scope="row" class="text-center">{{ forloop.counter }}</th>
-                  <td class="text-center">
-                    <a class="text-decoration-none" href="{% url 'judgy:team_name' competition.code team.name %}">
-                      {{ team.name }}
-                    </a>
-                  </td>
-                </tr>
-              {% endfor %}
             </tbody>
           </table>
         </div>

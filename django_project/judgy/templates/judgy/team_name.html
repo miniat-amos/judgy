@@ -5,27 +5,18 @@
 {% block main_competition %}
 
 <div class="mx-5 px-5">
-  <div class="align-items-stretch d-flex">
-    <div class="d-flex justify-content-start py-5 w-100">
-      <div>
-        <h1>{{ team.name }}</h1>
-        <div class="row g-4">
-          {% for member in team.members.all %}
-            <div class="col">
-              <div class="text-center">
-                <i class="bi bi-person" style="font-size: 8rem;"></i>
-                <h5>{{ member.first_name }} {{ member.last_name }}</h5>
-                <p>{{ member.email }}</p>
-              </div>
-            </div>
-          {% endfor %}
+  <div class="py-5">
+    <h1 class="text-center">{{ team.name }}</h1>
+    <div class="row g-4">
+      {% for member in team.members.all %}
+        <div class="col">
+          <div class="text-center">
+            <i class="bi bi-person" style="font-size: 8rem"></i>
+            <h5>{{ member.first_name }} {{ member.last_name }}</h5>
+            <p>{{ member.email }}</p>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="d-flex justify-content-end py-5 w-100">
-      <div class="text-center">
-        <i class="bi bi-1-circle-fill" style="font-size: 16rem; color: gold;"></i>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
