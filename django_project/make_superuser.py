@@ -16,7 +16,7 @@ User = get_user_model()
 if not User.objects.filter(email=config('SUPER_USER_EMAIL')).exists():
     User.objects.create_superuser(
         email=config('SUPER_USER_EMAIL'),
-        password=config('SUPER_USER_PASSWORD'),
+        password=input('Input super user password: '),
         first_name=config('SUPER_USER_FIRST_NAME'),
         last_name=config('SUPER_USER_LAST_NAME')
     )
