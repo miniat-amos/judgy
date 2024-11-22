@@ -308,7 +308,8 @@ class ProblemForm(forms.ModelForm):
         fields = [
             'number',
             'name',
-            'score_preference'
+            'score_preference',
+            'show_output'
         ]
     
     def __init__(self, *args, **kwargs):

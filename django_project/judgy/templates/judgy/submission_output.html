@@ -1,0 +1,21 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}Output for {{ problem.name }}{% endblock %}
+
+{% block main %}
+
+<div class="container mt-5">
+  <h1 class="text-center">{{ competition.name }}</h1>
+  <h2 class="text-center text-muted">{{ problem.name }}</h2>
+
+  <div class="card mt-4 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Output</h5>
+    </div>
+    <div class="card-body">
+      <pre class="bg-dark text-light p-3 rounded" style="font-family: 'Courier New', monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">{{ output_data }}</pre>
+    </div>
+  </div>  
+</div>
+
+{% endblock %}
