@@ -91,44 +91,42 @@ def run_submission(code, problem, team, user, files):
                         return container_main_directory / problem / f.name
             return None
 
-        def classes_string():
-            file_paths = [str(container_main_directory / problem / f.name) for f in submitted_files]
-            return " ".join(file_paths)
-
+        def classes_list():
+            return [str(container_main_directory / problem / f.name) for f in submitted_files]
 
         main_file = find_main_file()
-        classes = classes_string()
-                
+        classes = classes_list()
+                    
         command = [
             "bash", "-c",
-            f"cd /app/{problem} && "
-            f"{compiler} {classes} && "
-            f"python3 judge.py {interpreter} {main_file.stem} | {separate_score_filepath} | "
+            f"cd \"/app/{problem}\" && "
+            f"{compiler} " + " ".join([f"\"{cls}\"" for cls in classes]) + " && "
+            f"python3 judge.py {interpreter} \"{main_file.stem}\" | {separate_score_filepath} | "
             f"while read number filepath; do "
             f"echo $number > {container_score_path}; "
-            f"cat $filepath > {container_output_path}; "
-            f"done" 
+            f"cat \"$filepath\" > {container_output_path}; "
+            f"done"
         ]
-        
+
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
         command = (
-            f'bash -c "cd /app/{problem}/ && '
-            f'python3 judge.py {interpreter} {container_user_file} | {separate_score_filepath} | '
+            f'bash -c "cd \\"/app/{problem}\\" && '
+            f'python3 judge.py {interpreter} \\"{container_user_file}\\" | {separate_score_filepath} | '
             f'while read number filepath; do '
             f'echo $number > {container_score_path}; '
-            f'cat $filepath > {container_output_path}; '
+            f'cat \\"$filepath\\" > {container_output_path}; '
             f'done"'
         )
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
         command = (
-            f'bash -c "cd /app/{problem}/ && '
-            f'{compiler} {container_user_file} -o a.out && '
+            f'bash -c "cd \\"/app/{problem}\\" && '
+            f'{compiler} \\"{container_user_file}\\" -o a.out && '
             f'python3 judge.py ./a.out | {separate_score_filepath} | '
             f'while read number filepath; do '
             f'echo $number > {container_score_path}; '
-            f'cat $filepath > {container_output_path}; '
+            f'cat \\"$filepath\\" > {container_output_path}; '
             f'done"'
         )    
     try:
