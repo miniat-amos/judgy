@@ -54,10 +54,11 @@ def run_submission(code, problem, team, user, files):
     # Variables for container
     code = code.lower()
     docker_image = f"judgy-{code}-{submitted_image}_app"
-    container_name = f"{submitted_image}_{user.first_name}_container"
     container_main_directory = Path("/app")    
     container_score_path = container_main_directory / "outputs" / "score.txt"
     container_output_path = container_main_directory / "outputs" / "output.txt"
+    
+    separate_score_filepath = "sed 's/^\([0-9]\+\) \(.*\)$/\\1 \\2/'"
 
     # Volumes for file-to-file binding
     volumes = {
@@ -100,27 +101,47 @@ def run_submission(code, problem, team, user, files):
                 
         command = [
             "bash", "-c",
-            f"cd /app/{problem} && {compiler} {classes} && python3 judge.py {interpreter} {main_file.stem} > {container_score_path} && cat run_* > {container_output_path}"
+            f"cd /app/{problem} && "
+            f"{compiler} {classes} && "
+            f"python3 judge.py {interpreter} {main_file.stem} | {separate_score_filepath} | "
+            f"while read number filepath; do "
+            f"echo $number > {container_score_path}; "
+            f"cat $filepath > {container_output_path}; "
+            f"done" 
         ]
         
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
-        command=f'bash -c "cd /app/{problem}/ && python3 judge.py {interpreter} {container_user_file} > {container_score_path} && cat run_* > {container_output_path}"'
-
+        command = (
+            f'bash -c "cd /app/{problem}/ && '
+            f'python3 judge.py {interpreter} {container_user_file} | {separate_score_filepath} | '
+            f'while read number filepath; do '
+            f'echo $number > {container_score_path}; '
+            f'cat $filepath > {container_output_path}; '
+            f'done"'
+        )
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
-        command=f'bash -c "cd /app/{problem}/ && {compiler} {container_user_file} -o a.out && python3 judge.py ./a.out > {container_score_path} && cat run_* > {container_output_path}"'
-    
-    container = client.containers.run(
-        docker_image,
-        command=command,
-        volumes=volumes,
-        detach=True,
-        name=container_name,
-    )
-
-    container.stop()
-    container.remove()
+        command = (
+            f'bash -c "cd /app/{problem}/ && '
+            f'{compiler} {container_user_file} -o a.out && '
+            f'python3 judge.py ./a.out | {separate_score_filepath} | '
+            f'while read number filepath; do '
+            f'echo $number > {container_score_path}; '
+            f'cat $filepath > {container_output_path}; '
+            f'done"'
+        )    
+    try:
+        container = client.containers.run(
+            docker_image,
+            command=command,
+            volumes=volumes,
+            detach=True,
+        )
+        container.wait()  
+    finally:
+        container.stop()
+        container.remove()
         
     return score_file, output_file
 

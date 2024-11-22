@@ -423,7 +423,6 @@ def submit_view(request, code, problem_name):
                 
                 with open(score_file, 'r') as f:
                     score = f.read()
-                score = score.split(' ')[0]
 
                 Notification.objects.create(
                     user=request.user,
