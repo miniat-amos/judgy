@@ -10,6 +10,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.html import format_html
 from .decorators import verified_required
 from .forms import (
     CustomUserCreationForm,
@@ -421,16 +422,29 @@ def submit_view(request, code, problem_name):
             if form.is_valid():
                 files = request.FILES.getlist('files')
                 score_file, output_file = run_submission(code, problem_name, user_team, request.user, files)
+                request.session['output_dir'] = str(output_file)
                 
                 with open(score_file, 'r') as f:
                     score = f.read()
                 score = score.split(' ')[0]
-                
+
+                if problem.show_output:
+                    output_url = f'/competition/{code}/{problem_name}/submission/output'
+                    body = format_html(
+                        'You got a score of {} in the problem "{}" for the competition "{}".<br>'
+                        'Click <a href="{}" target="_blank">here</a> to see the output.',
+                        score,
+                        problem.name,
+                        competition.name,
+                        output_url
+                    )
+                else:
+                    body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
 
                 Notification.objects.create(
                     user=request.user,
                     header='Your Score',
-                    body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
+                    body=body,
                 )
 
                 competition_submissions = Submission.objects.filter(problem=problem)
@@ -463,3 +477,18 @@ def submit_view(request, code, problem_name):
             else:
                 print('Some field was incorrectly filled out.')
                 print('form.errors:\n', form.errors)
+
+
+@verified_required
+def output_view(request, code, problem_name):
+    competition = get_object_or_404(Competition, code=code)
+    problem = get_object_or_404(Problem, competition=competition, name=problem_name)
+
+    with open(str(request.session.get('output_dir')), 'r') as f:
+        output_data = f.read()
+
+    return render(request, 'judgy/submission_output.html', {
+        'problem': problem,
+        'competition': competition,
+        'output_data': output_data,
+    })
