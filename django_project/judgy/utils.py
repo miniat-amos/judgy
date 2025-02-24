@@ -24,11 +24,11 @@ def get_dist_dir(code, problem):
     main_directory = parent_dir / 'competitions'
     
     comp_directory = main_directory / code.lower()
-    
-    problem_directory = comp_directory / problem
+        
+    problem_directory = comp_directory / 'problems' / problem
     
     distributed_directory = problem_directory / 'dist'
-    
+        
     return distributed_directory.resolve()
 
 def create_problem(code, name, description, judge_py, other_files, dist):
