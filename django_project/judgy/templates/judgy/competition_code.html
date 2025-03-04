@@ -39,7 +39,7 @@
         }
         $('#rankings').append(`
           <div
-            class="card h-100 bg-body-tertiary"
+            class="card  bg-body-tertiary"
           >
          
             <div class="card-body">
@@ -55,6 +55,7 @@
             </div>
           </div>
         </div>
+        <br>
         `);
       }
     '{% endif %}'
@@ -80,10 +81,12 @@
               <h5 class="card-title">Problem {{ problem.number }}: {{ problem.name }}</h5>
               {% comment %} Do we truncate or keep full desc {% endcomment %}
               <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
-              {% if download %}
+              {% if download and user_team or is_competition_over %}
+
                   <a  href="{% url 'judgy:download' competition.code problem.name %}" class="d-block">
                     Download               
                   </a>
+
               {% endif %}
             <br>
               {% if upload %}

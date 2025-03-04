@@ -150,7 +150,7 @@ def competition_code_view(request, code):
     user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     teams = Team.objects.filter(competition=competition)
     problems = Problem.objects.filter(competition=competition).order_by('number')
-
+    
     for problem in problems:
         competition_submissions = Submission.objects.filter(problem=problem)
         team_submissions = Submission.objects.filter(problem=problem, team=user_team)
@@ -181,7 +181,8 @@ def competition_code_view(request, code):
             'problems': problems,
             'download': competition.start <= timezone.now(),
             'upload': competition.start <= timezone.now() < competition.end and user_team,
-            'enroll': competition.enroll_start <= timezone.now() < competition.enroll_end
+            'enroll': competition.enroll_start <= timezone.now() < competition.enroll_end,
+            'is_competition_over': competition.end <= timezone.now()
         })
 
     if request.method == 'DELETE':
