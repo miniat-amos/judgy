@@ -1,0 +1,168 @@
+{% extends 'judgy/base_competition.html' %}
+
+{% block title %}{{ competition.name }}{% endblock %}
+
+{% block main_competition %}
+
+<script>
+  $(async () => {
+    '{% if submission_form %}'
+      $('#submission').on('show.bs.modal', event => {
+        $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
+        $('#submission').closest('form').attr('action', "{% url 'judgy:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
+      });
+    '{% else %}'
+      $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
+      $('#submission').closest('form').remove();
+    '{% endif %}'
+
+    '{% if teams %}'
+      const response = await fetch("{% url 'judgy:rankings' competition.code %}");
+      const rankings = await response.json();
+
+      $('#rankings-tab-pane tbody').empty();
+      for (const team of rankings) {
+        $('#rankings-tab-pane tbody').append(`
+          <tr style="height: 3.4375rem;">
+            <th scope="row" class="text-center">${team.rank}</th>
+            <td class="text-center">
+              <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+                ${team.team_name}
+              </a>
+            </td>
+          </tr>
+        `);
+      }
+    '{% endif %}'
+  });
+</script>
+
+<div class="container py-5">
+  <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        id="problems-tab"
+        class="nav-link active"
+        style="width: 8rem"
+        data-bs-target="#problems-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Problems
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        id="rankings-tab"
+        class="nav-link"
+        style="width: 8rem"
+        data-bs-target="#rankings-tab-pane"
+        data-bs-toggle="tab"
+        role="tab"
+        type="button"
+      >
+        Rankings
+      </button>
+    </li>
+  </ul>
+  <div class="py-5 tab-content">
+    <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
+      {% if user.is_superuser %}
+        <div class="pb-5 text-center">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
+        </div>
+      {% endif %}
+      {% if problems %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Problem</th>
+                {% if download %}
+                  <th scope="col" class="text-center">Download</th>
+                {% endif %}
+                {% if upload %}
+                  <th scope="col" class="text-center">Upload</th>
+                {% endif %}
+                <th scope="col" class="text-center">Competition Best Score</th>
+                {% if user_team %}
+                  <th scope="col" class="text-center">Team Best Score</th>
+                  <th scope="col" class="text-center">Your Best Score</th>
+                {% endif %}
+                <th scope="col" class="text-center">Score Preference</th>
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+              {% for problem in problems %}
+                <tr style="height: 3.4375rem;">
+                  <th scope="row">{{ problem.number }}. {{ problem.name }}</th>
+                  {% if download %}
+                    <td class="text-center">
+                      <a class="btn" href="{% url 'judgy:download' competition.code problem.name %}">
+                        <i class="bi bi-download"></i>
+                      </a>
+                    </td>
+                  {% endif %}
+                  {% if upload %}
+                    <td class="text-center">
+                      <button class="btn" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
+                        <i class="bi bi-upload"></i>
+                      </button>
+                    </td>
+                  {% endif %}
+                  <td class="text-center">{{ problem.competition_best_score }}</td>
+                  {% if user_team %}
+                    <td class="text-center">{{ problem.team_best_score }}</td>
+                    <td class="text-center">{{ problem.user_best_score }}</td>
+                  {% endif %}
+                  <td class="text-center">
+                    {% if problem.score_preference %}
+                      Higher Score is Better
+                    {% else %}
+                      Lower Score is Better
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center">
+          No Problems
+        </div>
+      {% endif %}
+    </div>
+    
+    <div id="rankings-tab-pane" class="tab-pane fade" role="tabpanel">
+      {% if teams %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">Rank</th>
+                <th scope="col" class="text-center">Team</th>
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center">
+          No Teams
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+
+
+
+{% include 'judgy/includes/manage_problems.html' %}
+{% include 'judgy/includes/submission.html' %}
+
+{% endblock %}

@@ -20,17 +20,41 @@
       const response = await fetch("{% url 'judgy:rankings' competition.code %}");
       const rankings = await response.json();
 
-      $('#rankings-tab-pane tbody').empty();
+      
+      $('#rankings').empty();
       for (const team of rankings) {
-        $('#rankings-tab-pane tbody').append(`
-          <tr style="height: 3.4375rem;">
-            <th scope="row" class="text-center">${team.rank}</th>
-            <td class="text-center">
-              <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+        const response = await fetch("{% url 'judgy:team_members' competition.code 'team.name' %}".replace('team.name', team.team_name))
+        const members = await response.json()
+        let membersHTML = ""
+
+        for (const member of members) {
+          membersHTML += `
+            <div class="col">
+              <div class="text-center">
+                <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+                <h5>${member.first_name}</h5>
+              </div>
+            </div>
+            `
+        }
+        $('#rankings').append(`
+          <div
+            class="card h-100 bg-body-tertiary"
+          >
+         
+            <div class="card-body">
+              <h4 class="card-title">Rank: #${team.rank}</h4>
+              <h5 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
                 ${team.team_name}
-              </a>
-            </td>
-          </tr>
+                </a>
+              </h5>
+              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                ${membersHTML}
+
+              </div>
+            </div>
+          </div>
+        </div>
         `);
       }
     '{% endif %}'
@@ -38,124 +62,83 @@
 </script>
 
 <div class="container py-5">
-  <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button
-        id="problems-tab"
-        class="nav-link active"
-        style="width: 8rem"
-        data-bs-target="#problems-tab-pane"
-        data-bs-toggle="tab"
-        role="tab"
-        type="button"
-      >
-        Problems
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button
-        id="rankings-tab"
-        class="nav-link"
-        style="width: 8rem"
-        data-bs-target="#rankings-tab-pane"
-        data-bs-toggle="tab"
-        role="tab"
-        type="button"
-      >
-        Rankings
-      </button>
-    </li>
-  </ul>
-  <div class="py-5 tab-content">
-    <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
-      {% if user.is_superuser %}
-        <div class="pb-5 text-center">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
-        </div>
-      {% endif %}
-      {% if problems %}
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Problem</th>
-                {% if download %}
-                  <th scope="col" class="text-center">Download</th>
-                {% endif %}
-                {% if upload %}
-                  <th scope="col" class="text-center">Upload</th>
-                {% endif %}
-                <th scope="col" class="text-center">Competition Best Score</th>
-                {% if user_team %}
-                  <th scope="col" class="text-center">Team Best Score</th>
-                  <th scope="col" class="text-center">Your Best Score</th>
-                {% endif %}
-                <th scope="col" class="text-center">Score Preference</th>
-              </tr>
-            </thead>
-            <tbody class="table-group-divider">
-              {% for problem in problems %}
-                <tr style="height: 3.4375rem;">
-                  <th scope="row">{{ problem.number }}. {{ problem.name }}</th>
-                  {% if download %}
-                    <td class="text-center">
-                      <a class="btn" href="{% url 'judgy:download' competition.code problem.name %}">
-                        <i class="bi bi-download"></i>
-                      </a>
-                    </td>
-                  {% endif %}
-                  {% if upload %}
-                    <td class="text-center">
-                      <button class="btn" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
-                        <i class="bi bi-upload"></i>
-                      </button>
-                    </td>
-                  {% endif %}
-                  <td class="text-center">{{ problem.competition_best_score }}</td>
-                  {% if user_team %}
-                    <td class="text-center">{{ problem.team_best_score }}</td>
-                    <td class="text-center">{{ problem.user_best_score }}</td>
-                  {% endif %}
-                  <td class="text-center">
-                    {% if problem.score_preference %}
-                      Higher Score is Better
-                    {% else %}
-                      Lower Score is Better
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="text-center">
-          No Problems
-        </div>
-      {% endif %}
+  {% if user.is_superuser %}
+    <div class="pb-5 text-center">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
     </div>
-    <div id="rankings-tab-pane" class="tab-pane fade" role="tabpanel">
-      {% if teams %}
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col" class="text-center">Rank</th>
-                <th scope="col" class="text-center">Team</th>
-              </tr>
-            </thead>
-            <tbody class="table-group-divider">
-            </tbody>
-          </table>
+  {% endif %}
+  <h1 class="text-center">Problems</h1>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% if problems %}
+      {% for problem in problems %}
+        <div class="col">
+          <div
+            class="card h-100 bg-body-tertiary"
+          >
+         
+            <div class="card-body">
+              <h5 class="card-title">Problem {{ problem.number }}: {{ problem.name }}</h5>
+              {% comment %} Do we truncate or keep full desc {% endcomment %}
+              <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
+              {% if download %}
+                  <a  href="{% url 'judgy:download' competition.code problem.name %}" class="d-block">
+                    Download               
+                  </a>
+              {% endif %}
+            <br>
+              {% if upload %}
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
+                     Upload
+                    </button>
+              {% endif %}
+            </div>
+            <div class="card-footer">
+              {% if problem.score_preference %}
+                <i class="bi bi-arrow-up"></i> Higher Score is Better
+              {% else %}
+                <i class="bi bi-arrow-down"></i> Lower Score is Better
+              {% endif %}
+              <br>
+
+              {% if user_team %}
+                    Team Best: {{ problem.team_best_score|default:"--" }}
+                    <br>
+                    Your Best: {{ problem.user_best_score|default:"--" }}
+              {% endif %}
+
+              <br>
+              Competition Best: {{ problem.competition_best_score|default:"--" }}
+
+            </div>
+          </div>
         </div>
-      {% else %}
-        <div class="text-center">
-          No Teams
-        </div>
-      {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="text-center">
+        No Problems
+      </div>
+    {% endif %}
+  </div>
+
+  <h1 class="text-center">Rankings</h1>
+  <div class="row row-cols-1 g-4">
+    {% if teams %}
+    <div id="rankings">
     </div>
+          
+      <div class="col">
+
+
+         
+    {% else %}
+      <div class="text-center">
+        No Teams
+      </div>
+    {% endif %}
   </div>
 </div>
+
+
 
 {% include 'judgy/includes/manage_problems.html' %}
 {% include 'judgy/includes/submission.html' %}

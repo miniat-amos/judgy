@@ -158,7 +158,7 @@ def competition_code_view(request, code):
         if problem.score_preference: # Higher Score is Better
             problem.competition_best_score = competition_submissions.aggregate(Max('score'))['score__max']
             problem.team_best_score = team_submissions.aggregate(Max('score'))['score__max']
-            problem.user_best_score = user_submissions.aggregate(Max('score'))['score__max']
+            problem.user_best_score = user_submissions.aggregate(Max('score'))['score__max'] 
         else: # Lower Score is Better
             problem.competition_best_score = competition_submissions.aggregate(Min('score'))['score__min']
             problem.team_best_score = team_submissions.aggregate(Min('score'))['score__min']
@@ -214,7 +214,7 @@ def problems_update_view(request, code):
 
             create_problem(code, problem.name, description, judge_py, other_files, dist)
 
-            create_images(code)
+            # create_images(code)
 
             return redirect('judgy:competition_code', code=competition.code)
         else:
@@ -607,3 +607,9 @@ def rankings_view(request, code):
             'best_time': team[problem.name]['best_time']
         } for problem in problems}
     } for team in rankings], safe=False)
+
+def get_members_view(request, code, name):
+    competition = get_object_or_404(Competition, code=code)
+    team = get_object_or_404(Team, competition=competition, name=name)
+
+    return JsonResponse(list(team.members.all().values()), safe=False)
