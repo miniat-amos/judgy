@@ -32,7 +32,7 @@
             <div class="col">
               <div class="text-center">
                 <i class="bi bi-person-circle" style="font-size: 4rem"></i>
-                <h5>${member.first_name}</h5>
+                <h4>${member.first_name}</h4>
               </div>
             </div>
             `
@@ -43,11 +43,11 @@
           >
          
             <div class="card-body">
-              <h4 class="card-title">Rank: #${team.rank}</h4>
-              <h5 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+              <h2 class="card-title">Rank: #${team.rank}</h2>
+              <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
                 ${team.team_name}
                 </a>
-              </h5>
+              </h3>
               <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 ${membersHTML}
 
@@ -78,13 +78,13 @@
           >
          
             <div class="card-body">
-              <h5 class="card-title">Problem {{ problem.number }}: {{ problem.name }}</h5>
+              <h2 class="card-title">Problem {{ problem.number }}: <br>{{ problem.name }}</h2>
               {% comment %} Do we truncate or keep full desc {% endcomment %}
               <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
-              {% if download and user_team or is_competition_over %}
+              {% if download and user_team or is_competition_over or user.is_superuser %}
 
                   <a  href="{% url 'judgy:download' competition.code problem.name %}" class="d-block">
-                    Download               
+                    <h2>Download</h2>               
                   </a>
 
               {% endif %}

@@ -6,6 +6,7 @@
   ::selection {
     color: {{ competition.color }};
   }
+
 </style>
 
 {% endblock %}
@@ -19,6 +20,9 @@
       colorDark: '{{ competition.color }}',
       colorLight: '#00000000'
     });
+
+    const qrCodeImg = $('#qrcode').find("img")
+    qrCodeImg.attr("alt", "{% url 'judgy:competition_code' competition.code %}")
     
    $('#delete-competition').on('show.bs.modal', event => {
       $('.modal-body .name').text('{{ competition.name }}');
@@ -169,10 +173,14 @@
         </div>
       </div>
       <div class="d-flex justify-content-end py-5 w-100">
-        <div>
-          <div id="qrcode"></div>
+        <div class="d-flex flex-column align-items-center text-center">
+          <h1>Share this Competition</h1>
+          <a class="text-decoration-none" href="{% url 'judgy:competition_code' competition.code %}">
+            <div id="qrcode"  data-alt="QR code linking to the competition page">
+            </div>
+          </a>
           <br>
-          <h2 class="text-center" style="color: {{ competition.color }};">CODE: {{ competition.code }}</h2>
+          <h2 class="text-center">CODE: {{ competition.code }}</h2>
         </div>
       </div>
     </div>
