@@ -4,3 +4,4 @@ PyMySQL==1.1.1
 python-decouple==3.8
 cryptography
 gunicorn
+djangorestframework
