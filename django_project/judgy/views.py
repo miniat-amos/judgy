@@ -13,6 +13,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import format_html
+from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .decorators import verified_required
 from .forms import (
     CustomUserCreationForm,
@@ -43,6 +47,10 @@ from .utils import (
     create_problem,
     get_dist_dir,
     team_add_user
+)
+
+from .serializers import (
+    CompSerializer
 )
 
 def home_view(request):
@@ -166,6 +174,7 @@ def competition_code_view(request, code):
 
     if request.method == 'GET':
         problem_form = ProblemForm()
+        update_comp_form = CompetitionCreationForm(instance=competition)
         submission_form = SubmissionForm()
         team_enroll_form = TeamEnrollForm()
         team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
@@ -175,6 +184,7 @@ def competition_code_view(request, code):
             'user_team': user_team,
             'teams': teams,
             'problem_form': problem_form,
+            'update_comp_form': update_comp_form,
             'submission_form': submission_form,
             'team_enroll_form': team_enroll_form,
             'team_invite_form': team_invite_form,
@@ -614,3 +624,20 @@ def get_members_view(request, code, name):
     team = get_object_or_404(Team, competition=competition, name=name)
 
     return JsonResponse(list(team.members.all().values()), safe=False)
+
+
+class CompUpdate(APIView):
+    def put(self, request, code):
+        
+        competition = get_object_or_404(Competition, code=code)
+        
+        serializer = CompSerializer(competition, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
+            return Response({"success": f"Competition {competition} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
+        else:
+            print(serializer.errors)
+            return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

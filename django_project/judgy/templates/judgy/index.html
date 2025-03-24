@@ -252,6 +252,10 @@
                   <button
                     class="edit btn p-0"
                     onclick="event.preventDefault();"
+                    data-bs-toggle="modal"
+                    data-bs-target="#edit-competition"
+                    data-code="{{ competition.code }}"
+
                   >
                     Edit <i class="bi bi-pencil-fill"></i>
                   </button>
@@ -285,5 +289,6 @@
 </div>
 
 {% include 'judgy/includes/delete_competition.html' %}
+{% include 'judgy/includes/edit_competition.html' %}
 
 {% endblock %}

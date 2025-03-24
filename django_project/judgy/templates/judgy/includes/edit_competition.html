@@ -1,0 +1,156 @@
+<form id="updateCompForm" action="{% url 'judgy:update_competition' competition.code %}">
+  {% csrf_token %}
+  <div id="edit-competition" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Edit Competition</h1>
+          <button id="close_delete_comp_btn" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          
+          <div id="error-messages" class="alert alert-danger" style="display: none;"></div>
+          <div id="success-messages" class="alert alert-success" style="display: none;"></div>
+          
+                <div class='my-3'>
+                    <div class='form-floating'>
+                      {{ update_comp_form.name }}
+                      <label for='name'>Competition Name</label>
+                    </div>
+                  </div>
+              
+                  <div class='my-3'>
+                    <div class='form-floating'>
+                      {{ update_comp_form.description }}
+                      <label for='description'>Competition Description</label>
+                    </div>
+                  </div>
+              
+                  <div class='my-3'>
+                    <div class='row'>
+                      <div class='col-md-6'>
+                        <div class='form-floating'>
+                          {{ update_comp_form.start }}
+                          <label for='start'>Competition Start</label>
+                        </div>
+                      </div>
+              
+                      <div class='col-md-6'>
+                        <div class='form-floating'>
+                          {{ update_comp_form.end }}
+                          <label for='end'>Competition End</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              
+                  <div class='my-3'>
+                    <div class='row'>
+                      <div class='col-md-6'>
+                        <div class='form-floating'>
+                          {{ update_comp_form.enroll_start }}
+                          <label for='enroll-start'>Enroll Start</label>
+                        </div>
+                      </div>
+              
+                      <div class='col-md-6'>
+                        <div class='form-floating'>
+                          {{ update_comp_form.enroll_end }}
+                          <label for='enroll-end'>Enroll End</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              
+                  <div class='my-3'>
+                    <div class="row">
+                      <div class="col">
+                        <div class='form-floating'>
+                          {{ update_comp_form.team_size_limit }}
+                          <label for='team-size-limit'>Team Size Limit</label>
+                        </div>
+                      </div>
+              
+                      <div class="col">
+                        <div class='form-floating'>
+                          {{ update_comp_form.color }}
+                          <label for='color'>Competition Color</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+                <button id="updateCompetitionButton" type="button" class="btn btn-primary">Save Updates</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+</form>
+
+<script>
+    $(() => {
+      $('#start, #end, #enroll-start, #enroll-end').attr('type', 'datetime-local');
+      $('#color').attr('type', 'color');
+    });
+
+    
+    // Update Competition   
+    $("#updateCompetitionButton").click(function() {
+        $("#success-messages").empty().hide()
+        $("#error-messages").empty().hide()
+
+        let formData = new FormData($("#updateCompForm")[0])
+
+        $.ajax({
+            url: "{% url 'judgy:update_competition' competition.code %}", 
+            type: 'PUT',
+            processData: false, 
+            contentType: false,  
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'  
+            },
+            data: formData,
+            success: function(response) {
+                let successDiv = $("#success-messages")
+                successDiv.html("")
+                successDiv.show()
+
+                if (response.success) {
+                    let successMessage = $("<p class='text-success'></p>").text(response.success)
+                    successDiv.append(successMessage)
+                }
+
+                $(".modal-body").scrollTop(0);
+
+
+                if (response.redirect_url) {
+                    window.location.href = response.redirect_url  
+                } 
+            },
+            error: function(xhr) {
+                console.error("Update failed:", xhr.responseText) 
+
+                let errorDiv = $("#error-messages");
+                errorDiv.html("") 
+                errorDiv.show()
+
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    $.each(xhr.responseJSON.errors, function (field, messages) {
+                        let errorMessage = $("<p class='text-danger'></p>").text(messages.join(", "));
+                        errorDiv.append(errorMessage)
+                    });
+                } else {
+                    errorDiv.append("<p class='text-danger'>An unexpected error occurred.</p>")
+                }
+                $(".modal-body").scrollTop(0);
+
+            }
+
+        })
+    })
+  
+
+</script>

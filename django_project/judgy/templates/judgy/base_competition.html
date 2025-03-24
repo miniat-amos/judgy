@@ -146,7 +146,7 @@
           <br>
           {% if user.is_superuser %}
             <div class="d-flex gap-3">
-              <button class="btn btn-warning">EDIT</button>
+              <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
             </div>
           {% elif user.is_authenticated %}
@@ -189,6 +189,7 @@
 
 {% block main_competition %}{% endblock %}
 
+{% include 'judgy/includes/edit_competition.html' %}
 {% include 'judgy/includes/delete_competition.html' %}
 {% include 'judgy/includes/enroll_team.html' %}
 {% include 'judgy/includes/leave_team.html' %}
