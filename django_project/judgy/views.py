@@ -631,6 +631,7 @@ def get_members_view(request, code, name):
     return JsonResponse(list(team.members.all().values()), safe=False)
 
 # Class for updating a competition
+@user_passes_test(lambda u: u.is_superuser)
 class CompUpdate(APIView):
     def put(self, request, code):
         
