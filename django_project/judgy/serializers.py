@@ -28,14 +28,15 @@ class CompSerializer(serializers.ModelSerializer):
 
         # Validate that dates are not in the past
         if self.instance:
-            if 'start' in data:
-                if data['start'] < now and self.instance.start != data['start']:
-                    raise serializers.ValidationError({'start': 'You cannot change the start date to a past date.'})
+            if start < now and self.instance.start != start:
+                raise serializers.ValidationError({'start': 'You cannot change the start date to a past date.'})
+                
             if end and end < now:
                 raise serializers.ValidationError({'end': 'End date cannot be in the past.'})
-            if 'enroll_start' in data:
-                if data['enroll_start'] < now and self.instance.enroll_start != data['enroll_start']:
-                    raise serializers.ValidationError({'enroll_start': 'You cannot change the enroll start date to a past date.'})
+            
+            if enroll_start < now and self.instance.enroll_start != enroll_start:
+                raise serializers.ValidationError({'enroll_start': 'You cannot change the enroll start date to a past date.'})
+            
             if enroll_end and enroll_end < now:
                 raise serializers.ValidationError({'enroll_end': 'Enrollment end date cannot be in the past.'})
 

@@ -1,11 +1,11 @@
-<form id="updateCompForm" action="{% url 'judgy:update_competition' competition.code %}">
+<form id="updateCompForm" action="">
   {% csrf_token %}
   <div id="edit-competition" class="modal fade">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5">Edit Competition</h1>
-          <button id="close_delete_comp_btn" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button id="close_edit_comp_btn" type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           
@@ -96,16 +96,18 @@
       $('#color').attr('type', 'color');
     });
 
-    
+
     // Update Competition   
     $("#updateCompetitionButton").click(function() {
         $("#success-messages").empty().hide()
         $("#error-messages").empty().hide()
 
+        let form = $("#updateCompForm")
         let formData = new FormData($("#updateCompForm")[0])
 
+
         $.ajax({
-            url: "{% url 'judgy:update_competition' competition.code %}", 
+            url: form.attr("action"), 
             type: 'PUT',
             processData: false, 
             contentType: false,  
@@ -113,6 +115,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'  
             },
             data: formData,
+            // On success display message and redirect to the competition page
             success: function(response) {
                 let successDiv = $("#success-messages")
                 successDiv.html("")
@@ -125,11 +128,11 @@
 
                 $(".modal-body").scrollTop(0);
 
-
                 if (response.redirect_url) {
                     window.location.href = response.redirect_url  
                 } 
             },
+            // On error display error message 
             error: function(xhr) {
                 console.error("Update failed:", xhr.responseText) 
 

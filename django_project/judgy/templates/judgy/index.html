@@ -3,14 +3,13 @@
 {% block style %}
 
 <style>
+    :root {
+      --cream: #fffdd0;
+    }
+
   .card {
     transition: box-shadow 0.3s, transform 0.3s;
 
-    & .btn {
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
 
     &:hover {
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -24,10 +23,11 @@
   }
 
   .edit, .delete {
-    color: var(--bs-dark);
+    color: var(--cream);
 
     &:hover {
       color: var(--bs-light);
+
     }
   }
 </style>
@@ -98,7 +98,26 @@
       );
       if (response.ok) $(`[data-code=${code}]`).closest('.col').remove();
     });
+
+    // Allow every edit button to open a correct modal with that competition card's information
+    $(".edit").click(function() {
+      const url = $(this).data("url").replace("COMPETITION_CODE", $(this).data("code"))
+      $("#updateCompForm").attr("action", url);
+
+      $("#name").val($(this).data("name"));
+      $("#description").val($(this).data("description"));
+      $("#start").val($(this).data("start"));
+      $("#end").val($(this).data("end"));
+      $("#enroll-start").val($(this).data("enroll-start"));
+      $("#enroll-end").val($(this).data("enroll-end"));
+      $("#team_size_limit").val($(this).data("team-size-limit"));
+      $("#color").val($(this).data("color"));
+      
+    })
+
   });
+
+
 </script>
 
 {% endblock %}
@@ -168,11 +187,24 @@
             >
               <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
                 {% if user.is_superuser %}
-                  <button
-                    class="edit btn p-0"
-                    onclick="event.preventDefault();"
-                  >
-                    <i class="bi bi-pencil-fill"></i>
+                    <button
+                      class="edit btn p-0"
+                      onclick="event.preventDefault();"
+                      data-bs-toggle="modal"
+                      data-bs-target="#edit-competition"
+                      data-code="{{ competition.code }}"
+                      data-name="{{ competition.name }}"
+                      data-description="{{ competition.description }}"
+                      data-start="{{ competition.start|date:'Y-m-d\TH:i' }}"
+                      data-end="{{ competition.end|date:'Y-m-d\TH:i' }}"
+                      data-enroll-start="{{ competition.enroll_start|date:'Y-m-d\TH:i' }}"
+                      data-enroll-end="{{ competition.enroll_end|date:'Y-m-d\TH:i' }}"
+                      data-team-size-limit="{{ competition.team_size_limit }}"
+                      data-color="{{ competition.color }}"
+                      data-url="{% url 'judgy:update_competition' 'COMPETITION_CODE' %}"
+
+                    >
+                      Edit <i class="bi bi-pencil-fill"></i>
                   </button>
                   <button
                     class="delete btn p-0"
@@ -210,11 +242,24 @@
               <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
                 {% if user.is_superuser %}
                   <button
-                    class="edit btn p-0"
-                    onclick="event.preventDefault();"
-                  >
-                    <i class="bi bi-pencil-fill"></i>
-                  </button>
+                  class="edit btn p-0"
+                  data-bs-toggle="modal"
+                  data-bs-target="#edit-competition"
+                  data-code="{{ competition.code }}"
+                  data-name="{{ competition.name }}"
+                  data-description="{{ competition.description }}"
+                  data-start="{{ competition.start|date:'Y-m-d\TH:i' }}"
+                  data-end="{{ competition.end|date:'Y-m-d\TH:i' }}"
+                  data-enroll-start="{{ competition.enroll_start|date:'Y-m-d\TH:i' }}"
+                  data-enroll-end="{{ competition.enroll_end|date:'Y-m-d\TH:i' }}"
+                  data-team-size-limit="{{ competition.team_size_limit }}"
+                  data-color="{{ competition.color }}"
+                  data-url="{% url 'judgy:update_competition' 'COMPETITION_CODE' %}"
+                  onclick="event.preventDefault();"
+
+                >
+                  Edit <i class="bi bi-pencil-fill"></i>
+                </button>
                   <button
                     class="delete btn p-0"
                     data-bs-toggle="modal"
@@ -249,16 +294,6 @@
             >
               <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
                 {% if user.is_superuser %}
-                  <button
-                    class="edit btn p-0"
-                    onclick="event.preventDefault();"
-                    data-bs-toggle="modal"
-                    data-bs-target="#edit-competition"
-                    data-code="{{ competition.code }}"
-
-                  >
-                    Edit <i class="bi bi-pencil-fill"></i>
-                  </button>
                   <button
                     class="delete btn p-0"
                     data-bs-toggle="modal"

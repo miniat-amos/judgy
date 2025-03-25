@@ -92,7 +92,27 @@
       $('[data-bs-target="#invite-people"]').remove();
       $('#invite-people').closest('form').remove();
     '{% endif %}'
-  });
+
+  
+      // Update the action attribute in the edit competition modal 
+      $(".edit-competition-btn").click(function() {
+          let url = "{% url 'judgy:update_competition' competition.code %}"
+          $("#updateCompForm").attr("action", url)
+      })
+
+
+      // Only display the edit button if the competition hasn't ended
+      const end = new Date('{{ competition.end|date:'Y-m-d H:i:s' }}');
+      if (end < now) {
+        $("#edit-button").remove()
+      } 
+
+
+
+      
+    });
+
+
 
   function setup() {
     noCanvas();
@@ -146,7 +166,7 @@
           <br>
           {% if user.is_superuser %}
             <div class="d-flex gap-3">
-              <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
+              <button id="edit-button" class="edit-competition-btn btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
             </div>
           {% elif user.is_authenticated %}

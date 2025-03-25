@@ -61,6 +61,9 @@ def home_view(request):
         start__lte=now, end__gt=now
     ).order_by('end')
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
+    
+    update_comp_form = CompetitionCreationForm()
+
 
     return render(
         request,
@@ -69,6 +72,8 @@ def home_view(request):
             'past_competitions': past_competitions,
             'ongoing_competitions': ongoing_competitions,
             'upcoming_competitions': upcoming_competitions,
+            'update_comp_form': update_comp_form,
+
         },
     )
 
@@ -625,7 +630,7 @@ def get_members_view(request, code, name):
 
     return JsonResponse(list(team.members.all().values()), safe=False)
 
-
+# Class for updating a competition
 class CompUpdate(APIView):
     def put(self, request, code):
         
@@ -637,7 +642,7 @@ class CompUpdate(APIView):
             serializer.save()
             
             redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
-            return Response({"success": f"Competition {competition} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
+            return Response({"success": f"Competition {competition.name} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
         else:
             print(serializer.errors)
             return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
