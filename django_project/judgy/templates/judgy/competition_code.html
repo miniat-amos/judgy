@@ -65,7 +65,7 @@
 <div class="container py-5">
   {% if user.is_superuser %}
     <div class="pb-5 text-center">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-problems">Add Problems</button>
     </div>
   {% endif %}
   <h1 class="text-center">Problems</h1>
@@ -139,7 +139,7 @@
 
 
 
-{% include 'judgy/includes/manage_problems.html' %}
+{% include 'judgy/includes/add_problems.html' %}
 {% include 'judgy/includes/submission.html' %}
 
 {% endblock %}

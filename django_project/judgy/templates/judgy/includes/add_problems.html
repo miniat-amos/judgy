@@ -2,13 +2,13 @@
   $(() => {
     let step = 1;
 
-    $('#manage-problems').closest('form')[0].reset();
+    $('#add-problems').closest('form')[0].reset();
 
     $('.step-1').show();
     $('.step-2').hide();
 
-    $('#manage-problems .title').text(`${$('#manage-problems #number').val()}. ${$('#manage-problems #name').val()}`);
-    $('#manage-problems #number, #manage-problems #name').on('input', () => $('#manage-problems .title').text(`${$('#manage-problems #number').val()}. ${$('#manage-problems #name').val()}`));
+    $('#add-problems .title').text(`${$('#add-problems #number').val()}. ${$('#add-problems #name').val()}`);
+    $('#add-problems #number, #add-problems #name').on('input', () => $('#add-problems .title').text(`${$('#add-problems #number').val()}. ${$('#add-problems #name').val()}`));
     
     $('#back').on('click', () => {
       if (step == 2) {
@@ -23,7 +23,7 @@
 
     $('#next').on('click', () => {
       if (step == 1) {
-        if ($('#manage-problems').closest('form')[0].checkValidity()) {
+        if ($('#add-problems').closest('form')[0].checkValidity()) {
           $('.step').hide();
           $(`.step-${++step}`).show();
 
@@ -67,7 +67,7 @@
           $('#next').hide();
           $('#save').show();
         } else {
-          $('#manage-problems').closest('form')[0].reportValidity();
+          $('#add-problems').closest('form')[0].reportValidity();
         }
       }
     }).show();
@@ -78,11 +78,11 @@
 
 <form action="{% url 'judgy:problems_update' competition.code %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
-    <div id="manage-problems" class="modal fade">
+    <div id="add-problems" class="modal fade">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Manage Problems</h1>
+            <h1 class="modal-title fs-5">Add Problems</h1>
             <button class="btn btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
           </div>
           <div class="modal-body">

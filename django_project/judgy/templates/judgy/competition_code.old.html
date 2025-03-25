@@ -70,7 +70,7 @@
     <div id="problems-tab-pane" class="tab-pane fade show active" role="tabpanel">
       {% if user.is_superuser %}
         <div class="pb-5 text-center">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manage-problems">Manage Problems</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-problems">Manage Problems</button>
         </div>
       {% endif %}
       {% if problems %}
@@ -162,7 +162,7 @@
 
 
 
-{% include 'judgy/includes/manage_problems.html' %}
+{% include 'judgy/includes/add_problems.html' %}
 {% include 'judgy/includes/submission.html' %}
 
 {% endblock %}
