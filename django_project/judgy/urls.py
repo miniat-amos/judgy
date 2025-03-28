@@ -25,7 +25,8 @@ from .views import (
     output_view,
     rankings_view,
     get_members_view,
-    CompUpdate
+    CompUpdate,
+    ProblemUpdate
 )
 
 app_name = 'judgy'
@@ -56,5 +57,6 @@ urlpatterns = [
     path('competition/<str:code>/rankings', rankings_view, name='rankings'),
     path('competition/<str:code>/<str:problem_name>/submission/output', output_view, name='output'),
     path('competition/<str:code>/team/<str:name>/members', get_members_view, name='team_members'),
-    path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition")
+    path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition"),
+    path('competiiton/<str:code>/<str:problem_name>/update', ProblemUpdate.as_view(), name="update_problem")
 ]

@@ -50,7 +50,8 @@ from .utils import (
 )
 
 from .serializers import (
-    CompSerializer
+    CompSerializer,
+    ProblemSerializer
 )
 
 def home_view(request):
@@ -393,6 +394,7 @@ def team_name_view(request, code, name):
         'user_team': user_team,
         'team': team,
         'teams': teams,
+        'enroll': competition.enroll_start <= timezone.now() < competition.enroll_end,
         'team_enroll_form': team_enroll_form,
         'team_invite_form': team_invite_form
     })
@@ -643,6 +645,24 @@ class CompUpdate(APIView):
             
             redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
             return Response({"success": f"Competition {competition.name} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
+        else:
+            print(serializer.errors)
+            return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Class for updating a problem
+class ProblemUpdate(APIView):
+    def put(self, request, name , code):
+        
+        problem = Problem.objects.filter(name=name, competition_id=code).first()
+        
+        serializer = ProblemSerializer(problem, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
+            return Response({"success": f"Problem {problem.name} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
         else:
             print(serializer.errors)
             return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
