@@ -54,10 +54,13 @@ from .serializers import (
 )
 
 def home_view(request):
-    return render(
-        request, 'judgy/index.html'
-    )
-    
+    if request.user.is_authenticated:
+        return redirect('judgy:see_competitions')
+    else:
+        return render(
+            request, 'judgy/index.html'
+        )
+        
 def see_competitions_view(request):
     now = timezone.now()
 
