@@ -3,33 +3,43 @@
 {% block style %}
 
 <style>
-    :root {
-      --cream: #fffdd0;
-    }
 
-  .card {
-    transition: box-shadow 0.3s, transform 0.3s;
-
-
-    &:hover {
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05) translateY(-10px);
-
-      & .btn {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
+  .vl {
+    border-left: 2px solid gray;
+    height: 500px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
-  .edit, .delete {
-    color: var(--cream);
-
-    &:hover {
-      color: var(--bs-light);
-
-    }
+  .index-container .btn {
+    width: 200px;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
   }
+
+  .account-buttons {
+    position: absolute;
+    right: 55%; 
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+  }
+  
+  .competition-button {
+    position: absolute;
+    left: 55%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  
 </style>
 
 {% endblock %}
@@ -37,85 +47,6 @@
 {% block script %}
 
 <script>
-  $(() => {
-    const update_time = () => {
-      $('#ongoing-tab-pane .card').each(function () {
-        const end = new Date($(this).data('end'));
-        const now = new Date();
-        const time = end - now;
-
-        if (time > 0) {
-          const d = (time / (1000 * 60 * 60 * 24)) | 0;
-          const h = ((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)) | 0;
-          const m = ((time % (1000 * 60 * 60)) / (1000 * 60)) | 0;
-          $(this)
-            .find('.card-footer')
-            .text(`Ending in: ${d}d ${h}h ${m}m`)
-            .removeClass('text-success text-warning text-danger')
-            .addClass(d ? 'text-success' : h ? 'text-warning' : 'text-danger');
-        }
-      });
-      $('#upcoming-tab-pane .card').each(function () {
-        const start = new Date($(this).data('start'));
-        const now = new Date();
-        const time = start - now;
-
-        if (time > 0) {
-          const d = (time / (1000 * 60 * 60 * 24)) | 0;
-          const h = ((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)) | 0;
-          const m = ((time % (1000 * 60 * 60)) / (1000 * 60)) | 0;
-          $(this)
-            .find('.card-footer')
-            .text(`Starting in: ${d}d ${h}h ${m}m`)
-            .removeClass('text-success text-warning text-danger')
-            .addClass(d ? 'text-success' : h ? 'text-warning' : 'text-danger');
-        }
-      });
-    };
-    update_time();
-    setInterval(update_time, 1000);
-
-    $('#delete-competition').on('show.bs.modal', event => {
-      $('.modal-body').data('code', $(event.relatedTarget).data('code'));
-      $('.modal-body .name').text($(event.relatedTarget).data('name'));
-      $('.modal-body .description').text($(event.relatedTarget).data('description'));
-      $('.modal-body').css('color', $(event.relatedTarget).data('color'));
-    });
-
-    $('#delete-competition .btn-danger').on('click', async () => {
-      const code = $('.modal-body').data('code');
-      const response = await fetch(
-        "{% url 'judgy:competition_code' 'code' %}".replace(
-          'code',
-          code
-        ),
-        {
-          method: 'DELETE',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-          }
-        }
-      );
-      if (response.ok) $(`[data-code=${code}]`).closest('.col').remove();
-    });
-
-    // Allow every edit button to open a correct modal with that competition card's information
-    $(".edit").click(function() {
-      const url = $(this).data("url").replace("COMPETITION_CODE", $(this).data("code"))
-      $("#updateCompForm").attr("action", url);
-
-      $("#name").val($(this).data("name"));
-      $("#description").val($(this).data("description"));
-      $("#start").val($(this).data("start"));
-      $("#end").val($(this).data("end"));
-      $("#enroll-start").val($(this).data("enroll-start"));
-      $("#enroll-end").val($(this).data("enroll-end"));
-      $("#team_size_limit").val($(this).data("team-size-limit"));
-      $("#color").val($(this).data("color"));
-      
-    })
-
-  });
 
 
 </script>
@@ -124,206 +55,20 @@
 
 {% block main %}
 
-<div class="container">
-  {% if user.is_superuser %}
-    <div class="pt-5 text-center">
-      <a class="btn btn-success" href="{% url 'judgy:competition_create' %}">Create Competition</a>
-    </div>
-  {% endif %}
+<div class="index-container">
+  <div class="vl"></div>
+  
+  <div class="account-buttons">
+    <a href="{% url 'judgy:register' %}" class="btn btn-primary">Create Account</a>
+    <a href="{% url 'judgy:login' %}" class="btn btn-primary">Login</a>
+  </div>
 
-  <h1 class="py-5 text-center">Competitions</h1>
-
-  <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button
-        id="ongoing-tab"
-        class="nav-link active"
-        style="width: 8rem"
-        data-bs-target="#ongoing-tab-pane"
-        data-bs-toggle="tab"
-        role="tab"
-        type="button"
-      >
-        Ongoing
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button
-        id="upcoming-tab"
-        class="nav-link"
-        style="width: 8rem"
-        data-bs-target="#upcoming-tab-pane"
-        data-bs-toggle="tab"
-        role="tab"
-        type="button"
-      >
-        Upcoming
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button
-        id="past-tab"
-        class="nav-link"
-        style="width: 8rem"
-        data-bs-target="#past-tab-pane"
-        data-bs-toggle="tab"
-        role="tab"
-        type="button"
-      >
-        Past
-      </button>
-    </li>
-  </ul>
-
-  <div class="py-5 tab-content">
-    <div id="ongoing-tab-pane" class="tab-pane fade show active" role="tabpanel">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for competition in ongoing_competitions %}
-          <div class="col">
-            <a
-              class="card h-100 bg-body-tertiary text-decoration-none"
-              href="{% url 'judgy:competition_code' competition.code %}"
-              data-end="{{ competition.end|date:'Y-m-d H:i:s' }}"
-            >
-              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
-                {% if user.is_superuser %}
-                    <button
-                      class="edit btn p-0"
-                      onclick="event.preventDefault();"
-                      data-bs-toggle="modal"
-                      data-bs-target="#edit-competition"
-                      data-code="{{ competition.code }}"
-                      data-name="{{ competition.name }}"
-                      data-description="{{ competition.description }}"
-                      data-start="{{ competition.start|date:'Y-m-d\TH:i' }}"
-                      data-end="{{ competition.end|date:'Y-m-d\TH:i' }}"
-                      data-enroll-start="{{ competition.enroll_start|date:'Y-m-d\TH:i' }}"
-                      data-enroll-end="{{ competition.enroll_end|date:'Y-m-d\TH:i' }}"
-                      data-team-size-limit="{{ competition.team_size_limit }}"
-                      data-color="{{ competition.color }}"
-                      data-url="{% url 'judgy:update_competition' 'COMPETITION_CODE' %}"
-
-                    >
-                      Edit <i class="bi bi-pencil-fill"></i>
-                  </button>
-                  <button
-                    class="delete btn p-0"
-                    data-bs-toggle="modal"
-                    data-bs-target="#delete-competition"
-                    data-code="{{ competition.code }}"
-                    data-name="{{ competition.name }}"
-                    data-description="{{ competition.description }}"
-                    data-color="{{ competition.color }}"
-                    onclick="event.preventDefault();"
-                  >
-                    <i class="bi bi-x-circle-fill"></i>
-                  </button>
-                {% endif %}
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">{{ competition.name }}</h5>
-                <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
-              </div>
-              <div class="card-footer"></div>
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <div id="upcoming-tab-pane" class="tab-pane fade" role="tabpanel">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for competition in upcoming_competitions %}
-          <div class="col">
-            <a
-              class="card h-100 bg-body-tertiary text-decoration-none"
-              href="{% url 'judgy:competition_code' competition.code %}"
-              data-start="{{ competition.start|date:'Y-m-d H:i:s' }}"
-            >
-              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
-                {% if user.is_superuser %}
-                  <button
-                  class="edit btn p-0"
-                  data-bs-toggle="modal"
-                  data-bs-target="#edit-competition"
-                  data-code="{{ competition.code }}"
-                  data-name="{{ competition.name }}"
-                  data-description="{{ competition.description }}"
-                  data-start="{{ competition.start|date:'Y-m-d\TH:i' }}"
-                  data-end="{{ competition.end|date:'Y-m-d\TH:i' }}"
-                  data-enroll-start="{{ competition.enroll_start|date:'Y-m-d\TH:i' }}"
-                  data-enroll-end="{{ competition.enroll_end|date:'Y-m-d\TH:i' }}"
-                  data-team-size-limit="{{ competition.team_size_limit }}"
-                  data-color="{{ competition.color }}"
-                  data-url="{% url 'judgy:update_competition' 'COMPETITION_CODE' %}"
-                  onclick="event.preventDefault();"
-
-                >
-                  Edit <i class="bi bi-pencil-fill"></i>
-                </button>
-                  <button
-                    class="delete btn p-0"
-                    data-bs-toggle="modal"
-                    data-bs-target="#delete-competition"
-                    data-code="{{ competition.code }}"
-                    data-name="{{ competition.name }}"
-                    data-description="{{ competition.description }}"
-                    data-color="{{ competition.color }}"
-                    onclick="event.preventDefault();"
-                  >
-                    <i class="bi bi-x-circle-fill"></i>
-                  </button>
-                {% endif %}
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">{{ competition.name }}</h5>
-                <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
-              </div>
-              <div class="card-footer"></div>
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <div id="past-tab-pane" class="tab-pane fade" role="tabpanel">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for competition in past_competitions %}
-          <div class="col">
-            <a
-              class="card h-100 bg-body-tertiary text-decoration-none"
-              href="{% url 'judgy:competition_code' competition.code %}"
-            >
-              <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
-                {% if user.is_superuser %}
-                  <button
-                    class="delete btn p-0"
-                    data-bs-toggle="modal"
-                    data-bs-target="#delete-competition"
-                    data-code="{{ competition.code }}"
-                    data-name="{{ competition.name }}"
-                    data-description="{{ competition.description }}"
-                    data-color="{{ competition.color }}"
-                    onclick="event.preventDefault();"
-                  >
-                    Delete <i class="bi bi-x-circle-fill"></i>
-                  </button>
-                {% endif %}
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">{{ competition.name }}</h5>
-                <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
-              </div>
-              <div class="card-footer text-info">
-                {{ competition.start|date:'m/d/Y' }} - {{ competition.end|date:'m/d/Y' }}
-              </div>
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
+  <div class="competition-button">
+    <a href="{% url 'judgy:see_competitions' %}" class="btn btn-primary">View Competitions</a>
   </div>
 </div>
 
-{% include 'judgy/includes/delete_competition.html' %}
-{% include 'judgy/includes/edit_competition.html' %}
+
+
 
 {% endblock %}

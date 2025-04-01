@@ -54,20 +54,25 @@ from .serializers import (
 )
 
 def home_view(request):
+    return render(
+        request, 'judgy/index.html'
+    )
+    
+def see_competitions_view(request):
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lte=now).order_by('-end')
     ongoing_competitions = Competition.objects.filter(
         start__lte=now, end__gt=now
     ).order_by('end')
+    
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
     
     update_comp_form = CompetitionCreationForm()
 
-
     return render(
         request,
-        'judgy/index.html',
+        'judgy/view_competitions.html',
         {
             'past_competitions': past_competitions,
             'ongoing_competitions': ongoing_competitions,
@@ -76,13 +81,14 @@ def home_view(request):
 
         },
     )
+    
 
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('judgy:home')
+            return redirect('judgy:see_competitions')
     else:
         form = AuthenticationForm()
     return render(request, 'judgy/login.html', {'form': form})
