@@ -11,8 +11,8 @@
   }
 
   .card-border:hover {
-    transform: translateY(-5px); /* Slightly enlarges the card */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Adds a shadow for emphasis */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     border-color: white;
   }
  
@@ -93,9 +93,7 @@
       <div class="col">
         <div class="card h-100 bg-body-tertiary d-flex justify-content-center align-items-center card-border">
           <button class="w-100 h-100 d-flex justify-content-center align-items-center border-0 bg-transparent add-problem" 
-                  data-bs-toggle="modal" data-bs-target="#add-problems"        
-                  data-code="{{ competition.code }}"
-                  data-url="{% url 'judgy:problems_update' 'COMPETITION_CODE' %}">
+                  data-bs-toggle="modal" data-bs-target="#add-problems">
             <i class="bi bi-plus plus-icon"></i>
           </button>
         </div>
