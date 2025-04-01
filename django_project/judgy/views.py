@@ -650,21 +650,3 @@ class CompUpdate(APIView):
         else:
             print(serializer.errors)
             return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# Class for updating a problem
-class ProblemUpdate(APIView):
-    def put(self, request, name , code):
-        
-        problem = Problem.objects.filter(name=name, competition_id=code).first()
-        
-        serializer = ProblemSerializer(problem, data=request.data, partial=True)
-        
-        if serializer.is_valid():
-            serializer.save()
-            
-            redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
-            return Response({"success": f"Problem {problem.name} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
-        else:
-            print(serializer.errors)
-            return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
