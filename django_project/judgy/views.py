@@ -388,12 +388,15 @@ def team_name_view(request, code, name):
     team_enroll_form = TeamEnrollForm()
     team_invite_limit = competition.team_size_limit - (user_team.members.count() if user_team else 0)
     team_invite_form = TeamInviteForm(team_invite_limit=team_invite_limit) if team_invite_limit != 0 else None
+    update_comp_form = CompetitionCreationForm(instance=competition)
+
     return render(request, 'judgy/team_name.html', {
         'competition': competition,
         'user_team': user_team,
         'team': team,
         'teams': teams,
         'enroll': competition.enroll_start <= timezone.now() < competition.enroll_end,
+        'update_comp_form': update_comp_form,
         'team_enroll_form': team_enroll_form,
         'team_invite_form': team_invite_form
     })
