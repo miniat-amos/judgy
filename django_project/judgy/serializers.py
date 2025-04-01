@@ -44,11 +44,3 @@ class CompSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
-
-class ProblemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Problem
-        fields = [
-            'number', 'name', 'description', 'judge_py',
-            'other_files', 'score_preference', 'show_output'
-        ]

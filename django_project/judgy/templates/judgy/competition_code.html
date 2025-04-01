@@ -8,7 +8,6 @@
 
   .card-border {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 0.5em;
   }
 
   .card-border:hover {
@@ -83,65 +82,33 @@
         `);
       }
     '{% endif %}'
-
-    $(".edit").click(function() {
-      const url = $(this).data("url").replace("COMPETITION_CODE", $(this).data("code"))
-      $("#updateCompForm").attr("action", url);
-
-      console.log("OPEN")
-
-      $("#number").val($(this).data("number"));
-      $("#name").val($(this).data("name"));
-      $("#score_preference").val($(this).data("score_preference"));
-      $("#show_output").val($(this).data("show_output"));
-      
-    })
   });
 </script>
 
 <div class="container py-5">
+  
   <h1 class="text-center">Problems</h1>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-
     {% if user.is_superuser %}
-    
-    <div class="col">
-      <div class="card h-100 bg-body-tertiary d-flex justify-content-center align-items-center card-border">
-        <button class="w-100 h-100 d-flex justify-content-center align-items-center border-0 bg-transparent" 
-                data-bs-toggle="modal" data-bs-target="#add-problems">
-          <i class="bi bi-plus plus-icon"></i>
-        </button>
+      <div class="col">
+        <div class="card h-100 bg-body-tertiary d-flex justify-content-center align-items-center card-border">
+          <button class="w-100 h-100 d-flex justify-content-center align-items-center border-0 bg-transparent add-problem" 
+                  data-bs-toggle="modal" data-bs-target="#add-problems"        
+                  data-code="{{ competition.code }}"
+                  data-url="{% url 'judgy:problems_update' 'COMPETITION_CODE' %}">
+            <i class="bi bi-plus plus-icon"></i>
+          </button>
+        </div>
       </div>
-    </div>
-    
     {% endif %}
-
     {% if problems %}
       {% for problem in problems %}
         <div class="col">
           <div
             class="card h-100 bg-body-tertiary"
           >
+         
             <div class="card-body">
-
-              {% if user.is_superuser %}
-              
-                <button
-                class="edit btn p-0"
-                data-bs-toggle="modal"
-                data-bs-target="#edit-problems"
-                data-code="{{ competition.code }}"
-                data-number="{{ problem.number }}"
-                data-name="{{ problem.name }}"
-                data-score_preference="{{ problem.score_preference }}"
-                data-show_output="{{ problem.show_output }}"
-                onclick="event.preventDefault();"
-
-              >
-                Edit <i class="bi bi-pencil-fill"></i>
-              </button>
-              
-              {% endif %}
               <h2 class="card-title">Problem {{ problem.number }}: <br>{{ problem.name }}</h2>
               {% comment %} Do we truncate or keep full desc {% endcomment %}
               <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
@@ -205,6 +172,7 @@
 
 {% include 'judgy/includes/add_problems.html' %}
 {% include 'judgy/includes/submission.html' %}
-{% include 'judgy/includes/edit_problems.html' %}
 
 {% endblock %}
+
+

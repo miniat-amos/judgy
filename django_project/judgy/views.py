@@ -51,7 +51,6 @@ from .utils import (
 
 from .serializers import (
     CompSerializer,
-    ProblemSerializer
 )
 
 def home_view(request):
