@@ -46,7 +46,11 @@ from .utils import (
     create_comp_dir,
     create_problem,
     get_dist_dir,
-    team_add_user
+    team_add_user,
+)
+from .tasks import (
+    send_6dc_email_task,
+    create_images_task,
 )
 
 from .serializers import (
@@ -97,13 +101,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            send_mail(
-                'Welcome to judgy!',
-                render_to_string('judgy/emails/account_verification.html', { 'user': user }),
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                html_message=render_to_string('judgy/emails/account_verification.html', { 'user': user })
-            )
+            send_6dc_email_task(user.id, user.email)
             return redirect('judgy:verify')
         else:
             print('Any field in the registration form was not filled out right.')
@@ -231,6 +229,7 @@ def problems_update_view(request, code):
             create_problem(code, problem.name, description, judge_py, other_files, dist)
 
             create_images(code)
+            # create_images_task.delay(code)
 
             return redirect('judgy:competition_code', code=competition.code)
         else:
