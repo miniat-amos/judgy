@@ -2,7 +2,7 @@ from celery import Celery
 import os
 
 # Set Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progcomp')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progcomp.settings')
 
 # Create Celery app
 app = Celery('progcomp')
