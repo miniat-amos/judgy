@@ -101,7 +101,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            send_6dc_email_task(user.id, user.email)
+            send_6dc_email_task.delay(user.id, user.email)
             return redirect('judgy:verify')
         else:
             print('Any field in the registration form was not filled out right.')
