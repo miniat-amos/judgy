@@ -101,6 +101,9 @@ def logout_view(request):
     return redirect('judgy:home')
 
 def register_view(request):
+    now = timezone.now()
+    enrollable_competitions = Competition.objects.filter(enroll_start__lte=now, enroll_end__gt=now).order_by('enroll_end')
+    
     if request.method == 'POST':
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
@@ -119,7 +122,8 @@ def register_view(request):
             print('form.errors:\n', form.errors)
     else:
         form = CustomUserCreationForm()
-    return render(request, 'judgy/register.html', {'form': form})
+
+    return render(request, 'judgy/register.html', {'form': form, 'enrollable_comps': enrollable_competitions})
 
 def verify_view(request):
     if request.method == 'POST':
@@ -128,7 +132,8 @@ def verify_view(request):
         if form.is_valid():
             request.user.is_verified = True
             request.user.save()
-            return redirect('judgy:home')
+            return redirect(reverse('judgy:register') + '?step=3')  
+
         else:
             print('6-digit code provided is incorrect')
             print('form.errors:\n', form.errors)
