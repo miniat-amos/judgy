@@ -49,9 +49,7 @@
     color: white;
   }
 
-  .step.done {
-    background: #32da3d;
-  }
+ 
   
   .step-label {
     margin-top: 5px;
@@ -88,7 +86,6 @@
         $(this).next(".step-label").addClass("fw-bold").css("color", "white")
       } else if (index+1 < currentStep) {
         $(this).removeClass("active")
-        $(this).addClass("done")
         $(this).next(".step-label").removeClass("fw-bold")
 
       }
