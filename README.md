@@ -35,6 +35,23 @@
 - Starts the development server.
 
 ---
+## Redis and Celery
+
+#### In the parent judgy folder:
+
+### `redis-server`
+
+- Starts the redis server, which celery uses as a message broker.
+- Run this before starting the celery worker.
+
+#### In judgy/django_project:
+
+### `celery -A progcomp worker -l info`
+
+- Starts celery worker for progcomp.
+- `-l info` logs info for useful runtime output.
+
+---
 
 ## Django Database Migrations Commands
 
