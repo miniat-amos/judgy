@@ -5,3 +5,5 @@ python-decouple==3.8
 cryptography
 gunicorn
 djangorestframework
+redis
+celery
