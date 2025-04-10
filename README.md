@@ -37,14 +37,14 @@
 ---
 ## Redis and Celery
 
-#### In the parent judgy folder:
+#### In a seperate terminal, in the parent judgy folder:
 
 ### `redis-server`
 
 - Starts the redis server, which celery uses as a message broker.
 - Run this before starting the celery worker.
 
-#### In judgy/django_project:
+#### In another terminal, in judgy/django_project:
 
 ### `celery -A progcomp worker -l info`
 
