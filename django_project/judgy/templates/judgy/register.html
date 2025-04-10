@@ -2,70 +2,226 @@
 
 {% block title %}Registration{% endblock %}
 
+{% block style %}
+
+<style>
+  .progress-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .progress-container::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 4%;
+    width: 90%;
+    height: 4px;
+    background: #ddd;
+    z-index: -1;
+    transform: translateY(-50%);
+  }
+  
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .step {
+    width: 40px;
+    height: 40px;
+    background: #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .step.active {
+    background: #007bff;
+    color: white;
+  }
+
+ 
+  
+  .step-label {
+    margin-top: 5px;
+    font-size: 14px;
+    color: grey;
+  }
+
+
+
+
+
+</style>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function () {
+    let steps = $(".step");
+
+    // Function to get query parameters from URL
+    function getQueryParam(param) {
+      let searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get(param);
+    }
+
+    let currentStep = parseInt(getQueryParam('step')) || 1; 
+
+    steps.each(function (index) {
+      if (index+1 === currentStep) {
+        $(this).addClass("active")  
+        $(this).next(".step-label").addClass("fw-bold").css("color", "white")
+      } else if (index+1 < currentStep) {
+        $(this).removeClass("active")
+        $(this).next(".step-label").removeClass("fw-bold")
+
+      }
+    });
+
+    if (currentStep === 3) {
+      $('#step-1').addClass('d-none')
+      $('#step-3').removeClass('d-none')
+    }
+  });
+</script>
+
+
+{% endblock %}
+
 {% block main %}
 
 {% for errors in form.errors.values %}
   {% for error in errors %}
-    <div
-      class="alert alert-danger alert-dismissible fade fixed-top show text-center"
-      role="alert"
-    >
+    <div class="alert alert-danger alert-dismissible fade fixed-top show text-center" role="alert">
       {{ error }}
       <button class="btn btn-close" data-bs-dismiss="alert"></button>
     </div>
   {% endfor %}
 {% endfor %}
 
-<div
-  class="align-items-center d-flex justify-content-center text-center"
-  style="height: calc(100vh - 7.5rem)"
->
-  <form method="post">
-    {% csrf_token %}
-
-    <h2>Create Account</h2>
-
-    <div class="my-3">
-      <div class="row">
-        <div class="col">
-          <div class="form-floating">
-            {{ form.first_name }}
-            <label for="first_name">First Name</label>
-          </div>
+<div class="align-items-center d-flex justify-content-center text-center" style="height: calc(100vh - 7.5rem)">
+  
+    <div class="w-75">
+      <!-- Steps Progress Bar -->
+      <div class="progress-container d-flex justify-content-between mb-4">
+        <div class="step-item text-center">
+          <div class="step active">1</div>
+          <small class="step-label">Create Account</small>
+        </div>
+        <div class="step-item text-center">
+          <div class="step">2</div>
+          <small class="step-label">Verify</small>
         </div>
 
-        <div class="col">
-          <div class="form-floating">
-            {{ form.last_name }}
-            <label for="last_name">Last Name</label>
-          </div>
+        <div class="step-item text-center">
+          <div class="step">3</div>
+          <small class="step-label" >Enroll in a Competition</small>
         </div>
       </div>
-    </div>
+    
 
-    <div class="my-3">
-      <div class="form-floating">
-        {{ form.email }}
-        <label for="email">Email Address</label>
+
+
+      <div id="step-1">
+        <form method="post">
+          {% csrf_token %}
+          <h2>Create Account</h2>
+    
+          <div class="my-3">
+            <div class="row">
+              <div class="col">
+                <div class="form-floating">
+                  {{ form.first_name }}
+                  <label for="first_name">First Name</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-floating">
+                  {{ form.last_name }}
+                  <label for="last_name">Last Name</label>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <div class="my-3">
+            <div class="form-floating">
+              {{ form.email }}
+              <label for="email">Email Address</label>
+            </div>
+          </div>
+    
+          <div class="my-3">
+            <div class="form-floating">
+              {{ form.password1 }}
+              <label for="password1">Password</label>
+            </div>
+          </div>
+    
+          <div class="my-3">
+            <div class="form-floating">
+              {{ form.password2 }}
+              <label for="password2">Password Confirmation</label>
+            </div>
+          </div>
+    
+          <button class="btn btn-primary p-2 w-100">CREATE ACCOUNT</button>
+        </form>
       </div>
-    </div>
 
-    <div class="my-3">
-      <div class="form-floating">
-        {{ form.password1 }}
-        <label for="password1">Password</label>
+      <div id="step-3" class="d-none">
+        <div class="text-center">
+          <h1>Welcome to Judgy, {{ user.first_name }}!</h1>
+          <h2>To get started choose an actively enrollable competition and click <button class="btn btn-success">ENROLL</button>
+          </h2>
+
+          <h3>This will allow you to create a team and then you can invite other's with their email with <button class="btn btn-success">INVITE</button></h3>
+
+          <div class="mt-4">
+            <h3>Enrollable Competitions</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-4">
+              {% for competition in enrollable_comps %}
+                <div class="col">
+                  <a
+                    class="card h-100 bg-body-tertiary text-decoration-none"
+                    href="{% url 'judgy:competition_code' competition.code %}"
+                    data-end="{{ competition.end|date:'Y-m-d H:i:s' }}"
+                  >
+                    <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">
+                    </div>
+  
+                    <div class="card-body">
+                      <h5 class="card-title">{{ competition.name }}</h5>
+                      <p class="card-text">Code: {{ competition.code }}</p>
+
+                      <p class="card-text">{{ competition.description|truncatechars:100 }}</p>
+                    </div>
+                    <div class="card-footer">Enrollable Competition</div>
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+
+          </div>
+        </div>
+  
+        </div>
       </div>
-    </div>
 
-    <div class="my-3">
-      <div class="form-floating">
-        {{ form.password2 }}
-        <label for="password2">Password Confirmation</label>
-      </div>
-    </div>
-
-    <button class="btn btn-primary p-2 w-100">CREATE ACCOUNT</button>
-  </form>
 </div>
+
 
 {% endblock %}

@@ -58,20 +58,28 @@ from .serializers import (
 )
 
 def home_view(request):
+    if request.user.is_authenticated:
+        return redirect('judgy:see_competitions')
+    else:
+        return render(
+            request, 'judgy/index.html'
+        )
+        
+def see_competitions_view(request):
     now = timezone.now()
 
     past_competitions = Competition.objects.filter(end__lte=now).order_by('-end')
     ongoing_competitions = Competition.objects.filter(
         start__lte=now, end__gt=now
     ).order_by('end')
+    
     upcoming_competitions = Competition.objects.filter(start__gt=now).order_by('start')
     
     update_comp_form = CompetitionCreationForm()
 
-
     return render(
         request,
-        'judgy/index.html',
+        'judgy/view_competitions.html',
         {
             'past_competitions': past_competitions,
             'ongoing_competitions': ongoing_competitions,
@@ -80,13 +88,14 @@ def home_view(request):
 
         },
     )
+    
 
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('judgy:home')
+            return redirect('judgy:see_competitions')
     else:
         form = AuthenticationForm()
     return render(request, 'judgy/login.html', {'form': form})
@@ -96,6 +105,9 @@ def logout_view(request):
     return redirect('judgy:home')
 
 def register_view(request):
+    now = timezone.now()
+    enrollable_competitions = Competition.objects.filter(enroll_start__lte=now, enroll_end__gt=now).order_by('enroll_end')
+    
     if request.method == 'POST':
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
@@ -108,7 +120,8 @@ def register_view(request):
             print('form.errors:\n', form.errors)
     else:
         form = CustomUserCreationForm()
-    return render(request, 'judgy/register.html', {'form': form})
+
+    return render(request, 'judgy/register.html', {'form': form, 'enrollable_comps': enrollable_competitions})
 
 def verify_view(request):
     if request.method == 'POST':
@@ -117,7 +130,8 @@ def verify_view(request):
         if form.is_valid():
             request.user.is_verified = True
             request.user.save()
-            return redirect('judgy:home')
+            return redirect(reverse('judgy:register') + '?step=3')  
+
         else:
             print('6-digit code provided is incorrect')
             print('form.errors:\n', form.errors)
