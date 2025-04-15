@@ -6,8 +6,6 @@ from django.conf import settings
 from pathlib import Path
 from .utils import make_file, create_user_dir
 
-from docker.errors import ContainerError
-
 languages = {
     ".py": {"image": "python", "type": "interpreted", "interpreter": "python3"},
     ".js": {"image": "node", "type": "interpreted", "interpreter": "node"},
@@ -22,9 +20,17 @@ def run_submission(code, problem, team, user, files):
     # Get file extension
     file_extension = os.path.splitext(files[0].name)[1]
     submitted_image = languages[file_extension]["image"]
+    
+    problem_name = problem.name
+    
+    if problem.score_preference:
+        timeout_score = -9223372036854775808
+    else:
+        timeout_score = 9223372036854775808
 
+    
     # Make submissions dir
-    submission_dir, output_dir = create_user_dir(code, user, problem, team)
+    submission_dir, output_dir = create_user_dir(code, user, problem_name, team)
 
     if os.path.exists(submission_dir):
     # Loop through each item in the directory
@@ -48,6 +54,8 @@ def run_submission(code, problem, team, user, files):
     # Create output directory
     score_file = make_file(output_dir, "score.txt")
     output_file = make_file(output_dir, "output.txt")
+    
+    
 
     client = docker.from_env()
 
@@ -58,7 +66,6 @@ def run_submission(code, problem, team, user, files):
     container_score_path = container_main_directory / "outputs" / "score.txt"
     container_output_path = container_main_directory / "outputs" / "output.txt"
     
-    separate_score_filepath = "sed 's/^\([0-9]\+\) \(.*\)$/\\1 \\2/'"
 
     # Volumes for file-to-file binding
     volumes = {
@@ -69,12 +76,12 @@ def run_submission(code, problem, team, user, files):
     if all(file.name.endswith(".java") for file in submitted_files):
         # If all files are Java, bind all of them
         for submitted_file in submitted_files:
-            container_user_file = container_main_directory / problem / submitted_file.name
+            container_user_file = container_main_directory / problem_name / submitted_file.name
             volumes[str(submitted_file)] = {"bind": str(container_user_file), "mode": "rw"}
     else:
         # If not all files are Java, only bind the first file
         first_file = submitted_files[0]
-        container_user_file = container_main_directory / problem / first_file.name
+        container_user_file = container_main_directory / problem_name / first_file.name
         volumes[str(first_file)] = {"bind": str(container_user_file), "mode": "rw"}
         
     
@@ -88,46 +95,62 @@ def run_submission(code, problem, team, user, files):
                 with open(f, 'r') as file:
                     content = file.read()
                     if 'public static void main(String[] args)' in content:
-                        return container_main_directory / problem / f.name
+                        return container_main_directory / problem_name / f.name
             return None
 
         def classes_list():
-            return [str(container_main_directory / problem / f.name) for f in submitted_files]
+            return [str(container_main_directory / problem_name / f.name) for f in submitted_files]
 
         main_file = find_main_file()
         classes = classes_list()
                     
-        command = [
-            "bash", "-c",
-            f"cd \"/app/{problem}\" && "
+        command = (
+            f'bash -c "cd \"/app/{problem_name}\" && '
             f"{compiler} " + " ".join([f"\"{cls}\"" for cls in classes]) + " && "
-            f"python3 judge.py {interpreter} \"{main_file.stem}\" | {separate_score_filepath} | "
-            f"while read number filepath; do "
-            f"echo $number > {container_score_path}; "
-            f"cat \"$filepath\" > {container_output_path}; "
-            f"done"
-        ]
+            f'output=$(timeout 60s python3 judge.py {interpreter} \"{main_file.stem}\"); '
+            f'status=$?; '
+            f'if [ $status -eq 124 ]; then '
+            f'echo {timeout_score} > {container_score_path}; '
+            f'else '
+            f'score=$(echo $output | cut -d \\" \\" -f1); '
+            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f'echo $score > {container_score_path}; '
+            f'cat \\"$filepath\\" > {container_output_path}; '
+            f'fi"'
+        )
 
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
         command = (
-            f'bash -c "cd \\"/app/{problem}\\" && '
-            f'python3 judge.py {interpreter} \\"{container_user_file}\\" | {separate_score_filepath} | '
-            f'while read number filepath; do '
-            f'echo $number > {container_score_path}; '
+            f'bash -c "cd \\"/app/{problem_name}\\" && '
+            f'output=$(timeout 60s python3 judge.py {interpreter} \\"{container_user_file}\\"); '
+            f'status=$?; '
+            f'if [ $status -eq 124 ]; then '
+            f'echo {timeout_score} > {container_score_path}; '
+            f'echo Your program timed out > {container_output_path};'
+            f'else '
+            f'score=$(echo $output | cut -d \\" \\" -f1); '
+            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f'echo $score > {container_score_path}; '
             f'cat \\"$filepath\\" > {container_output_path}; '
-            f'done"'
+            f'fi"'
         )
+
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
         command = (
-            f'bash -c "cd \\"/app/{problem}\\" && '
+            f'bash -c "cd \\"/app/{problem_name}\\" && '
             f'{compiler} \\"{container_user_file}\\" -o a.out && '
-            f'python3 judge.py ./a.out | {separate_score_filepath} | '
-            f'while read number filepath; do '
-            f'echo $number > {container_score_path}; '
+            f'output=$(timeout 60s python3 judge.py ./a.out);'
+            f'status=$?; '
+            f'if [ $status -eq 124 ]; then '
+            f'echo {timeout_score} > {container_score_path}; '
+            f'else '
+            f'score=$(echo $output | cut -d \\" \\" -f1); '
+            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f'echo $score > {container_score_path}; '
             f'cat \\"$filepath\\" > {container_output_path}; '
-            f'done"'
+            f'fi"'
         )    
     try:
         container = client.containers.run(
@@ -142,9 +165,3 @@ def run_submission(code, problem, team, user, files):
         container.remove()
         
     return score_file, output_file
-
-# Create Docker images based on the competition code
-# Preloads all Docker images with problem files
-def create_images(competition_code):
-    docker_image_script = Path(settings.BASE_DIR) / "docker_setup.sh"
-    subprocess.run(f"bash {docker_image_script} {competition_code.lower()}", shell=True)
