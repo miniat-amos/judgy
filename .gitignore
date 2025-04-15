@@ -60,7 +60,7 @@ django_project/*
 
 # Other
 **/__pycache__
-**/migrations
 !README.md
+!migrations
 !.gitignore
 !.env.example
