@@ -79,7 +79,7 @@ class Submission(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    score = models.IntegerField()
+    score = models.BigIntegerField()
     time = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
