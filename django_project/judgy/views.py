@@ -29,7 +29,6 @@ from .forms import (
     TeamInviteForm
 )
 from .functions import (
-    create_images,
     run_submission
 )
 from .models import (
@@ -452,7 +451,7 @@ def submit_view(request, code, problem_name):
             form = SubmissionForm(request.POST, request.FILES)
             if form.is_valid():
                 files = request.FILES.getlist('files')
-                score_file, output_file = run_submission(code, problem_name, user_team, request.user, files)
+                score_file, output_file = run_submission(code, problem, user_team, request.user, files)
                 request.session['output_dir'] = str(output_file)
                 
                 with open(score_file, 'r') as f:
