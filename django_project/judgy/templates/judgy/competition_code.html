@@ -88,6 +88,13 @@
 <div class="container py-5">
   
   <h1 class="text-center">Problems</h1>
+
+  {% if not problems %}
+  <div class="mt-1 mb-5"> 
+    <h2 class="text-center">No Problems</h2>
+  </div>
+  {% endif %}
+
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     {% if user.is_superuser %}
       <div class="col">
@@ -145,23 +152,19 @@
           </div>
         </div>
       {% endfor %}
-    {% else %}
-      <div class="text-center">
-        No Problems
-      </div>
     {% endif %}
+
   </div>
 
-  <h1 class="text-center">Rankings</h1>
+  <div class="mt-1">
+    <h1 class="text-center">Rankings</h1>
+  </div>
   <div class="row row-cols-1 g-4">
     {% if teams %}
     <div id="rankings">
     </div>
-         
     {% else %}
-      <div class="text-center">
-        No Teams
-      </div>
+      <h2 class="text-center">No Teams</h2>
     {% endif %}
   </div>
 </div>
