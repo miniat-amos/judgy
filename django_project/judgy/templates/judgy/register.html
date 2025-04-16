@@ -5,24 +5,17 @@
 {% block style %}
 
 <style>
-  .progress-container {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-  
+
   .progress-container::before {
     content: "";
     position: absolute;
-    top: 20px;
-    left: 4%;
-    width: 90%;
+    top: 50%;
+    left: 50%;
+    width: 99%;
     height: 4px;
     background: #ddd;
+    transform: translate(-50%, -50%);
     z-index: -1;
-    transform: translateY(-50%);
   }
   
   .step-item {
@@ -50,15 +43,12 @@
   }
 
  
-  
   .step-label {
-    margin-top: 5px;
-    font-size: 14px;
-    color: grey;
+    position: absolute;
+    top: 110%;
+    width: 50%;
+    color: gray;
   }
-
-
-
 
 
 </style>
@@ -71,6 +61,8 @@
 <script>
   $(document).ready(function () {
     let steps = $(".step");
+    $('#step-3').hide()
+
 
     // Function to get query parameters from URL
     function getQueryParam(param) {
@@ -92,8 +84,8 @@
     });
 
     if (currentStep === 3) {
-      $('#step-1').addClass('d-none')
-      $('#step-3').removeClass('d-none')
+      $('#step-1').hide()
+      $('#step-3').show()
     }
   });
 </script>
@@ -112,11 +104,11 @@
   {% endfor %}
 {% endfor %}
 
-<div class="align-items-center d-flex justify-content-center text-center" style="height: calc(100vh - 7.5rem)">
+<div class="text-center" style="min-height: calc(100vh - 7.5rem)">
   
-    <div class="w-75">
+    <div class="w-75 m-auto">
       <!-- Steps Progress Bar -->
-      <div class="progress-container d-flex justify-content-between mb-4">
+       <div class="progress-container align-items-center position-relative d-flex justify-content-between mb-4 mt-5">
         <div class="step-item text-center">
           <div class="step active">1</div>
           <small class="step-label">Create Account</small>
@@ -131,8 +123,7 @@
           <small class="step-label" >Enroll in a Competition</small>
         </div>
       </div>
-    
-
+     
 
 
       <div id="step-1">
@@ -182,7 +173,9 @@
         </form>
       </div>
 
-      <div id="step-3" class="d-none">
+    </div>
+
+      <div id="step-3" class="mb-5">
         <div class="text-center">
           <h1>Welcome to Judgy, {{ user.first_name }}!</h1>
           <h2>To get started choose an actively enrollable competition and click <button class="btn btn-success">ENROLL</button>
@@ -190,7 +183,7 @@
 
           <h3>This will allow you to create a team and then you can invite other's with their email with <button class="btn btn-success">INVITE</button></h3>
 
-          <div class="mt-4">
+          <div class="mt-4 container">
             <h3>Enrollable Competitions</h3>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-4">
               {% for competition in enrollable_comps %}
@@ -218,9 +211,7 @@
           </div>
         </div>
   
-        </div>
       </div>
-
 </div>
 
 
