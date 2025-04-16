@@ -46,7 +46,7 @@
   .step-label {
     position: absolute;
     top: 110%;
-    width: 50%;
+    width: 10rem;
     color: gray;
   }
 
@@ -108,7 +108,7 @@
   
     <div class="w-75 m-auto">
       <!-- Steps Progress Bar -->
-       <div class="progress-container align-items-center position-relative d-flex justify-content-between mb-4 mt-5">
+       <div class="progress-container align-items-center position-relative d-flex justify-content-between mb-5 mt-5">
         <div class="step-item text-center">
           <div class="step active">1</div>
           <small class="step-label">Create Account</small>
@@ -126,7 +126,7 @@
      
 
 
-      <div id="step-1">
+      <div id="step-1" class="mt-4">
         <form method="post">
           {% csrf_token %}
           <h2>Create Account</h2>
