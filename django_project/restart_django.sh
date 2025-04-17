@@ -11,6 +11,8 @@ restart_server() {
 echo "Activating python virtual env"
 source ./env/bin/activate
 
+pip3 install -r requirements.txt
+
 echo "Entering django project directory"
 cd ./django_project
 
