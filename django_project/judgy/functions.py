@@ -103,21 +103,30 @@ def run_submission(code, problem, team, user, files):
 
         main_file = find_main_file()
         classes = classes_list()
-                    
         command = (
-            f'bash -c "cd \"/app/{problem_name}\" && '
-            f"{compiler} " + " ".join([f"\"{cls}\"" for cls in classes]) + " && "
-            f'output=$(timeout 60s python3 judge.py {interpreter} \"{main_file.stem}\"); '
+            f'bash -c "cd \\"/app/{problem_name}\\" && '
+            f'{compiler} ' + " ".join([f'\\"{cls}\\"' for cls in classes]) + '; '
+            f'status=$?; '
+            f'if [ $status -ne 0 ]; then '
+            f'  echo {timeout_score} > {container_score_path}; '
+            f'  echo Compilation failed > {container_output_path}; '
+            f'  exit 1; '
+            f'fi; '
+            f'output=$(timeout 60s python3 judge.py {interpreter} \\"{main_file.stem}\\"); '
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
-            f'echo {timeout_score} > {container_score_path}; '
+            f'  echo {timeout_score} > {container_score_path}; '
+            f'  echo Your program timed out > {container_output_path}; '
+            f'elif [ $status -ne 0 ]; then '
+            f'  echo {timeout_score} > {container_score_path}; '
+            f'  echo Runtime error or invalid execution > {container_output_path}; '
             f'else '
-            f'score=$(echo $output | cut -d \\" \\" -f1); '
-            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
-            f'echo $score > {container_score_path}; '
-            f'cat \\"$filepath\\" > {container_output_path}; '
+            f'  score=$(echo $output | cut -d \\" \\" -f1); '
+            f'  filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f'  echo $score > {container_score_path}; '
+            f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
-        )
+    )
 
     elif languages[file_extension]["type"] == "interpreted":
         interpreter = languages[file_extension]["interpreter"]
@@ -126,30 +135,41 @@ def run_submission(code, problem, team, user, files):
             f'output=$(timeout 60s python3 judge.py {interpreter} \\"{container_user_file}\\"); '
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
-            f'echo {timeout_score} > {container_score_path}; '
-            f'echo Your program timed out > {container_output_path};'
+            f'  echo {timeout_score} > {container_score_path}; '
+            f'  echo Your program timed out > {container_output_path}; '
+            f'elif [ $status -ne 0 ]; then '
+            f'  echo {timeout_score} > {container_score_path}; '
+            f'  echo Runtime error > {container_output_path}; '
             f'else '
-            f'score=$(echo $output | cut -d \\" \\" -f1); '
-            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
-            f'echo $score > {container_score_path}; '
-            f'cat \\"$filepath\\" > {container_output_path}; '
+            f'  score=$(echo $output | cut -d \\" \\" -f1); '
+            f'  filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f'  echo $score > {container_score_path}; '
+            f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
+
         )
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
-            f'{compiler} \\"{container_user_file}\\" -o a.out && '
+            f'{compiler} \\"{container_user_file}\\" -o a.out;'
+            f'status=$?; '
+            f'if [ $status -ne 0 ]; then '
+            f' echo {timeout_score} > {container_score_path}; '
+            f' echo Compilation failed > {container_output_path}; '
+            f' exit 1; '
+            f'fi;'
             f'output=$(timeout 60s python3 judge.py ./a.out);'
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
-            f'echo {timeout_score} > {container_score_path}; '
+            f' echo {timeout_score} > {container_score_path}; '
+            f' echo Your program timed out > {container_output_path};'
             f'else '
-            f'score=$(echo $output | cut -d \\" \\" -f1); '
-            f'filepath=$(echo $output | cut -d \\" \\" -f2-); '
-            f'echo $score > {container_score_path}; '
-            f'cat \\"$filepath\\" > {container_output_path}; '
+            f' score=$(echo $output | cut -d \\" \\" -f1); '
+            f' filepath=$(echo $output | cut -d \\" \\" -f2-); '
+            f' echo $score > {container_score_path}; '
+            f' cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )    
     try:
