@@ -24,11 +24,12 @@
     const qrCodeImg = $('#qrcode').find("img")
     qrCodeImg.attr("alt", "{% url 'judgy:competition_code' competition.code %}")
     
-   $('#delete-competition').on('show.bs.modal', event => {
-      $('.modal-body .name').text('{{ competition.name }}');
-      $('.modal-body .description').text('{{ competition.description }}');
-      $('.modal-body').css('color', '{{ competition.color }}');
+    $('#delete-competition').on('show.bs.modal', event => {
+      $('.modal-body .name').text('{{ competition.name|escapejs }}');
+      $('.modal-body .description').text('{{ competition.description|escapejs }}');
+      $('.modal-body').css('color', '{{ competition.color|escapejs }}');
     });
+    
 
     $('#delete-competition .btn-danger').on('click', async () => {
       const response = await fetch("{% url 'judgy:competition_code' competition.code %}", {
