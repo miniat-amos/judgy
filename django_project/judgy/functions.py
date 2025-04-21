@@ -7,12 +7,12 @@ from pathlib import Path
 from .utils import make_file, create_user_dir
 
 languages = {
-    ".py": {"image": "python", "type": "interpreted", "interpreter": "python3"},
-    ".js": {"image": "node", "type": "interpreted", "interpreter": "node"},
-    ".rb": {"image": "ruby", "type": "interpreted", "interpreter": "ruby"},
-    ".c": {"image": "gcc", "type": "compiled", "compiler": "gcc"},
-    ".cpp": {"image": "gcc", "type": "compiled", "compiler": "g++"},
-    ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java"}
+    ".py": {"image": "python", "type": "interpreted", "interpreter": "python3", "language": "Python"},
+    ".js": {"image": "node", "type": "interpreted", "interpreter": "node", "language": "JavaScript"},
+    ".rb": {"image": "ruby", "type": "interpreted", "interpreter": "ruby", "language": "Ruby"},
+    ".c": {"image": "gcc", "type": "compiled", "compiler": "gcc", "language": "C"},
+    ".cpp": {"image": "gcc", "type": "compiled", "compiler": "g++", "language": "C++"},
+    ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java", "language": "Java"}
 }
 
 def run_submission(code, problem, team, user, files):
@@ -20,6 +20,7 @@ def run_submission(code, problem, team, user, files):
     # Get file extension
     file_extension = os.path.splitext(files[0].name)[1]
     submitted_image = languages[file_extension]["image"]
+    language = languages[file_extension]["language"]
     
     problem_name = problem.name
     
@@ -95,6 +96,7 @@ def run_submission(code, problem, team, user, files):
                 with open(f, 'r') as file:
                     content = file.read()
                     if 'public static void main(String[] args)' in content:
+                        file_name = f.name
                         return container_main_directory / problem_name / f.name
             return None
 
@@ -146,8 +148,8 @@ def run_submission(code, problem, team, user, files):
             f'  echo $score > {container_score_path}; '
             f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
-
         )
+        file_name = files[0].name
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
@@ -172,6 +174,7 @@ def run_submission(code, problem, team, user, files):
             f' cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )    
+        file_name = files[0].name
     try:
         container = client.containers.run(
             docker_image,
@@ -184,4 +187,4 @@ def run_submission(code, problem, team, user, files):
         container.stop()
         container.remove()
         
-    return score_file, output_file
+    return score_file, output_file, language, file_name

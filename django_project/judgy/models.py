@@ -79,6 +79,9 @@ class Submission(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    language = models.CharField(max_length=50, default="")
+    file_name = models.CharField(max_length=50, default="")
+    output = models.TextField(blank=True, null=True)
     score = models.BigIntegerField()
     time = models.DateTimeField(auto_now_add=True)
 

@@ -451,12 +451,15 @@ def submit_view(request, code, problem_name):
             form = SubmissionForm(request.POST, request.FILES)
             if form.is_valid():
                 files = request.FILES.getlist('files')
-                score_file, output_file = run_submission(code, problem, user_team, request.user, files)
+                score_file, output_file, language, file_name = run_submission(code, problem, user_team, request.user, files)
                 request.session['output_dir'] = str(output_file)
                 
                 with open(score_file, 'r') as f:
                     score = f.read()
                 score = score.split(' ')[0]
+                
+                with open (output_file, 'r') as f:
+                    file_output = f.read()
 
                 if problem.show_output:
                     output_url = f'/competition/{code}/{problem_name}/submission/output'
@@ -501,7 +504,7 @@ def submit_view(request, code, problem_name):
                         for user in participants:
                             Notification.objects.create(user=user, header=header, body=body)
 
-                Submission.objects.create(problem=problem, team=user_team, user=request.user, score=score)
+                Submission.objects.create(problem=problem, team=user_team, user=request.user, language=language, file_name=file_name, output=file_output, score=score)
 
                 return redirect('judgy:competition_code', code=code)
             else:
@@ -513,14 +516,22 @@ def submit_view(request, code, problem_name):
 def output_view(request, code, problem_name):
     competition = get_object_or_404(Competition, code=code)
     problem = get_object_or_404(Problem, competition=competition, name=problem_name)
+    
+    submissions = Submission.objects.filter(user=request.user, problem=problem).order_by('-time')
 
-    with open(str(request.session.get('output_dir')), 'r') as f:
-        output_data = f.read()
-
+    outputs = [
+        {
+            'submission_time': s.time,
+            'output_data': s.output,
+            'file_name': s.file_name,
+        }
+        for s in submissions
+    ]
+    
     return render(request, 'judgy/submission_output.html', {
-        'problem': problem,
         'competition': competition,
-        'output_data': output_data,
+        'problem': problem,
+        'outputs': outputs
     })
 
 def rankings_view(request, code):

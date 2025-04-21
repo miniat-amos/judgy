@@ -1,21 +1,76 @@
 {% extends 'judgy/base.html' %}
 
-{% block title %}Output for {{ problem.name }}{% endblock %}
+<!-- {% block title %}Output for {{ problem.name }}{% endblock %} -->
+
+{% block style %}
+
+<style>
+  .submission-output-card {
+    transition: max-height 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    max-height: 300px;
+    cursor: pointer;
+  }
+
+  .submission-output-card.expanded {
+    max-height: none; /* Effectively unlimited, but still animates */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .submission-output {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #212529;
+    color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+</style>
+
+{% endblock %}
 
 {% block main %}
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
   <h1 class="text-center">{{ competition.name }}</h1>
   <h2 class="text-center text-muted">{{ problem.name }}</h2>
 
-  <div class="card mt-4 shadow-sm mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">Output</h5>
+  {% if outputs %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for entry in outputs %}
+        <div class="col">
+          <div class="card submission-output-card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white">
+              {% if entry.file_name %}
+                <h6 class="mb-0 fw-bold">{{ entry.file_name }}</h6>
+              {% else %}
+                <h6 class="mb-0 fw-bold">{{ "No file name stored" }}</h6>
+              {% endif %}
+              <small>Submitted at: {{ entry.submission_time|date:"Y-m-d H:i:s" }}</small>
+            </div>
+            <div class="card-body">
+              <pre class="submission-output bg-dark text-light p-3 rounded">
+                {{ entry.output_data }}</pre>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-    <div class="card-body">
-      <pre class="bg-dark text-light p-3 rounded" style="font-family: 'Courier New', monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">{{ output_data }}</pre>
-    </div>
-  </div>  
+  {% else %}
+    <div class="alert alert-warning mt-4">No submissions found.</div>
+  {% endif %}
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.submission-output-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        card.classList.toggle('expanded');
+      });
+    });
+  });
+</script>
+
 
 {% endblock %}
