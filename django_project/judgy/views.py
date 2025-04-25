@@ -18,10 +18,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .decorators import verified_required
+
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+
+
 from .forms import (
     CustomUserCreationForm,
     AuthenticationForm,
     AccountVerificationForm,
+    ForgotPasswordForm,
+    ResetPasswordForm,
     CompetitionCreationForm,
     ProblemForm,
     SubmissionForm,
@@ -33,6 +41,7 @@ from .functions import (
 )
 from .models import (
   User,
+  UserUniqueToken,
   Competition,
   Problem,
   Team,
@@ -88,7 +97,6 @@ def see_competitions_view(request):
         },
     )
     
-
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -137,6 +145,66 @@ def verify_view(request):
     else:
         form = AccountVerificationForm()
     return render(request, 'judgy/verify.html', {'form': form})
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        form = ForgotPasswordForm(data=request.POST)
+        if form.is_valid(): 
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                UserUniqueToken.objects.create(user_id=user, token=token)
+                reset_password_link = request.build_absolute_uri(
+                    reverse('judgy:reset_password', kwargs={'uidb64': uid, 'token': token})
+                )
+                context = {'reset_link': reset_password_link}
+                send_mail(
+                    'judgy Password Reset',
+                    '',
+                    settings.EMAIL_HOST_USER,
+                    [email],
+                    html_message=render_to_string('judgy/emails/password_reset.html', context)
+                )
+                return redirect('judgy:home')
+            except User.DoesNotExist:
+                form.add_error('email', 'No account found with that email address.')
+    else:
+        form = ForgotPasswordForm()
+    return render(request, 'judgy/forgot_password.html', {'form': form})
+
+def reset_password_view(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+        
+    token_instance = UserUniqueToken.objects.get(user_id=user, token=token)
+    time_generated = token_instance.creation_time
+    time_window = 10
+        
+    if user is not None and time_generated > (timezone.now() - timedelta(minutes=time_window)) :
+        if request.method == 'POST':
+            form = ResetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('judgy:login')
+            else:
+                return render(request, 'judgy/reset_password.html', {
+                    'form': form,
+                })
+        else:
+            form = ResetPasswordForm(user)
+        return render(request, 'judgy/reset_password.html', {'form': form})
+    else:
+        # Token is invalid or expired (e.g., already used or replaced)
+        message = "This password reset link is invalid or has expired. Please request a new one."
+        return render(request, 'judgy/reset_password.html', {
+            'form': None,
+            'invalid_link_message': message,
+        })
 
 @verified_required
 def notifications_view(request):

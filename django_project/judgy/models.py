@@ -1,6 +1,7 @@
 import random
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 from django.db import models
 from .managers import UserManager
 
@@ -22,6 +23,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+class UserUniqueToken(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100)
+    creation_time = models.DateTimeField(default=timezone.now)
 
 class Competition(models.Model):
     code = models.CharField(editable=False, max_length=4, primary_key=True)

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django.utils import timezone
 from .models import User, Competition, Problem, Team, Submission
 
@@ -162,6 +162,35 @@ class AccountVerificationForm(forms.Form):
         if not code == self.user.verification_code:
             raise forms.ValidationError('Invalid code. Please enter the correct six-digit verification code.')
         return cleaned_data
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(
+        label="Email Address",
+        widget=forms.EmailInput(attrs={
+            "class": "form-control",
+            "placeholder": "Email Address"
+        })
+    )
+
+class ResetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter new password",
+            "id": "id_new_password1"
+        }),
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Confirm new password",
+            "id": "id_new_password2"
+        }),
+        strip=False,
+    )
 
 class CompetitionCreationForm(forms.ModelForm):
     class Meta:
