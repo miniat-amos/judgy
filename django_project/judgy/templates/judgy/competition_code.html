@@ -126,12 +126,17 @@
               {% endif %}
             <br>
               {% if upload %}
+                  <div>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
                      Upload
                     </button>
-                    <button class="btn btn-primary" onclick="window.open('{% url 'judgy:output' competition.code problem.name %}', '_blank')">
-                      View Output for {{ problem.name|escapejs }}
-                    </button>
+
+                    <a class="mt-1 btn btn-primary" href="{% url 'judgy:output' competition.code problem.name %}">
+                        View Output for {{ problem.name|escapejs }}
+
+                    </a>
+
+                  </div>
               {% endif %}
             </div>
             <div class="card-footer">
