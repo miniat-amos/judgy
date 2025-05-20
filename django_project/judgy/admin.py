@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import User
+from .models import User, Team, Problem, Submission
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -23,3 +23,19 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 admin.site.register(User, CustomUserAdmin)
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ('name', 'competition', 'get_members',)
+
+    def get_members(self, obj):
+        return ", ".join([user.email for user in obj.members.all()])
+    get_members.short_description = 'Members'
+    
+@admin.register(Problem)
+class ProblemAdmin(admin.ModelAdmin):
+    list_display = ('competition', 'number', 'name', 'score_preference')
+
+@admin.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ('problem', 'team', 'user__first_name', 'language', 'file_name', 'score', 'time',)
