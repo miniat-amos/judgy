@@ -612,8 +612,10 @@ def rankings_view(request, code):
     time_list = []
 
     for team in teams:
+        
         team_data = {
             'team_name': team.name,
+            'members': [member.first_name for member in team.members.all()],
             'total_attempt': 0,
             'total_time': timedelta(0)
         }
@@ -621,7 +623,8 @@ def rankings_view(request, code):
         for problem in problems:
             # Get submissions for the current problem and team
             submissions = Submission.objects.filter(problem=problem, team=team)
-            
+
+                        
             # Determine the best submission based on score preference
             if problem.score_preference: # Higher Score is better
                 best_submission = submissions.order_by('-score', 'time').first()
@@ -705,6 +708,7 @@ def rankings_view(request, code):
     return JsonResponse([{
         'rank': team['rank'],
         'team_name': team['team_name'],
+        'members': team['members'],
         'attempt_rank': team['attempt_rank'],
         'score_rank': team['score_rank'],
         'time_rank': team['time_rank'],

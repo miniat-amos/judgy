@@ -45,42 +45,80 @@
 
       
       $('#rankings').empty();
-      for (const team of rankings) {
-        const response = await fetch("{% url 'judgy:team_members' competition.code 'team.name' %}".replace('team.name', team.team_name))
-        const members = await response.json()
-        let membersHTML = ""
 
-        for (const member of members) {
-          membersHTML += `
-            <div class="col">
-              <div class="text-center">
-                <i class="bi bi-person-circle" style="font-size: 4rem"></i>
-                <h4>${member.first_name}</h4>
+        for (const team of rankings) {
+          const members = team.members
+          let membersHTML = ""
+
+          for (const member of members) {
+            membersHTML += `
+              <div class="col">
+                <div class="text-center">
+                  <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+                  <h4>${member}</h4>
+                </div>
               </div>
-            </div>
-            `
-        }
-        $('#rankings').append(`
-          <div
-            class="card  bg-body-tertiary"
-          >
-         
-            <div class="card-body">
-              <h2 class="card-title">Rank: #${team.rank}</h2>
-              <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
-                ${team.team_name}
-                </a>
-              </h3>
-              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                ${membersHTML}
+              `
+          }
+          $('#rankings').append(`
+            <div
+              class="card  bg-body-tertiary"
+            >
+          
+              <div class="card-body">
+                <h2 class="card-title">Rank: #${team.rank}</h2>
+                <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+                  ${team.team_name}
+                  </a>
+                </h3>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                  ${membersHTML}
 
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <br>
-        `);
-      }
+          <br>
+          `);
+        }
+
+
+      // for (const team of rankings) {
+      //   const response = await fetch("{% url 'judgy:team_members' competition.code 'team.name' %}".replace('team.name', team.team_name))
+      //   const members = await response.json()
+      //   let membersHTML = ""
+
+      //   for (const member of members) {
+      //     membersHTML += `
+      //       <div class="col">
+      //         <div class="text-center">
+      //           <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+      //           <h4>${member.first_name}</h4>
+      //         </div>
+      //       </div>
+      //       `
+      //   }
+      //   $('#rankings').append(`
+      //     <div
+      //       class="card  bg-body-tertiary"
+      //     >
+         
+      //       <div class="card-body">
+      //         <h2 class="card-title">Rank: #${team.rank}</h2>
+      //         <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'judgy:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+      //           ${team.team_name}
+      //           </a>
+      //         </h3>
+      //         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      //           ${membersHTML}
+
+      //         </div>
+      //       </div>
+      //     </div>
+      //   </div>
+      //   <br>
+      //   `);
+      // }
     '{% endif %}'
   });
 </script>
@@ -133,9 +171,7 @@
 
                     <a class="mt-1 btn btn-primary" href="{% url 'judgy:output' competition.code problem.name %}">
                         View Output for {{ problem.name|escapejs }}
-
                     </a>
-
                   </div>
               {% endif %}
             </div>
