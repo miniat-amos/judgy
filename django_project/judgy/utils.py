@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.text import slugify
 from pathlib import Path
 from .models import (
   Team,
@@ -86,7 +87,8 @@ def create_user_dir(code, user, problem, team):
     comp_directory = main_directory / code.lower()
     submissions_directory = comp_directory / 'problems' / problem / 'submissions'
 
-    user_directory = submissions_directory / str(team.name) / str(user.email) 
+    team_name = slugify(str(team.name))
+    user_directory = submissions_directory / team_name / str(user.email) 
     user_directory.mkdir(parents=True, exist_ok=True)
 
     submission_directory = user_directory / 'submission'
