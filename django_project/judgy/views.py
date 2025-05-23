@@ -248,13 +248,13 @@ def competition_code_view(request, code):
         team_submissions = Submission.objects.filter(problem=problem, team=user_team)
         user_submissions = Submission.objects.filter(problem=problem, team=user_team, user=request.user if request.user.is_authenticated else None)
         if problem.score_preference: # Higher Score is Better
-            problem.competition_best_score = competition_submissions.aggregate(Max('score'))['score__max']
-            problem.team_best_score = team_submissions.aggregate(Max('score'))['score__max']
-            problem.user_best_score = user_submissions.aggregate(Max('score'))['score__max'] 
+            problem.competition_best_score = str(competition_submissions.aggregate(Max('score'))['score__max']) if competition_submissions else ""
+            problem.team_best_score = str(team_submissions.aggregate(Max('score'))['score__max']) if team_submissions else ""
+            problem.user_best_score = str(user_submissions.aggregate(Max('score'))['score__max']) if user_submissions else ""
         else: # Lower Score is Better
-            problem.competition_best_score = competition_submissions.aggregate(Min('score'))['score__min']
-            problem.team_best_score = team_submissions.aggregate(Min('score'))['score__min']
-            problem.user_best_score = user_submissions.aggregate(Min('score'))['score__min']
+            problem.competition_best_score = str(competition_submissions.aggregate(Max('score'))['score__min']) if competition_submissions else ""
+            problem.team_best_score = str(team_submissions.aggregate(Max('score'))['score__min']) if team_submissions else ""
+            problem.user_best_score = str(user_submissions.aggregate(Max('score'))['score__min']) if user_submissions else ""
 
     if request.method == 'GET':
         problem_form = ProblemForm()
