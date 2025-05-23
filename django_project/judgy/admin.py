@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import User, Team, Problem, Submission
+from .models import User, Team, Problem, Submission, Competition
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -39,3 +39,7 @@ class ProblemAdmin(admin.ModelAdmin):
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('problem', 'team', 'user__first_name', 'language', 'file_name', 'score', 'time',)
+
+@admin.register(Competition)
+class CompetitionAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'start', 'end', 'enroll_start', 'enroll_end',)
