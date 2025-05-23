@@ -28,6 +28,7 @@ from .views import (
     output_view,
     rankings_view,
     get_members_view,
+    get_teams_view,
     CompUpdate,
 )
 
@@ -62,5 +63,7 @@ urlpatterns = [
     path('competition/<str:code>/rankings', rankings_view, name='rankings'),
     path('competition/<str:code>/<str:problem_name>/submission/output', output_view, name='output'),
     path('competition/<str:code>/team/<str:name>/members', get_members_view, name='team_members'),
+    path('competition/<str:code>/teams', get_teams_view, name='competition_teams'),
+
     path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition"),
 ]

@@ -14,7 +14,7 @@
 {% block script %}
 
 <script>
-  $(() => {
+  $(async () => {
     new QRCode($('#qrcode')[0], {
       text: `${window.location.origin}{% url 'judgy:competition_code' competition.code %}`,
       colorDark: '{{ competition.color }}',
@@ -49,25 +49,46 @@
       $('#enroll').closest('form').remove();
     }
 
+    const response = await fetch("{% url 'judgy:competition_teams' competition.code %}");
+    const teams = await response.json();
+
     $('#team-name').on('input', function () {
       const input = $(this).val().trim();
+      const $teamList = $('.teams');
+      $teamList.empty();
+
       if (input) {
-        $('.teams').addClass('show');
+        $teamList.addClass('show');
+        const escapedInput = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedInput, 'i');
+
+        for (const team of teams) {
+          const teamName = team.name;
+
+          if (regex.test(teamName)) {
+            const $item = $(`
+              <li>
+                <div class="dropdown-item" data-team-name="${$('<div>').text(teamName).text()}">
+                  ${$('<div>').text(teamName).html()}
+                </div>
+              </li>
+            `);
+            $teamList.append($item);
+          }
+        }
+
+        $teamList.off('click', '.dropdown-item');
+        $teamList.on('click', '.dropdown-item', function () {
+          const teamName = $(this).data('team-name');
+          $('#team-name').val(teamName);
+          $teamList.removeClass('show');
+        });
       } else {
-        $('.teams').removeClass('show');
+        $teamList.removeClass('show');
       }
-      $('.teams').html(`
-        {% for team in teams %}
-          ${RegExp(input).test('{{ team.name }}') ? `
-            <li>
-              <div class="dropdown-item" onclick="$('#team-name').val('{{ team.name }}'); $('.teams').removeClass('show');">
-                {{ team.name }}
-              </div>
-            </li>
-          ` : ''}
-        {% endfor %}
-      `);
     });
+
+
 
     $('#leave-team .btn-danger').on('click', async () => {
       const response = await fetch("{% url 'judgy:team_leave' competition.code %}", {

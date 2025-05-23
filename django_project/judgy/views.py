@@ -722,6 +722,12 @@ def rankings_view(request, code):
         } for problem in problems}
     } for team in rankings], safe=False)
 
+def get_teams_view(request, code):
+    competition = get_object_or_404(Competition, code=code)
+    teams = Team.objects.filter(competition=competition).values()
+    
+    return JsonResponse(list(teams), safe=False)
+
 def get_members_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)
     team = get_object_or_404(Team, competition=competition, name=name)
