@@ -108,7 +108,3 @@ start_server
 echo "Starting nginx"
 # Create the nginx container to start web server
 docker compose -f ../docker-compose.web.yml up --build nginx -d
-
-
-
-
