@@ -64,4 +64,3 @@ django_project/*
 !migrations
 !.gitignore
 !.env.example
-!QuickStart/
