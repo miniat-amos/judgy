@@ -16,8 +16,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=celery
-Group=celery
+User=admin
+Group=admin
 WorkingDirectory=/home/admin/judgy/django_project
 ExecStart=/home/admin/judgy/env/bin/celery -A progcomp worker --loglevel=info
 
