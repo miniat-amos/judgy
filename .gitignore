@@ -54,6 +54,8 @@ django_project/*
 !Dockerfile
 !entrypoint.sh
 
+!vm_scripts
+
 # Requirements files
 !requirements.in
 !requirements.txt
