@@ -1,3 +1,9 @@
-# get_members_view.py
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from ..models import Competition, Team
 
-# TODO: Implement get_members_view logic here
+def get_members_view(request, code, name):
+    competition = get_object_or_404(Competition, code=code)
+    team = get_object_or_404(Team, competition=competition, name=name)
+
+    return JsonResponse(list(team.members.all().values()), safe=False)

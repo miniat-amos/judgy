@@ -1,3 +1,5 @@
-# competitions_view.py
+from django.http import JsonResponse
+from ..models import Competition
 
-# TODO: Implement competitions_view logic here
+def competitions_view(request):
+    return JsonResponse(list(Competition.objects.all().values()), safe=False)
