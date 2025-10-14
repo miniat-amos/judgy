@@ -1,36 +1,34 @@
 from django.urls import path
-from .views import (
-    home_view,
-    see_competitions_view,
-    login_view,
-    logout_view,
-    register_view,
-    verify_view,
-    forgot_password_view,
-    reset_password_view,
-    notifications_view,
-    notification_clear_view,
-    set_timezone_view,
-    competition_create_view,
-    competition_code_view,
-    problems_update_view,
-    team_enroll_view,
-    team_join_accept_view,
-    team_join_decline_view,
-    team_leave_view,
-    team_invite_view,
-    team_invite_accept_view,
-    team_invite_decline_view,
-    team_name_view,
-    competitions_view,
-    download_view,
-    submit_view,
-    output_view,
-    rankings_view,
-    get_members_view,
-    get_teams_view,
-    CompUpdate,
-)
+from .views.home_view import home_view
+from .views.see_competition_view import see_competitions_view
+from .views.login_view import login_view
+from .views.logout_view import logout_view
+from .views.register_view import register_view
+from .views.verify_view import verify_view
+from .views.forgot_password_view import forgot_password_view
+from .views.reset_password_view import reset_password_view
+from .views.notifications_view import notifications_view
+from .views.notification_clear_view import notification_clear_view
+from .views.set_timezone_view import set_timezone_view
+from .views.competition_create_view import competition_create_view
+from .views.competition_code_view import competition_code_view
+from .views.problems_update_view import problems_update_view
+from .views.team_enroll_view import team_enroll_view
+from .views.team_join_accept_view import team_join_accept_view
+from .views.team_join_decline_view import team_join_decline_view
+from .views.team_leave_view import team_leave_view
+from .views.team_invite_view import team_invite_view
+from .views.team_invite_accept_view import team_invite_accept_view
+from .views.team_invite_decline_view import team_invite_decline_view
+from .views.team_name_view import team_name_view
+from .views.competitions_view import competitions_view
+from .views.download_view import download_view
+from .views.submit_view import submit_view
+from .views.output_view import output_view
+from .views.rankings_view import rankings_view
+from .views.get_members_view import get_members_view
+from .views.get_teams_view import get_teams_view
+from .views.compUpdate_view import CompUpdate
 
 app_name = 'judgy'
 
