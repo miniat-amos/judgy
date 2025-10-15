@@ -11,19 +11,42 @@ judgygunicorn() {
 
 doas tee /etc/init.d/gunicorn > /dev/null <<'EOF'
 #!/sbin/openrc-run
-name="Judgy Gunicorn Service"
+name="Judgy Gunicorn"
 description="Gunicorn daemon for Django Judgy project"
 
+pidfile="/run/gunicorn/gunicorn.pid"
 command="/home/admin/judgy/env/bin/gunicorn"
-command_args="--config /home/admin/judgy/django_project/gunicorn_config.py progcomp.wsgi:application"
-command_user="admin:admin"
-command_background="yes"
 directory="/home/admin/judgy/django_project"
-pidfile="/run/gunicorn.pid"
+user="admin"
+group="admin"
+gunicorn_config="/home/admin/judgy/django_project/gunicorn_config.py"
+wsgi_module="progcomp.wsgi:application"
 
 depend() {
     need net
 }
+
+start_pre() {
+    checkpath --directory --owner ${user}:${group} /run/gunicorn
+}
+
+start() {
+    ebegin "Starting ${name}"
+    start-stop-daemon --start --quiet \
+        --chdir "${directory}" \
+        --user "${user}" --group "${group}" \
+        --background --make-pidfile --pidfile "${pidfile}" \
+        --exec "${command}" -- \
+        --config "${gunicorn_config}" "${wsgi_module}" 
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${name}"
+    start-stop-daemon --stop --quiet --pidfile "${pidfile}"
+    eend $?
+}
+
 
 EOF
 
