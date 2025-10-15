@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from models import (Competition)
-from forms import CompetitionCreationForm
+from ..models import (Competition)
+from ..forms import CompetitionCreationForm
 from django.utils import timezone
 def see_competitions_view(request):
     now = timezone.now()
