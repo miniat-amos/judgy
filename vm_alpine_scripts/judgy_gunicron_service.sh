@@ -9,7 +9,7 @@
 
 judgygunicorn() {
 
-sudo tee /etc/init.d/gunicorn > /dev/null <<'EOF'
+doas tee /etc/init.d/gunicorn > /dev/null <<'EOF'
 #!/sbin/openrc-run
 name="Judgy Gunicorn Service"
 description="Gunicorn daemon for Django Judgy project"
