@@ -58,6 +58,7 @@ class Problem(models.Model):
     name = models.CharField(max_length=255)
     score_preference = models.BooleanField(default=True)
     show_output = models.BooleanField(default=True)
+    subjective = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
