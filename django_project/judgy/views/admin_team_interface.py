@@ -1,0 +1,18 @@
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from ..models import Competition, Team, Problem, Submission
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_team_interface(request, code, name):
+    competition = get_object_or_404(Competition, code=code)
+    team = get_object_or_404(Team, name=name)
+
+    
+    
+    context = {
+        'competition': competition,
+        'team': team
+    }
+
+
+    return render(request, 'judgy/admin_team_interface.html', context=context)

@@ -1,0 +1,86 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }} Admin Interface {% endblock %}
+
+{% block main %}
+
+<script>
+  $(async () => {
+
+          const member_scores_url = "{% url 'judgy:members_scores' competition.code team.name %}"
+
+          const response = await fetch(member_scores_url);
+          const member_scores = await response.json();
+
+          console.log(member_scores)
+
+           $('#teams').empty();
+
+            for (const [email, member] of Object.entries(member_scores.members)) {
+  
+              memberHTML = `
+                <div class="col">
+                  <div class="text-center">
+                    
+                    <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+                    <h4>${member.first_name}</h4>
+                    <h5>${email}</h5>
+
+                  </div>
+                </div>
+                `;
+                
+                scoresHTML = "";
+                for (const [problem_name, score_data] of Object.entries(member.scores))
+                {
+                    scoresHTML += `
+                      <div class="col">
+                        <div class="text-center">
+                      
+                          <h3>Problem: ${problem_name}</h3>
+                          <h4>Score: ${score_data.member_score !== "" ? score_data.member_score : "--"}</h4>
+                          <h5>Subjective: ${score_data.subjective}</h5>
+    
+                        </div>
+                    </div>
+                    `;
+                }
+            }
+
+            $('#team').append(`
+            <div class="card bg-body-tertiary">
+                <div class="card-body">
+    
+                  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    ${memberHTML}
+                    ${scoresHTML}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            `);
+          }
+      );
+</script>
+
+<div class="container py-5">
+
+  <div class="mb-5">
+    <h1 class="text-center">Admin Interface for {{ team.name }}</h1>
+  </div>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+  </div>
+
+  <div class="mt-1">
+    <h1 class="text-center">User</h1>
+  </div>
+  <div class="row row-cols-1 g-4">
+    <div id="team">
+    </div>
+  </div>
+</div>
+
+{% endblock %}
