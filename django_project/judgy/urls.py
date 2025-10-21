@@ -29,6 +29,9 @@ from .views.rankings_view import rankings_view
 from .views.get_members_view import get_members_view
 from .views.get_teams_view import get_teams_view
 from .views.compUpdate_view import CompUpdate
+from .views.admin_comp_interface import admin_comp_interface
+from .views.admin_team_interface import admin_team_interface
+from .views.get_member_scores_view import get_member_scores
 
 app_name = 'judgy'
 
@@ -62,6 +65,9 @@ urlpatterns = [
     path('competition/<str:code>/<str:problem_name>/submission/output', output_view, name='output'),
     path('competition/<str:code>/team/<str:name>/members', get_members_view, name='team_members'),
     path('competition/<str:code>/teams', get_teams_view, name='competition_teams'),
-
+    path('competition/<str:code>/team/<str:name>/members-scores', get_member_scores, name='members_scores'),
     path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition"),
+    path('competition/<str:code>/admin-interface', admin_comp_interface, name="admin_comp_interface"),
+    path('competition/<str:code>/team/<str:name>/admin-interface', admin_team_interface, name="admin_team_interface"),
+
 ]
