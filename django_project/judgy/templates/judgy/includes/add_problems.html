@@ -104,10 +104,15 @@
               </div>
 
               <div class="my-3">
+                  <label for="description" class="form-label">Problem Description</label>
+                  {{ problem_form.description }}
+              </div>
+
+              <div class="my-3">
                 <div class="row">
                   <div class="col">
-                    <label for="description" class="form-label">Problem Description</label>
-                    {{ problem_form.description }}
+                    <label for="subjective" class="form-label">Subjective Grading</label>
+                    {{ problem_form.subjective }}
                   </div>
 
                   <div class="col">
@@ -116,6 +121,8 @@
                   </div>
                 </div>
               </div>
+
+             
 
               <div class="my-3">
                 <label for="other-files" class="form-label">Other Files</label>
