@@ -331,6 +331,14 @@ class ProblemForm(forms.ModelForm):
             (False, 'No')
         ]
     )
+    
+    subjective = forms.ChoiceField(
+        choices=[
+            (False, 'No'),
+            (True, 'Yes')
+        ]
+    )
+
 
     class Meta:
         model = Problem
@@ -338,7 +346,8 @@ class ProblemForm(forms.ModelForm):
             'number',
             'name',
             'score_preference',
-            'show_output'
+            'show_output',
+            'subjective'
         ]
     
     def __init__(self, *args, **kwargs):
@@ -347,10 +356,12 @@ class ProblemForm(forms.ModelForm):
         self.fields['number'].required = True
         self.fields['name'].required = True
         self.fields['description'].required = True
-        self.fields['judge_py'].required = True
+        self.fields['judge_py'].required = False
         self.fields['other_files'].required = False
         self.fields['score_preference'].required = True
         self.fields['show_output'].required = True
+        self.fields['subjective'].required = True
+
 
         self.fields['number'].widget.attrs.update(
             {
@@ -399,6 +410,13 @@ class ProblemForm(forms.ModelForm):
                 'id': 'show-output',
                 'class': 'form-select',
                 'placeholder': 'Show Output'
+            }
+        )
+        self.fields['subjective'].widget.attrs.update(
+            {
+                'id': 'subjective',
+                'class': 'form-select',
+                'placeholder': 'Subjective Grading'
             }
         )
 
