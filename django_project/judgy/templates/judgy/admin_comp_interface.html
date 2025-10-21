@@ -1,0 +1,83 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }} Admin Interface {% endblock %}
+
+
+{% block main %}
+
+<script>
+  $(async () => {
+
+      const response = await fetch("{% url 'judgy:competition_teams' competition.code %}");
+      const teams = await response.json();
+
+      $('#teams').empty();
+
+        for (const team of teams) {
+
+          const member_url = "{% url 'judgy:team_members' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+
+          const response = await fetch(member_url);
+          const members = await response.json();
+
+          let membersHTML = ""
+
+          for (const member of members) {
+            membersHTML += `
+              <div class="col">
+                <div class="text-center">
+                  
+                  <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+                  <h4>${member.first_name}</h4>
+                  <h5>${member.email}</h5>
+                </div>
+              </div>
+              `
+          }
+          team_admin_url = "{% url 'judgy:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+
+          $('#teams').append(`
+          <div class="card bg-body-tertiary">
+                <a href=${team_admin_url} style="text-decoration: none; color: white;">
+              <div class="card-body">
+                    <h3 class="card-title">Team: 
+                    ${team.name}
+                    </h3>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                  ${membersHTML}
+                </div>
+              </div>
+            </div>
+            </a>
+          </div>
+          <br>
+          `);
+        }
+
+  });
+</script>
+
+
+
+<div class="container py-5">
+  
+    <div class="mb-5">
+        <h1 class="text-center">Admin Interface for {{ competition.name }}</h1>
+    </div>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+  </div>
+
+  <div class="mt-1">
+    <h1 class="text-center">Teams</h1>
+  </div>
+  <div class="row row-cols-1 g-4">
+    <div id="teams">
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
