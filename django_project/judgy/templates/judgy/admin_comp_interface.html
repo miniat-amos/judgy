@@ -34,7 +34,8 @@
               </div>
               `
           }
-          team_admin_url = "{% url 'judgy:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+          
+          const team_admin_url = "{% url 'judgy:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
 
           $('#teams').append(`
           <div class="card bg-body-tertiary">
