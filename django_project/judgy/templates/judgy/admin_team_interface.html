@@ -2,7 +2,7 @@
 
 {% block title %}{{ competition.name }} Admin Interface {% endblock %}
 
-{% block main %}
+{% block script %}
 
 <script>
 $(async () => {
@@ -146,6 +146,12 @@ $(async () => {
       }
     );
 </script>
+
+{% endblock %}
+
+{% block main %}
+
+
 
 <div class="container py-5">
 
