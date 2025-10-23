@@ -12,6 +12,8 @@ $(async () => {
         const response = await fetch(member_scores_url);
         const member_scores = await response.json();
 
+        console.log(member_scores)
+
         $('#team-members').empty();
 
         let memberHTML = "";
@@ -23,6 +25,7 @@ $(async () => {
               <tr>
                 <th scope="col">Problem #</th>
                 <th scope="col">Problem</th>
+                <th scope="col">Score Preference</th>
                 <th scope="col">Score</th>
                 <th scope="col">Download Source Code</th>
                 <th scope="col">Input Score</th>
@@ -34,13 +37,6 @@ $(async () => {
           </table>
         `;
 
-        let inputScore = `
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Input Score" aria-label="Input Score" aria-describedby="button-addon2">
-            <button class="btn btn-success" type="button" id="button-addon2">Submit</button>
-          </div>
-        `
-        
         for (const [email, member] of Object.entries(member_scores.members)) {
   
           let subjectiveProblemHtml = $(scoresTable).attr('id', 'subjective-table');
@@ -58,11 +54,18 @@ $(async () => {
             
             for (const [problem_name, problem_data] of Object.entries(member.scores))
             {
-
+                let inputScore = `
+                  <div class="input-group mb-3">
+                    <input class="form-control score-input" data-submission-id=${problem_data.submission_id} type="text" class="form-control" placeholder="Input Score" aria-label="Input Score" aria-describedby="button-addon2">
+                    <button class="btn btn-success submit-score" type="button" id="button-addon2">Submit</button>
+                  </div>
+                `
+                
                 scoresHTML = `
                   <tr>
                     <th scope="row">${problem_data.problem_number}</th>
                     <td>${problem_name}</td>
+                    <td>${problem_data.score_preference === true ? ` <i class="bi bi-arrow-up"></i> Higher Score is Better` : `<i class="bi bi-arrow-down"></i> Lower Score is Better`}</td>
                     <td>${problem_data.member_score !== "" ? problem_data.member_score : "--"}</td>
                     <td></td>
                     <td>${inputScore}</td>
@@ -99,6 +102,46 @@ $(async () => {
             `);
                 
         }
+
+
+        $(".submit-score").on("click", function() {
+            let inputGroup = $(this).closest(".input-group");
+            let scoreInputField = inputGroup.find(".score-input");
+            let submissionId = scoreInputField.data("submission-id");
+            let newScore = scoreInputField.val();
+
+            const updatedData = {
+                score: newScore
+            }
+            
+            const scoreInputUrl = `/score/${submissionId}/update`
+
+            fetch(scoreInputUrl, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  
+              },
+              body: JSON.stringify(updatedData)
+            })
+            .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log('Item updated successfully:', data);
+              location.reload(); 
+
+          })
+          .catch(error => {
+              console.error('Error updating item:', error);
+          });
+            
+        });
+
+
 
       }
     );
