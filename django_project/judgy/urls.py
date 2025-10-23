@@ -32,6 +32,7 @@ from .views.compUpdate_view import CompUpdate
 from .views.admin_comp_interface import admin_comp_interface
 from .views.admin_team_interface import admin_team_interface
 from .views.get_member_scores_view import get_member_scores
+from .views.admin_score_input_view import ScoreUpdate
 
 app_name = 'judgy'
 
@@ -69,5 +70,6 @@ urlpatterns = [
     path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition"),
     path('competition/<str:code>/admin-interface', admin_comp_interface, name="admin_comp_interface"),
     path('competition/<str:code>/team/<str:name>/admin-interface', admin_team_interface, name="admin_team_interface"),
+    path('score/<int:pk>/update', ScoreUpdate.as_view(), name="update_score")
 
 ]
