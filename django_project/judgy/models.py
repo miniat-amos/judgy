@@ -89,7 +89,7 @@ class Submission(models.Model):
     language = models.CharField(max_length=50, default="")
     file_name = models.CharField(max_length=50, default="")
     output = models.TextField(blank=True, null=True)
-    score = models.BigIntegerField()
+    score = models.BigIntegerField(blank=True, null=True)
     time = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
