@@ -26,14 +26,18 @@ def get_member_scores(request, code, name):
         for problem in problems:
             user_submissions = Submission.objects.filter(problem=problem, team=team, user=member['id'])
             if problem.score_preference: # Higher Score is Better
-                user_best_score = user_submissions.aggregate(Max('score'))['score__max']
+                user_best_score = user_submissions.order_by('-score').first()
+        
             else: # Lower Score is Better
-                user_best_score = user_submissions.aggregate(Max('score'))['score__min']
-                
-            member_scores['members'][email]['scores'][problem.name] = {
-                "problem_number": problem.number,
-                "member_score": str(user_best_score) if user_best_score is not None else "",
-                "subjective": problem.subjective
-            }
+                user_best_score = user_submissions.order_by('score').first()
+            
+            if user_best_score:
+                member_scores['members'][email]['scores'][problem.name] = {
+                    "submission_id": user_best_score.id,
+                    "problem_number": problem.number,
+                    'score_preference': problem.score_preference,
+                    "member_score": str(user_best_score.score) if user_best_score is not None else "",
+                    "subjective": problem.subjective
+                }
 
     return JsonResponse(member_scores, safe=False)
