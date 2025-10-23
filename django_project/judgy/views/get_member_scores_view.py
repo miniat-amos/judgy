@@ -7,7 +7,7 @@ from ..models import Competition, Team, Problem, Submission
 def get_member_scores(request, code, name):
     competition = get_object_or_404(Competition, code=code)
     team = get_object_or_404(Team, competition=competition, name=name)
-    members = team.members.all().values('id', 'email', 'first_name')
+    members = team.members.all().values('id', 'email', 'first_name', 'last_name')
     problems = Problem.objects.filter(competition=competition).order_by('number')
         
     member_scores = {
@@ -19,6 +19,7 @@ def get_member_scores(request, code, name):
         email = member['email']
         member_scores['members'][email] = {
             'first_name': member['first_name'],
+            'last_name': member['last_name'],
             'scores': {}
         }
 
@@ -30,6 +31,7 @@ def get_member_scores(request, code, name):
                 user_best_score = user_submissions.aggregate(Max('score'))['score__min']
                 
             member_scores['members'][email]['scores'][problem.name] = {
+                "problem_number": problem.number,
                 "member_score": str(user_best_score) if user_best_score is not None else "",
                 "subjective": problem.subjective
             }
