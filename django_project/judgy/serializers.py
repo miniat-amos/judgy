@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from .models import Competition, Problem
+from .models import Competition, Submission
 
 class CompSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,9 +45,9 @@ class CompSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
 
-class ProblemScoreSerializer(serializers.ModelSerializer):
+class SubmissionScoreSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Problem
+        model = Submission
         fields = [
             'score'
         ]
