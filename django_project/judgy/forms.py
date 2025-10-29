@@ -1,8 +1,12 @@
+import re
 from django import forms
 from django.contrib.auth import authenticate
+from django.utils.html import strip_tags
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django.utils import timezone
 from .models import User, Competition, Problem, Team, Submission
+from django.core.exceptions import ValidationError
+
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -458,6 +462,14 @@ class TeamEnrollForm(forms.ModelForm):
                 'placeholder': 'Team Name',
             }
         )
+        
+    def clean_name(self):
+        """Strip HTML tags and validate the team name."""
+        name = self.cleaned_data.get('name', '')
+
+        name = strip_tags(name).strip()
+
+        return name
 
 class TeamInviteForm(forms.Form):
     def __init__(self, *args, team_invite_limit, **kwargs):
