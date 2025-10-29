@@ -25,15 +25,16 @@ def get_member_scores(request, code, name):
 
         for problem in problems:
             user_submissions = Submission.objects.filter(problem=problem, team=team, user=member['id'])
+            latest_submission = Submission.objects.filter(problem=problem, team=team, user=member['id']).order_by('-pk').first()
             if problem.score_preference: # Higher Score is Better
                 user_best_score = user_submissions.order_by('-score').first()
-        
             else: # Lower Score is Better
                 user_best_score = user_submissions.order_by('score').first()
             
+            print(user_best_score.id)        
             if user_best_score:
                 member_scores['members'][email]['scores'][problem.name] = {
-                    "submission_id": user_best_score.id,
+                    "submission_id": latest_submission.id,
                     "problem_number": problem.number,
                     'score_preference': problem.score_preference,
                     "member_score": str(user_best_score.score) if user_best_score is not None else "",
