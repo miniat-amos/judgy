@@ -32,13 +32,17 @@ def get_member_scores(request, code, name):
                 user_best_score = user_submissions.order_by('score').first()
             
             if user_submissions:
-                member_scores['members'][email]['scores'][problem.name] = {
+                member_scores['members'][email]['scores'][problem.name] = (
+                {
                     "latest_submission_id": latest_submission.id,
                     "problem_number": problem.number,
-                    'score_preference': problem.score_preference,
-                    'member_current_score': str(latest_submission.score) if latest_submission is not None else "",
-                    "member_best_score": str(user_best_score.score) if user_best_score is not None else "",
-                    "subjective": problem.subjective
+                    "score_preference": problem.score_preference,
+                    "member_current_score": str(latest_submission.score) if latest_submission else "",
+                    "member_best_score": str(user_best_score.score) if user_best_score else "",
+                    "subjective": problem.subjective,
                 }
+        
+        )
+
 
     return JsonResponse(member_scores, safe=False)
