@@ -190,7 +190,7 @@
             <div class="d-flex gap-3">
               <button id="edit-button" class="edit-competition-btn btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
-              <a class="btn btn-primary" href="{% url 'judgy:admin_comp_interface' competition.code %}">ADMIN</a>
+              <a class="btn btn-primary" href="{% url 'judgy:admin_comp_interface' competition.code %}">MANAGE</a>
             </div>
           {% elif user.is_authenticated %}
             {% if user_team %}
