@@ -7,8 +7,6 @@ from .views.register_view import register_view
 from .views.verify_view import verify_view
 from .views.forgot_password_view import forgot_password_view
 from .views.reset_password_view import reset_password_view
-from .views.notifications_view import notifications_view
-from .views.notification_clear_view import notification_clear_view
 from .views.set_timezone_view import set_timezone_view
 from .views.competition_create_view import competition_create_view
 from .views.competition_code_view import competition_code_view
@@ -44,8 +42,6 @@ urlpatterns = [
     path('verify', verify_view, name='verify'),
     path('forgot-password', forgot_password_view, name='forgot_password'),
     path('reset-password/<uidb64>/<token>', reset_password_view, name='reset_password'),
-    path('notifications', notifications_view, name='notifications'),
-    path('notification/<str:id>/clear', notification_clear_view, name='notification_clear'),
     path('set-timezone', set_timezone_view, name='set_timezone'),
     path('all-competitions', see_competitions_view, name='see_competitions'),
     path('competition/create', competition_create_view, name='competition_create'),
