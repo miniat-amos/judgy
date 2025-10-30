@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from ..decorators import verified_required
-from ..models import TeamJoinNotification, Notification
+from notifications.models import TeamJoinNotification, Notification
 
 @verified_required
 def team_join_decline_view(request, id):

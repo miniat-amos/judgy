@@ -10,9 +10,10 @@ from ..models import (
     Problem,
     Team,
     Submission,
-    Notification,
     User
 )
+
+from notifications.models import Notification
 from ..functions import run_submission
 
 @verified_required

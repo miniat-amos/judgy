@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from ..decorators import verified_required
-from ..models import Competition, Team, Notification
+from ..models import Competition, Team
+from notifications.models import Notification
 
 @verified_required
 def team_leave_view(request, code):
