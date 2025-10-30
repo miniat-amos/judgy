@@ -9,3 +9,4 @@ redis
 celery
 channels
 channels_redis
+whitenoise
