@@ -126,7 +126,7 @@
 
           $('.toast .btn-close').on('click', function () {
             if ($(this).closest('.toast').data('type') == 0) {
-              fetch("{% url 'judgy:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'notifications:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }
