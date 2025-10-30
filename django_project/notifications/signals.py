@@ -1,10 +1,13 @@
 # notifications/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from judgy.models import Notification
+from judgy.models import Notification, TeamJoinNotification, TeamInviteNotification
 from .utils import send_notification
 
+
 @receiver(post_save, sender=Notification)
+@receiver(post_save, sender=TeamJoinNotification)
+@receiver(post_save, sender=TeamInviteNotification)
 def push_notification(sender, instance, created, **kwargs):
     if created:
         data = [{
@@ -14,3 +17,5 @@ def push_notification(sender, instance, created, **kwargs):
             "body": instance.body,
         }]
         send_notification(instance.user, data)
+
+
