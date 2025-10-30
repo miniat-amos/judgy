@@ -1,7 +1,7 @@
 from django.db.models import Min, Max
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from ..models import Competition, Team, Problem, Submission
+from judgy.models import Competition, Team, Problem, Submission
 
 
 def get_member_scores(request, code, name):

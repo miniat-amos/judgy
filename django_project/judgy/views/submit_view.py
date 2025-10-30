@@ -3,9 +3,9 @@ from django.db.models import Min, Max
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.html import format_html
-from ..decorators import verified_required
-from ..forms import SubmissionForm
-from ..models import (
+from judgy.decorators import verified_required
+from judgy.forms import SubmissionForm
+from judgy.models import (
     Competition,
     Problem,
     Team,
@@ -14,7 +14,7 @@ from ..models import (
 )
 
 from notifications.models import Notification
-from ..functions import run_submission
+from judgy.functions import run_submission
 
 @verified_required
 def submit_view(request, code, problem_name):

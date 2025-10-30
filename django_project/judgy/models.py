@@ -3,7 +3,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.db import models
-from .managers import UserManager
+from judgy.managers import UserManager
 
 class User(AbstractUser):
     username = None

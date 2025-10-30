@@ -1,10 +1,8 @@
 import docker
 import os
-import subprocess
 import shutil
-from django.conf import settings
 from pathlib import Path
-from .utils import make_file, create_user_dir
+from judgy.utils import make_file, create_user_dir
 
 languages = {
     ".py": {"image": "python", "type": "interpreted", "interpreter": "python3", "language": "Python"},

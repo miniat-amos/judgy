@@ -1,8 +1,8 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
-from ..decorators import verified_required
-from ..forms import TeamInviteForm
-from ..models import Competition, Team, User
+from judgy.decorators import verified_required
+from judgy.forms import TeamInviteForm
+from judgy.models import Competition, Team, User
 from notifications.models import TeamInviteNotification
 
 @verified_required

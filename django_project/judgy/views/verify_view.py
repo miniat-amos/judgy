@@ -1,4 +1,4 @@
-from ..forms import AccountVerificationForm
+from judgy.forms import AccountVerificationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse
 

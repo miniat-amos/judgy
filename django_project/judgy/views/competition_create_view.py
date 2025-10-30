@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
-from ..forms import CompetitionCreationForm
-from ..utils import create_comp_dir
+from judgy.forms import CompetitionCreationForm
+from judgy.utils import create_comp_dir
 
 @user_passes_test(lambda u: u.is_superuser)
 def competition_create_view(request):

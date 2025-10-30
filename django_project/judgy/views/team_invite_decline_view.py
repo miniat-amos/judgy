@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from ..decorators import verified_required
+from judgy.decorators import verified_required
 from notifications.models import TeamInviteNotification, Notification
 
 @verified_required

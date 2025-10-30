@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import User, Team, Problem, Submission, Competition
+from judgy.forms import CustomUserCreationForm, CustomUserChangeForm
+from judgy.models import User, Team, Problem, Submission, Competition
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm

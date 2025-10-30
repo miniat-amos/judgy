@@ -1,5 +1,5 @@
-from django.shortcuts import redirect
 import json
+from django.shortcuts import redirect
 
 
 def set_timezone_view(request):
