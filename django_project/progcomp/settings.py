@@ -48,9 +48,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "judgy",
+    "notifications",
     "rest_framework",
     "channels",
-    "notifications.apps.NotificationsConfig",
 ]
 
 MIDDLEWARE = [
