@@ -1,8 +1,19 @@
-{% extends 'judgy/base.html' %}
-
-{% block style %}
+{% extends 'judgy/base.html' %} {% block style %}
+<link
+  href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap"
+  rel="stylesheet"
+/>
 
 <style>
+  body {
+    background: linear-gradient(
+        315deg,
+        rgba(255, 255, 255, 0.04),
+        /* Subtle white gradient */ rgb(33, 37, 41)
+      ),
+      #212529; /* Original background color */
+    color: #fff; /* Ensure text is readable */
+  }
 
   .vl {
     border-left: 2px solid gray;
@@ -17,19 +28,27 @@
     width: 200px;
     padding: 10px 20px;
     color: white;
-    border-radius: 5px;
+    border-radius: 25px; /* Rounded corners */
+    background: #007bff;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .index-container .btn:hover {
+    transform: scale(1.1); /* Slight zoom effect */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add shadow */
   }
 
   .account-buttons {
     position: absolute;
-    right: 55%; 
+    right: 55%;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 10px; 
+    gap: 10px;
   }
-  
+
   .competition-button {
     position: absolute;
     left: 55%;
@@ -38,37 +57,108 @@
     display: flex;
     flex-direction: column;
   }
-  
-  
+
+  .welcome-text {
+    font-family: "Luckiest Guy", cursive;
+    font-size: 8rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .welcome-text span {
+    display: inline-block;
+    animation: wave 6s infinite;
+  }
+
+  /* Create the wave animation */
+  @keyframes wave {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Add delay to each letter for the wave effect */
+  .welcome-text span:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .welcome-text span:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .welcome-text span:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .welcome-text span:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .welcome-text span:nth-child(5) {
+    animation-delay: 0.4s;
+  }
+  .welcome-text span:nth-child(6) {
+    animation-delay: 0.5s;
+  }
+  .welcome-text span:nth-child(7) {
+    animation-delay: 0.6s;
+  }
+  .welcome-text span:nth-child(8) {
+    animation-delay: 0.7s;
+  }
+  .welcome-text span:nth-child(9) {
+    animation-delay: 0.8s;
+  }
+  .welcome-text span:nth-child(10) {
+    animation-delay: 0.9s;
+  }
+  .welcome-text span:nth-child(11) {
+    animation-delay: 1s;
+  }
+  .welcome-text span:nth-child(12) {
+    animation-delay: 1.1s;
+  }
+  .welcome-text span:nth-child(13) {
+    animation-delay: 1.2s;
+  }
+  .welcome-text span:nth-child(14) {
+    animation-delay: 1.3s;
+  }
+  .welcome-text span:nth-child(15) {
+    animation-delay: 1.4s;
+  }
+  .welcome-text span:nth-child(16) {
+    animation-delay: 1.5s;
+  }
 </style>
-
-{% endblock %}
-
-{% block script %}
-
+{% endblock %} {% block script %}
 <script>
-
-
+  // Add any JavaScript if needed
 </script>
-
-{% endblock %}
-
-{% block main %}
-
+{% endblock %} {% block main %}
+<div class="text-center" style="margin-top: 6rem">
+  <h1 class="welcome-text">
+    {% for letter in "Welcome to judgy" %}
+    <span>{{ letter }}</span>
+    {% endfor %}
+  </h1>
+</div>
 <div class="index-container">
   <div class="vl"></div>
-  
+
   <div class="account-buttons">
-    <a href="{% url 'judgy:register' %}" class="btn btn-primary">Create Account</a>
+    <a href="{% url 'judgy:register' %}" class="btn btn-primary"
+      >Create Account</a
+    >
     <a href="{% url 'judgy:login' %}" class="btn btn-primary">Login</a>
   </div>
 
   <div class="competition-button">
-    <a href="{% url 'judgy:see_competitions' %}" class="btn btn-primary">View Competitions</a>
+    <a href="{% url 'judgy:see_competitions' %}" class="btn btn-primary"
+      >View Competitions</a
+    >
   </div>
 </div>
-
-
-
-
 {% endblock %}
