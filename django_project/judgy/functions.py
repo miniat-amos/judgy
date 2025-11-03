@@ -65,6 +65,8 @@ def run_submission(code, problem, team, user, files):
     container_score_path = container_main_directory / "outputs" / "score.txt"
     container_output_path = container_main_directory / "outputs" / "output.txt"
     
+    
+    
 
     # Volumes for file-to-file binding
     volumes = {
@@ -84,6 +86,8 @@ def run_submission(code, problem, team, user, files):
         volumes[str(first_file)] = {"bind": str(container_user_file), "mode": "rw"}
         
     
+    judgy_source_file = os.path.basename(container_user_file)
+     
     if languages[file_extension]["type"] == "compiled-and-interpreted":
         # Directory where Java files are stored in the container
         interpreter = languages[file_extension]["interpreter"]
@@ -132,6 +136,7 @@ def run_submission(code, problem, team, user, files):
         interpreter = languages[file_extension]["interpreter"]
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
+            f'export JUDGY_SOURCE_FILE={judgy_source_file};'
             f'output=$(timeout 60s python3 judge.py {interpreter} \\"{container_user_file}\\"); '
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
@@ -160,12 +165,13 @@ def run_submission(code, problem, team, user, files):
             f' echo Compilation failed > {container_output_path}; '
             f' exit 1; '
             f'fi;'
+            f'export JUDGY_SOURCE_FILE={judgy_source_file};'
             f'output=$(timeout 60s python3 judge.py ./a.out);'
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
             f' echo {timeout_score} > {container_score_path}; '
             f' echo Your program timed out > {container_output_path};'
-            f'else '
+            f'else'
             f' score=$(echo $output | cut -d \\" \\" -f1); '
             f' filepath=$(echo $output | cut -d \\" \\" -f2-); '
             f' echo $score > {container_score_path}; '
@@ -183,6 +189,6 @@ def run_submission(code, problem, team, user, files):
         container.wait()  
     finally:
         container.stop()
-        container.remove()
+        # container.remove()
         
     return score_file, output_file, language, file_name
