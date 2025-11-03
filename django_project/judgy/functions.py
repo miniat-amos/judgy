@@ -84,9 +84,7 @@ def run_submission(code, problem, team, user, files):
         first_file = submitted_files[0]
         container_user_file = container_main_directory / problem_name / first_file.name
         volumes[str(first_file)] = {"bind": str(container_user_file), "mode": "rw"}
-        
-    
-    judgy_source_file = os.path.basename(container_user_file)
+        judgy_source_file = os.path.basename(container_user_file)
      
     if languages[file_extension]["type"] == "compiled-and-interpreted":
         # Directory where Java files are stored in the container
@@ -106,6 +104,7 @@ def run_submission(code, problem, team, user, files):
             return [str(container_main_directory / problem_name / f.name) for f in submitted_files]
 
         main_file = find_main_file()
+        judgy_source_file = os.path.basename(main_file)
         classes = classes_list()
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
@@ -189,6 +188,6 @@ def run_submission(code, problem, team, user, files):
         container.wait()  
     finally:
         container.stop()
-        # container.remove()
+        container.remove()
         
     return score_file, output_file, language, file_name
