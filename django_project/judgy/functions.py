@@ -104,8 +104,8 @@ def run_submission(code, problem, team, user, files):
             return [str(container_main_directory / problem_name / f.name) for f in submitted_files]
 
         main_file = find_main_file()
-        judgy_source_file = os.path.basename(main_file)
         classes = classes_list()
+        judgy_source_file = os.path.basename(main_file)
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
             f'{compiler} ' + " ".join([f'\\"{cls}\\"' for cls in classes]) + '; '
@@ -151,7 +151,6 @@ def run_submission(code, problem, team, user, files):
             f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )
-        file_name = files[0].name
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
@@ -177,7 +176,7 @@ def run_submission(code, problem, team, user, files):
             f' cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )    
-        file_name = files[0].name
+
     try:
         container = client.containers.run(
             docker_image,
@@ -189,5 +188,5 @@ def run_submission(code, problem, team, user, files):
     finally:
         container.stop()
         container.remove()
-        
-    return score_file, output_file, language, file_name
+            
+    return score_file, output_file, language, judgy_source_file

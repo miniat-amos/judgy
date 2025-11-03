@@ -40,6 +40,6 @@ services:
       context: ..
       dockerfile: ./django_project/Dockerfile
       args:
-        BASE_IMAGE: openjdk:17-jdk-slim
+        BASE_IMAGE: eclipse-temurin:17-jdk-jammy
         COMP_CODE: ${COMP_CODE}
     image: judgy-${COMP_CODE}-java_app
