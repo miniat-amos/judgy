@@ -18,7 +18,7 @@ languages = {
 def run_submission(code, problem, team, user, files):
     # Variables for local machine
     # Get file extension
-    file_extension = os.path.splitext(files[0].name)[1]
+    file_extension = os.path.splitext(files[0])[1]
     submitted_image = languages[file_extension]["image"]
     language = languages[file_extension]["language"]
     
@@ -45,11 +45,12 @@ def run_submission(code, problem, team, user, files):
 
     # Store file in submissions dir
     submitted_files = []
-    for file in files:
-        file_path = Path(submission_dir) / file.name
-        with open(file_path, "wb+") as destination:
-            for chunk in file.chunks():
-                destination.write(chunk)
+    for file_path_str in files:  # files is now a list of strings
+        file_path = Path(submission_dir) / Path(file_path_str).name
+        # If you need to copy the file to submission_dir
+        with open(file_path_str, "rb") as source_file:
+            with open(file_path, "wb") as destination_file:
+                destination_file.write(source_file.read())
         submitted_files.append(file_path)  # Track all file paths
 
     # Create output directory
@@ -149,7 +150,7 @@ def run_submission(code, problem, team, user, files):
             f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )
-        file_name = files[0].name
+        file_name = Path(files[0]).name
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
@@ -174,7 +175,7 @@ def run_submission(code, problem, team, user, files):
             f' cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )    
-        file_name = files[0].name
+        file_name = Path(files[0]).name
     try:
         container = client.containers.run(
             docker_image,
