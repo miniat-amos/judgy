@@ -1,10 +1,8 @@
 import docker
 import os
-import subprocess
 import shutil
-from django.conf import settings
 from pathlib import Path
-from .utils import make_file, create_user_dir
+from judgy.utils import make_file, create_user_dir
 
 languages = {
     ".py": {"image": "python", "type": "interpreted", "interpreter": "python3", "language": "Python"},
@@ -68,7 +66,7 @@ def run_submission(code, problem, team, user, files):
     container_score_path = container_main_directory / "outputs" / "score.txt"
     container_output_path = container_main_directory / "outputs" / "output.txt"
     
-
+    
     # Volumes for file-to-file binding
     volumes = {
         str(score_file): {"bind": str(container_score_path), "mode": "rw"},
@@ -85,8 +83,8 @@ def run_submission(code, problem, team, user, files):
         first_file = submitted_files[0]
         container_user_file = container_main_directory / problem_name / first_file.name
         volumes[str(first_file)] = {"bind": str(container_user_file), "mode": "rw"}
-        
-    
+        judgy_source_file = os.path.basename(container_user_file)
+     
     if languages[file_extension]["type"] == "compiled-and-interpreted":
         # Directory where Java files are stored in the container
         interpreter = languages[file_extension]["interpreter"]
@@ -106,6 +104,7 @@ def run_submission(code, problem, team, user, files):
 
         main_file = find_main_file()
         classes = classes_list()
+        judgy_source_file = os.path.basename(main_file)
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
             f'{compiler} ' + " ".join([f'\\"{cls}\\"' for cls in classes]) + '; '
@@ -135,6 +134,7 @@ def run_submission(code, problem, team, user, files):
         interpreter = languages[file_extension]["interpreter"]
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
+            f'export JUDGY_SOURCE_FILE={judgy_source_file};'
             f'output=$(timeout 60s python3 judge.py {interpreter} \\"{container_user_file}\\"); '
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
@@ -150,7 +150,6 @@ def run_submission(code, problem, team, user, files):
             f'  cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )
-        file_name = Path(files[0]).name
 
     elif languages[file_extension]["type"] == "compiled":
         compiler = languages[file_extension]["compiler"]
@@ -163,19 +162,19 @@ def run_submission(code, problem, team, user, files):
             f' echo Compilation failed > {container_output_path}; '
             f' exit 1; '
             f'fi;'
+            f'export JUDGY_SOURCE_FILE={judgy_source_file};'
             f'output=$(timeout 60s python3 judge.py ./a.out);'
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
             f' echo {timeout_score} > {container_score_path}; '
             f' echo Your program timed out > {container_output_path};'
-            f'else '
+            f'else'
             f' score=$(echo $output | cut -d \\" \\" -f1); '
             f' filepath=$(echo $output | cut -d \\" \\" -f2-); '
             f' echo $score > {container_score_path}; '
             f' cat \\"$filepath\\" > {container_output_path}; '
             f'fi"'
         )    
-        file_name = Path(files[0]).name
     try:
         container = client.containers.run(
             docker_image,
@@ -187,5 +186,5 @@ def run_submission(code, problem, team, user, files):
     finally:
         container.stop()
         container.remove()
-        
-    return score_file, output_file, language, file_name
+            
+    return score_file, output_file, language, judgy_source_file

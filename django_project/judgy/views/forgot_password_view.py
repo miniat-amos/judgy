@@ -6,8 +6,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from ..forms import ForgotPasswordForm
-from ..models import User, UserUniqueToken
+from judgy.forms import ForgotPasswordForm
+from judgy.models import User, UserUniqueToken
 
 def forgot_password_view(request):
     if request.method == 'POST':

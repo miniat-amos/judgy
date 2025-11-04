@@ -1,6 +1,6 @@
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
-from ..forms import AuthenticationForm
+from judgy.forms import AuthenticationForm
 
 def login_view(request):
     if request.method == 'POST':

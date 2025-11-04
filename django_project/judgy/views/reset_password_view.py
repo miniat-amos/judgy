@@ -2,8 +2,8 @@ from datetime import timedelta
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
-from ..forms import ResetPasswordForm
-from ..models import User, UserUniqueToken
+from judgy.forms import ResetPasswordForm
+from judgy.models import User, UserUniqueToken
 
 def reset_password_view(request, uidb64, token):
     try:

@@ -4,9 +4,7 @@ from django.contrib.auth import authenticate
 from django.utils.html import strip_tags
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django.utils import timezone
-from .models import User, Competition, Problem, Team, Submission
-from django.core.exceptions import ValidationError
-
+from judgy.models import User, Competition, Problem, Team, Submission
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:

@@ -1,21 +1,17 @@
-import math
 import os
 from django.conf import settings
-from django.db.models import Min, Max
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
-from ..decorators import verified_required
-from ..forms import SubmissionForm
-from ..models import (
+from judgy.decorators import verified_required
+from judgy.forms import SubmissionForm
+from judgy.decorators import verified_required
+from judgy.forms import SubmissionForm
+from judgy.models import (
     Competition,
     Problem,
     Team,
-    Submission,
-    Notification,
-    User
 )
-from ..functions import run_submission
-from ..tasks import process_submission
+from judgy.tasks import process_submission
 
 @verified_required
 def submit_view(request, code, problem_name):

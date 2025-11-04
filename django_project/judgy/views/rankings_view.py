@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.db.models import Min, Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from ..models import Competition, Problem, Team, Submission
+from judgy.models import Competition, Problem, Team, Submission
 
 def rankings_view(request, code):
     competition = get_object_or_404(Competition, code=code)

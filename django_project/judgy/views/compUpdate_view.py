@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import Competition
-from ..serializers import CompSerializer
+from judgy.models import Competition
+from judgy.serializers import CompSerializer
 
 # Class for updating a competition
 class CompUpdate(APIView):

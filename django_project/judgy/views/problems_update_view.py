@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, get_object_or_404
-from ..forms import ProblemForm
-from ..models import Competition
-from ..utils import create_problem
-from ..tasks import create_images_task
+from judgy.forms import ProblemForm
+from judgy.models import Competition
+from judgy.utils import create_problem
+from judgy.tasks import create_images_task
 
 @user_passes_test(lambda u: u.is_superuser)
 def problems_update_view(request, code):

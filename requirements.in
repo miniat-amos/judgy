@@ -3,7 +3,10 @@ docker
 PyMySQL==1.1.1
 python-decouple==3.8
 cryptography
-gunicorn
+uvicorn[standard]
 djangorestframework
 redis
 celery
+channels
+channels_redis
+whitenoise

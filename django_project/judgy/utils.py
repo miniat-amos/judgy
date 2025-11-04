@@ -1,9 +1,12 @@
 from django.conf import settings
 from django.utils.text import slugify
 from pathlib import Path
-from .models import (
+from judgy.models import (
   Team,
-  Notification
+)
+
+from notifications.models import (
+    Notification
 )
 
 parent_dir = Path(settings.BASE_DIR).parent

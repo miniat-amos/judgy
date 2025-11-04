@@ -1,9 +1,10 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
-from ..decorators import verified_required
-from ..forms import TeamEnrollForm
-from ..models import Competition, Team, TeamJoinNotification
-from ..utils import team_add_user
+from judgy.decorators import verified_required
+from judgy.forms import TeamEnrollForm
+from judgy.models import Competition, Team
+from notifications.models import TeamJoinNotification
+from judgy.utils import team_add_user
 
 @verified_required
 def team_enroll_view(request, code):

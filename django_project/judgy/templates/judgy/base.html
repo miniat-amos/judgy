@@ -32,6 +32,7 @@
     </style>
 
     <script>
+
       $(async () => {
         $('textarea').css('height', 'auto');
 
@@ -67,11 +68,17 @@
           );
         });
 
-        let notifications = [];
-        const update_notifications = async () => {
-          const response = await fetch("{% url 'judgy:notifications' %}");
-          const updated_notifications = await response.json();
+        const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const notificationsSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/notifications/`);
 
+        notificationsSocket.onopen = function(e) {
+          console.log("Connected to notifications WebSocket");
+        };
+
+      
+        let notifications = [];
+        function update_notifications(updated_notifications) {
+  
           for (const notification of notifications) {
             if (!updated_notifications.some(n => n.id == notification.id)) {
               $(`[data-id="${notification.id}"]`).remove();
@@ -79,6 +86,7 @@
           }
 
           for (const notification of updated_notifications) {
+            console.log(notification)
             if (!notifications.some(n => n.id == notification.id)) {
               $('.toast-container').append(`
                 <div class="toast" role="alert" data-bs-autohide="false" data-id="${notification.id}" data-type="${notification.type}" data-header="${notification.header}">
@@ -118,7 +126,7 @@
 
           $('.toast .btn-close').on('click', function () {
             if ($(this).closest('.toast').data('type') == 0) {
-              fetch("{% url 'judgy:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'notifications:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }
@@ -164,8 +172,12 @@
 
           notifications = updated_notifications;
         };
-        update_notifications();
-        setInterval(update_notifications, 10000);
+
+        notificationsSocket.onmessage = function(event) {
+          const updated_notifications = JSON.parse(event.data);
+          console.log(updated_notifications)
+          update_notifications(updated_notifications);
+        };
 
         $(document).on('keydown', function (event) {
           if (event.key == '/') {
