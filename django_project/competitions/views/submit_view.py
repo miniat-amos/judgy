@@ -1,15 +1,13 @@
 import os
-from django.conf import settings
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.http import JsonResponse
 from judgy.decorators import verified_required
-from judgy.forms import SubmissionForm
-from judgy.models import (
+from competitions.forms import SubmissionForm
+from competitions.models import (
     Competition,
     Problem,
     Team,
-    Submission
 )
 from judgy.tasks import process_submission
 from judgy.utils import make_temp_dir

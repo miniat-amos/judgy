@@ -8,14 +8,14 @@ from django.contrib.auth import get_user_model
 from django.db.models import Min, Max
 from django.utils.html import format_html
 from pathlib import Path
-from judgy.models import (
+from judgy.models import User
+from judgy.functions import run_submission
+from competitions.models import (
     Competition,
     Problem,
     Team,
     Submission,
-    User
 )
-from judgy.functions import run_submission
 from notifications.models import Notification
 
 @shared_task

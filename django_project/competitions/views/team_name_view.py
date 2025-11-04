@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from judgy.forms import CompetitionCreationForm, TeamEnrollForm, TeamInviteForm
-from judgy.models import Competition, Team
+from competitions.forms import CompetitionCreationForm, TeamEnrollForm, TeamInviteForm
+from competitions.models import Competition, Team
 
 def team_name_view(request, code, name):
     competition = get_object_or_404(Competition, code=code)

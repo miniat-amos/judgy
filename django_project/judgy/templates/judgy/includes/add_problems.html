@@ -76,7 +76,7 @@
   });
 </script>
 
-<form action="{% url 'judgy:problems_update' competition.code %}" method="post" enctype="multipart/form-data">
+<form action="{% url 'competitions:problems_update' competition.code %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
     <div id="add-problems" class="modal fade">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">

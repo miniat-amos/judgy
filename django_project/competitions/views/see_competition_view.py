@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.utils import timezone
-from judgy.models import (Competition)
-from judgy.forms import CompetitionCreationForm
+from competitions.models import Competition
+from competitions.forms import CompetitionCreationForm
 def see_competitions_view(request):
     now = timezone.now()
 

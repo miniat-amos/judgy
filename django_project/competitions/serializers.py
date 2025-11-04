@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from judgy.models import Competition, Submission
+from competitions.models import Competition, Submission
 
 class CompSerializer(serializers.ModelSerializer):
     class Meta:

@@ -3,7 +3,7 @@ import zipfile
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from judgy.models import Competition
+from competitions.models import Competition
 from judgy.utils import get_dist_dir
 
 def download_view(request, code, problem_name):

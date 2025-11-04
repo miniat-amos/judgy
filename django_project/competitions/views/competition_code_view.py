@@ -2,14 +2,14 @@ from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from judgy.forms import (
+from competitions.forms import (
     CompetitionCreationForm,
     ProblemForm,
     SubmissionForm,
     TeamEnrollForm,
     TeamInviteForm
 )
-from judgy.models import Competition, Problem, Team, Submission
+from competitions.models import Competition, Problem, Team, Submission
 
 def competition_code_view(request, code):
     competition = get_object_or_404(Competition, code=code)

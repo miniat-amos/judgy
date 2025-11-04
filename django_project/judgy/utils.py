@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.utils.text import slugify
 from pathlib import Path
-from judgy.models import (
-  Team,
+from competitions.models import (
+  Team
 )
 
 from notifications.models import (

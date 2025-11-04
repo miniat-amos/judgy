@@ -1,6 +1,6 @@
 from rest_framework import generics
-from judgy.models import Submission
-from judgy.serializers import SubmissionScoreSerializer
+from competitions.models import Submission
+from competitions.serializers import SubmissionScoreSerializer
 
 # Class for updating a score as an Admin
 class ScoreUpdate(generics.RetrieveUpdateDestroyAPIView):

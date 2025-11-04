@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from judgy.models import Competition
-from judgy.serializers import CompSerializer
+from competitions.models import Competition
+from competitions.serializers import CompSerializer
 
 # Class for updating a competition
 class CompUpdate(APIView):
@@ -17,7 +17,7 @@ class CompUpdate(APIView):
         if serializer.is_valid():
             serializer.save()
             
-            redirect_url = reverse("judgy:competition_code", kwargs={"code":code})
+            redirect_url = reverse("competitions:competition_code", kwargs={"code":code})
             return Response({"success": f"Competition {competition.name} updated successfully!", "redirect_url": redirect_url}, status=status.HTTP_200_OK)
         else:
             print(serializer.errors)

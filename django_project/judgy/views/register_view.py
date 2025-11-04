@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from judgy.forms import CustomUserCreationForm
-from judgy.models import Competition
+from competitions.models import Competition
 from judgy.tasks import send_6dc_email_task
 
 def register_view(request):

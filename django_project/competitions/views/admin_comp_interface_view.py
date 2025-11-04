@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from judgy.models import Competition
+from competitions.models import Competition
 
 
 @user_passes_test(lambda u: u.is_superuser)

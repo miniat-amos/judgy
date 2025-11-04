@@ -1,9 +1,8 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, get_object_or_404
-from judgy.forms import ProblemForm
-from judgy.models import Competition
+from competitions.forms import ProblemForm
+from competitions.models import Competition
 from judgy.utils import create_problem
-from judgy.tasks import create_images_task
 
 @user_passes_test(lambda u: u.is_superuser)
 def problems_update_view(request, code):
@@ -28,8 +27,6 @@ def problems_update_view(request, code):
 
             create_problem(code, problem.name, description, judge_py, other_files, dist)
      
-            create_images_task.delay(code)
-
-            return redirect('judgy:competition_code', code=competition.code)
+            return redirect('competitions:competition_code', code=competition.code)
         else:
             print('form.errors:\n', problem_form.errors)

@@ -1,8 +1,8 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from judgy.decorators import verified_required
-from judgy.forms import TeamInviteForm
-from judgy.models import Competition, Team, User
+from competitions.forms import TeamInviteForm
+from competitions.models import Competition, Team, User
 from notifications.models import TeamInviteNotification
 
 @verified_required
@@ -22,7 +22,7 @@ def team_invite_view(request, code):
                         if user:
                             body = f'Hi {user.first_name}, {request.user} has invited you to join the team "{team.name}" for the competition "{competition.name}".'
                             TeamInviteNotification.objects.create(user=user, body=body, team=team)
-                return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+                return redirect('competitions:team_name', code=team.competition.code, name=team.name)
             else:
                 print('Some field was incorrectly filled out.')
                 print('form.errors:\n', form.errors)

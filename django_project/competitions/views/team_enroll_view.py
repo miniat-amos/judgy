@@ -1,8 +1,8 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from judgy.decorators import verified_required
-from judgy.forms import TeamEnrollForm
-from judgy.models import Competition, Team
+from competitions.forms import TeamEnrollForm
+from competitions.models import Competition, Team
 from notifications.models import TeamJoinNotification
 from judgy.utils import team_add_user
 
@@ -26,7 +26,7 @@ def team_enroll_view(request, code):
                         user = member
                         body = f'Hi {member.first_name}, {request.user} wants to join your team "{team.name}" for the competition "{competition.name}".'
                         TeamJoinNotification.objects.create(user=user, body=body, request_user=request.user, team=team)
-                return redirect('judgy:team_name', code=team.competition.code, name=team.name)
+                return redirect('competitions:team_name', code=team.competition.code, name=team.name)
             else:
                 print('Some field was not correctly filled.')
                 print('form.errors:\n', form.errors)

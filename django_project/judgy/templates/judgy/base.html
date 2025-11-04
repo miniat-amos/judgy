@@ -45,7 +45,7 @@
           body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
         });
 
-        const response = await fetch("{% url 'judgy:competitions' %}");
+        const response = await fetch("{% url 'competitions:competitions' %}");
         const competitions = await response.json();
         $('.search-input').on('input', function () {
           const input = $(this).val().trim();
@@ -59,7 +59,7 @@
               .filter(competition => RegExp(input, 'i').test(competition.name) || RegExp(input, 'i').test(competition.code))
               .map(competition => `
                 <li>
-                  <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'judgy:competition_code' 'code' %}".replace('code', competition.code)}>
+                  <a class="dropdown-item" style="color: ${competition.color};" href=${"{% url 'competitions:competition_code' 'code' %}".replace('code', competition.code)}>
                     ${competition.name} (${competition.code})
                   </a>
                 </li>
@@ -136,7 +136,7 @@
 
           $('.toast .accept').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Join Request') {
-              fetch("{% url 'judgy:team_join_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'competitions:team_join_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }
@@ -144,7 +144,7 @@
             }
 
             if ($(this).closest('.toast').data('header') == 'Team Invite') {
-              fetch("{% url 'judgy:team_invite_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'competitions:team_invite_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }
@@ -154,7 +154,7 @@
 
           $('.toast .decline').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Join Request') {
-              fetch("{% url 'judgy:team_join_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'competitions:team_join_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }
@@ -162,7 +162,7 @@
             }
 
             if ($(this).closest('.toast').data('header') == 'Team Invite') {
-              fetch("{% url 'judgy:team_invite_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
+              fetch("{% url 'competitions:team_invite_decline' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
                 headers: {
                   'X-CSRFToken': '{{ csrf_token }}'
                 }

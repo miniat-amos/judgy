@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from judgy.decorators import verified_required
-from judgy.models import Competition, Problem, Submission
+from competitions.models import Competition, Problem, Submission
 
 @verified_required
 def output_view(request, code, problem_name):
