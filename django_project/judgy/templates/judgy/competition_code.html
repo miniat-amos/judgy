@@ -39,6 +39,46 @@
       $('#submission').closest('form').remove();
     '{% endif %}'
 
+      $('#submit-submission').on('submit', async function (e) {
+        e.preventDefault(); // stop normal form post
+
+        const form = $(this);
+        const actionUrl = form.closest('form').attr('action');
+        const fileInput = $("#user-submission-files")[0];
+        const files = fileInput.files;
+        const formData = new FormData();
+
+        for (let i = 0; i < files.length; i++) {
+          formData.append('files', files[i]);
+        }
+
+        try {
+          const response = await fetch(actionUrl, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+
+          console.log(data)
+
+          $('#submission').modal('hide');
+          form.trigger('reset');
+
+        } catch (err) {
+          console.error('Upload error:', err);
+          alert('Error submitting file.');
+        }
+
+        return false; // stop any propagation
+    });
+
+
+    
+
     '{% if teams %}'
       const response = await fetch("{% url 'judgy:rankings' competition.code %}");
       const rankings = await response.json();
@@ -83,6 +123,9 @@
         }
 
     '{% endif %}'
+
+
+ 
   });
 </script>
 
@@ -116,7 +159,6 @@
          
             <div class="card-body">
               <h2 class="card-title">Problem {{ problem.number }}: <br>{{ problem.name }}</h2>
-              {% comment %} Do we truncate or keep full desc {% endcomment %}
               <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
               {% if download and user_team or is_competition_over or user.is_superuser %}
 
@@ -128,7 +170,7 @@
             <br>
               {% if upload %}
                   <div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
+                    <button class="btn btn-primary" class="upload-submission" data-bs-toggle="modal" data-bs-target="#submission" data-number="{{ problem.number }}" data-name="{{ problem.name }}">
                      Upload
                     </button>
 
@@ -147,7 +189,7 @@
               <br>
 
               {% if user_team %}
-                    Team Best: {{ problem.team_best_score|default:"--" }}
+                    <p>Team Best: {{ problem.team_best_score|default:"--" }}</p>
                     <br>
                     Your Best: {{ problem.user_best_score|default:"--" }}
               {% endif %}

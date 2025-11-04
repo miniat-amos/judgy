@@ -116,3 +116,14 @@ def team_add_user(competition, team, user):
         else:
             current_team.delete()
     team.members.add(user)
+
+
+def make_temp_dir(user):
+    main_directory = Path('/tmp')
+    temp_dir = main_directory / 'judgy_tmp'
+    temp_dir.mkdir(exist_ok=True)
+    
+    user_temp_dir = temp_dir / str(user.email)
+    user_temp_dir.mkdir(exist_ok=True)
+    
+    return user_temp_dir.resolve()

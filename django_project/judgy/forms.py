@@ -436,7 +436,7 @@ class SubmissionForm(forms.ModelForm):
 
         self.fields['files'].widget.attrs.update(
             {
-                'id': 'files',
+                'id': 'user-submission-files',
                 'class': 'form-control',
                 'multiple': True
             }

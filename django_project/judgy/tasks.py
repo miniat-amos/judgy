@@ -64,12 +64,8 @@ def process_submission(code, competition, problem_id, problem_name, team_id, use
     if problem.show_output:
         output_url = f'/competition/{code}/{problem_name}/submission/output'
         body = format_html(
-            'You got a score of {} in the problem "{}" for the competition "{}".<br>'
-            'Click <a href="{}" target="_blank">here</a> to see the output.',
-            score,
-            problem.name,
-            competition.name,
-            output_url
+            f'You got a score of {score} in the problem "{problem_name}" for the competition "{competition.name}".<br>'
+            f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
         )
     else:
         body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'

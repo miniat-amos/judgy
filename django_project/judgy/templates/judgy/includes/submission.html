@@ -1,4 +1,4 @@
-<form action="{% url 'judgy:submit' competition.code 'problem.name' %}" method="post" enctype="multipart/form-data">
+<form id="submit-submission" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   <div id="submission" class="modal fade">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
