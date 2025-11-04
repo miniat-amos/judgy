@@ -39,8 +39,6 @@ def submit_view(request, code, problem_name):
                             dest.write(chunk)
                     file_paths.append(save_path)
 
-                print(type(file_paths), file_paths)
-
                 process_submission.delay(code, competition.code, problem.id, problem_name, user_team.id, request.user.id, file_paths)
 
                 return redirect('judgy:competition_code', code=code)
