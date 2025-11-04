@@ -44,11 +44,10 @@ def submit_view(request, code, problem_name):
 
                 process_submission.delay(code, competition.code, problem.id, problem_name, user_team.id, request.user.id, file_paths)
 
-                latest_submission = Submission.objects.filter(user=user, problem=problem).first()
+                # latest_submission = Submission.objects.filter(user=user, problem=problem).first
                 
                 user_submission = {
                     "problem": problem.name,
-                    "score": latest_submission.score
                 }
                 
                 return JsonResponse(user_submission, safe=False)
