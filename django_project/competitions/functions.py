@@ -2,7 +2,7 @@ import docker
 import os
 import shutil
 from pathlib import Path
-from judgy.utils import make_file, create_user_dir
+from competitions.utils import make_file, create_user_dir
 
 languages = {
     ".py": {"image": "python", "type": "interpreted", "interpreter": "python3", "language": "Python"},

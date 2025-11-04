@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from judgy.decorators import verified_required
 from notifications.models import TeamInviteNotification, Notification
-from judgy.utils import team_add_user
+from competitions.utils import team_add_user
 
 @verified_required
 def team_invite_accept_view(request, id):

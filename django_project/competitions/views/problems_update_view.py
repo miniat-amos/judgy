@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, get_object_or_404
 from competitions.forms import ProblemForm
 from competitions.models import Competition
-from judgy.utils import create_problem
+from competitions.utils import create_problem
 
 @user_passes_test(lambda u: u.is_superuser)
 def problems_update_view(request, code):

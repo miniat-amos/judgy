@@ -4,7 +4,7 @@ from judgy.decorators import verified_required
 from competitions.forms import TeamEnrollForm
 from competitions.models import Competition, Team
 from notifications.models import TeamJoinNotification
-from judgy.utils import team_add_user
+from competitions.utils import team_add_user
 
 @verified_required
 def team_enroll_view(request, code):

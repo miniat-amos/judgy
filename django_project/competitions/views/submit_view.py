@@ -9,8 +9,8 @@ from competitions.models import (
     Problem,
     Team,
 )
-from judgy.tasks import process_submission
-from judgy.utils import make_temp_dir
+from competitions.tasks import process_submission
+from competitions.utils import make_temp_dir
 
 @verified_required
 def submit_view(request, code, problem_name):

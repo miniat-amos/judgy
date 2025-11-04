@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from competitions.models import Competition
-from judgy.utils import get_dist_dir
+from competitions.utils import get_dist_dir
 
 def download_view(request, code, problem_name):
     competition = get_object_or_404(Competition, code=code)
