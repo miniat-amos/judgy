@@ -65,13 +65,14 @@ def create_problem(code, name, description, judge_py, other_files, dist):
     judge_py_dir = problem / 'judging_program'
     judge_py_dir.mkdir(exist_ok=True)
 
-    with open(judge_py_dir / judge_py.name, 'wb') as f:
-        for chunk in judge_py.chunks():
-            f.write(chunk)
-    if judge_py.name in dist:
-        with open(dist_dir / judge_py.name, 'wb') as f:
+    if(judge_py):
+        with open(judge_py_dir / judge_py.name, 'wb') as f:
             for chunk in judge_py.chunks():
                 f.write(chunk)
+        if judge_py.name in dist:
+            with open(dist_dir / judge_py.name, 'wb') as f:
+                for chunk in judge_py.chunks():
+                    f.write(chunk)
     
     other_files_dir = problem / 'other_files'
     other_files_dir.mkdir(exist_ok=True)

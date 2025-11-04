@@ -39,13 +39,18 @@
               <td class="text-center"><input class="form-check-input" name="distribute[${description.name}]" type="checkbox" checked></td>
             </tr>
           `);
-          const judge_py = $('#judge-py')[0].files[0];
-          $('.step-2 tbody').append(`
-            <tr>
-              <th scope="row">${judge_py.name}</th>
-              <td class="text-center"><input class="form-check-input" name="distribute[${judge_py.name}]" type="checkbox" checked></td>
-            </tr>
-          `);
+          const judge_py_input = $('#judge-py')[0];
+          if (judge_py_input && judge_py_input.files.length > 0) {
+            const judge_py = judge_py_input.files[0];
+            $('.step-2 tbody').append(`
+              <tr>
+                <th scope="row">${judge_py.name}</th>
+                <td class="text-center">
+                  <input class="form-check-input" name="distribute[${judge_py.name}]" type="checkbox" checked>
+                </td>
+              </tr>
+            `);
+          }
           for (const file of $('#other-files')[0].files) {
             $('.step-2 tbody').append(`
               <tr>
