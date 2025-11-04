@@ -1,25 +1,22 @@
+import math
 import subprocess
 from celery import shared_task
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django.db.models import Min, Max
 from django.utils.html import format_html
-import math
 from pathlib import Path
-from .models import (
+from judgy.models import (
     Competition,
     Problem,
     Team,
     Submission,
-    Notification,
     User
 )
-
-from .models import Submission, Notification, Problem, User, Team
-from .functions import run_submission
+from judgy.functions import run_submission
+from notifications.models import Notification
 
 @shared_task
 def send_6dc_email_task(user_id, user_email):
@@ -63,13 +60,7 @@ def process_submission(code, competition, problem_id, problem_name, team_id, use
         output=file_output,
         score=score
     )
-
-    # if problem.show_output:
-    #     output_url = f'/competition/{problem.competition.code}/{problem.name}/submission/output'
-    #     body = f'You got a score of {score}. Click {output_url} to see output.'
-    # else:
-    #     body = f'You got a score of {score}.'
-
+    
     if problem.show_output:
         output_url = f'/competition/{code}/{problem_name}/submission/output'
         body = format_html(
