@@ -16,13 +16,24 @@
     border-color: white;
   }
 
-  .ranking-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  .rankings-wrapper {
+    position: relative;
   }
 
-  .ranking-card.ranking-updated {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+  .ranking-card {
+    position: relative;
+    transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scale, 1));
+    transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 420ms ease;
+    will-change: transform;
+  }
+
+  .ranking-card.ranking-floating {
+    z-index: 5;
+    box-shadow: 0 22px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .ranking-card .card-body {
+    transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1);
   }
  
   .plus-icon { 
@@ -95,6 +106,7 @@
     const scoreSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/scores/${competitionCode}/`);
     const rankingsContainer = $('#rankings');
     const teamUrlTemplate = "{% url 'competition:team_name' competition.code 'team.name' %}";
+    const transitionTiming = '420ms cubic-bezier(0.23, 1, 0.32, 1)';
 
     function teamUrl(teamName) {
       return teamUrlTemplate.replace('team.name', encodeURIComponent(teamName));
@@ -126,31 +138,89 @@
         .join('');
     }
 
-    function updateRankingCard($card, team) {
-      $card.attr('data-team-id', team.team_id);
-      $card.attr('data-rank', team.rank);
-      $card.find('.team-rank').text(`Rank: #${team.rank}`);
-      const $teamLink = $card.find('.team-name');
-      $teamLink.text(team.team_name);
-      $teamLink.attr('href', teamUrl(team.team_name));
-      $card.find('.rank-members').html(buildMembersHtml(team.members));
+    function setRankText(card, rank) {
+      card.querySelector('.team-rank').textContent = `Rank: #${rank}`;
+    }
+
+    function updateRankingCard(card, team, { deferRankUpdate = false } = {}) {
+      card.dataset.teamId = team.team_id;
+      card.dataset.pendingRank = team.rank;
+      card.querySelector('.team-name').textContent = team.team_name;
+      card.querySelector('.team-name').href = teamUrl(team.team_name);
+      card.querySelector('.rank-members').innerHTML = buildMembersHtml(team.members);
+
+      if (!deferRankUpdate) {
+        setRankText(card, team.rank);
+      }
     }
 
     function createRankingCard(team) {
-      const $card = $(`
-        <div class="card bg-body-tertiary ranking-card mb-3" data-team-id="${team.team_id}" data-rank="${team.rank}">
-          <div class="card-body">
-            <h2 class="card-title team-rank"></h2>
-            <h3 class="card-title">
-              Team:
-              <a class="text-decoration-none team-name" href="#"></a>
-            </h3>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 rank-members"></div>
-          </div>
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card bg-body-tertiary ranking-card mb-3';
+      wrapper.setAttribute('data-team-id', team.team_id);
+      wrapper.setAttribute('data-rank', team.rank);
+      wrapper.innerHTML = `
+        <div class="card-body">
+          <h2 class="card-title team-rank"></h2>
+          <h3 class="card-title">
+            Team:
+            <a class="text-decoration-none team-name" href="#"></a>
+          </h3>
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 rank-members"></div>
         </div>
-      `);
-      updateRankingCard($card, team);
-      return $card;
+      `;
+      updateRankingCard(wrapper, team);
+      return wrapper;
+    }
+
+    function measurePositions(container) {
+      const map = new Map();
+      container.querySelectorAll('[data-team-id]').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        map.set(card.dataset.teamId, {
+          rect,
+          rank: Number(card.dataset.rank || 0),
+        });
+      });
+      return map;
+    }
+
+    function applyFlip(card, prevRect, nextRect, rankChanged) {
+      const deltaX = prevRect.rect.left - nextRect.rect.left;
+      const deltaY = prevRect.rect.top - nextRect.rect.top;
+
+      if (!deltaX && !deltaY) {
+        if (rankChanged) {
+          setRankText(card, card.dataset.pendingRank);
+          card.dataset.rank = card.dataset.pendingRank;
+        }
+        return;
+      }
+
+      card.style.transition = 'none';
+      card.style.setProperty('--translate-x', `${deltaX}px`);
+      card.style.setProperty('--translate-y', `${deltaY}px`);
+
+      requestAnimationFrame(() => {
+        card.classList.add('ranking-floating');
+        card.style.transition = `transform ${transitionTiming}, box-shadow ${transitionTiming}`;
+        card.style.setProperty('--translate-x', '0px');
+        card.style.setProperty('--translate-y', '0px');
+        card.style.setProperty('--scale', rankChanged ? '1.06' : '1');
+
+        const onEnd = (event) => {
+          if (event.propertyName !== 'transform') return;
+          card.removeEventListener('transitionend', onEnd);
+          card.classList.remove('ranking-floating');
+          card.style.removeProperty('--scale');
+
+          if (rankChanged) {
+            setRankText(card, card.dataset.pendingRank);
+          }
+          card.dataset.rank = card.dataset.pendingRank;
+        };
+        card.addEventListener('transitionend', onEnd, { once: true });
+      });
     }
 
     function renderRankings(rankings) {
@@ -158,34 +228,74 @@
         return;
       }
 
-      const existingCards = new Map();
-      rankingsContainer.children('[data-team-id]').each(function () {
-        const $card = $(this);
-        existingCards.set($card.data('team-id'), $card);
+      const containerEl = rankingsContainer[0];
+      const previousPositions = measurePositions(containerEl);
+      const cardsById = new Map();
+      containerEl.querySelectorAll('[data-team-id]').forEach(card => {
+        cardsById.set(card.dataset.teamId, card);
       });
 
-      const seenTeams = new Set();
+      const fragment = document.createDocumentFragment();
+      const seenIds = new Set();
 
-      rankings.forEach((team) => {
-        const teamId = team.team_id;
-        let $card = existingCards.get(teamId);
+      rankings.forEach(team => {
+        const teamId = String(team.team_id);
+        let card = cardsById.get(teamId);
+        const prevRank = card ? Number(card.dataset.rank || 0) : null;
+        const rankChanged = prevRank !== null && prevRank !== team.rank;
 
-        if ($card) {
-          updateRankingCard($card, team);
+        if (!card) {
+          card = createRankingCard(team);
         } else {
-          $card = createRankingCard(team);
+          updateRankingCard(card, team, { deferRankUpdate: rankChanged });
         }
 
-        seenTeams.add(teamId);
-        rankingsContainer.append($card);
-        $card.addClass('ranking-updated');
-        setTimeout(() => $card.removeClass('ranking-updated'), 350);
+        card.dataset.rank = team.rank;
+        card.dataset.pendingRank = team.rank;
+        card.dataset.rankChanged = rankChanged ? '1' : '0';
+        fragment.appendChild(card);
+        seenIds.add(teamId);
       });
 
-      existingCards.forEach(($card, teamId) => {
-        if (!seenTeams.has(teamId)) {
-          $card.remove();
+      cardsById.forEach((card, id) => {
+        if (!seenIds.has(id)) {
+          card.remove();
         }
+      });
+
+      containerEl.appendChild(fragment);
+
+      const nextPositions = measurePositions(containerEl);
+      containerEl.querySelectorAll('[data-team-id]').forEach(card => {
+        const teamId = card.dataset.teamId;
+        const prevRect = previousPositions.get(teamId);
+        const nextRect = nextPositions.get(teamId);
+        const rankChanged = card.dataset.rankChanged === '1';
+
+        if (prevRect && nextRect) {
+          applyFlip(card, prevRect, nextRect, rankChanged);
+        } else {
+          card.style.transition = 'none';
+          card.style.setProperty('--translate-y', '20px');
+          card.style.setProperty('--scale', '0.92');
+          requestAnimationFrame(() => {
+            card.classList.add('ranking-floating');
+            card.style.transition = `transform ${transitionTiming}, box-shadow ${transitionTiming}`;
+            card.style.setProperty('--translate-y', '0px');
+            card.style.setProperty('--scale', '1');
+            setRankText(card, card.dataset.pendingRank);
+
+            const onEnd = (event) => {
+              if (event.propertyName !== 'transform') return;
+              card.removeEventListener('transitionend', onEnd);
+              card.classList.remove('ranking-floating');
+              card.style.removeProperty('--scale');
+            };
+            card.addEventListener('transitionend', onEnd, { once: true });
+          });
+        }
+
+        delete card.dataset.rankChanged;
       });
     }
 
@@ -329,7 +439,7 @@
   </div>
   <div class="row row-cols-1 g-4">
     {% if teams %}
-    <div id="rankings">
+    <div id="rankings" class="rankings-wrapper">
     </div>
     {% else %}
       <h2 class="text-center">No Teams</h2>
