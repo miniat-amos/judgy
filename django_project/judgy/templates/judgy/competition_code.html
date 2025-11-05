@@ -36,10 +36,6 @@
     transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
-  #rankings {
-    margin-top: 5px;
-  }
- 
   .plus-icon { 
     font-size: 200px; 
   }
@@ -213,6 +209,7 @@
         card.style.setProperty('--scale', rankChanged ? '1.06' : '1');
 
         let finalized = false;
+
         const finalize = () => {
           if (finalized) {
             return;
@@ -226,10 +223,10 @@
           }
           card.dataset.rank = card.dataset.pendingRank;
         };
+
         const onEnd = (event) => {
-          if (event.propertyName !== 'transform') {
-            return;
-          }
+          if (event.propertyName !== 'transform') return;
+          card.removeEventListener('transitionend', onEnd);
           finalize();
         };
         card.addEventListener('transitionend', onEnd, { once: true });
