@@ -14,7 +14,7 @@ from competition.models import (
     Submission,
 )
 from notifications.models import Notification
-
+from .functions import has_judging_program
 
 @shared_task
 def create_images_task(competition_code):
@@ -30,47 +30,56 @@ def process_submission(code, competition, problem_id, problem_name, team_id, use
     
     score_file, output_file, language, file_name = run_submission(code, problem, user_team, user, file_paths)
     
-    with open(score_file, 'r') as f:
-        score = f.read().split(' ')[0]
-    with open(output_file, 'r') as f:
-        file_output = f.read()
+    if not problem.subjective:
 
-    Submission.objects.create(
-        problem=problem,
-        team=user_team,
-        user=user,
-        language=language,
-        file_name=file_name,
-        output=file_output,
-        score=score
-    )
-    
-    if problem.show_output:
-        output_url = f'/competition/{code}/{problem_name}/submission/output'
-        body = format_html(
-            f'You got a score of {score} in the problem "{problem_name}" for the competition "{competition.name}".<br>'
-            f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
+        with open(score_file, 'r') as f:
+            score = f.read().split(' ')[0]
+        with open(output_file, 'r') as f:
+            file_output = f.read()
+
+        Submission.objects.create(
+            problem=problem,
+            team=user_team,
+            user=user,
+            language=language,
+            file_name=file_name,
+            output=file_output,
+            score=score
         )
-    else:
-        body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
+        
+        if problem.show_output:
+            output_url = f'/competition/{code}/{problem_name}/submission/output'
+            body = format_html(
+                f'You got a score of {score} in the problem "{problem_name}" for the competition "{competition.name}".<br>'
+                f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
+            )
+        else:
+            body=f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
 
-    Notification.objects.create(
-        user=user,
-        header='Your Score',
-        body=body,
-    )
+        Notification.objects.create(
+            user=user,
+            header='Your Score',
+            body=body,
+        )
 
-    Notification.objects.create(user=user, header='Your Score', body=body)
+        Notification.objects.create(user=user, header='Your Score', body=body)
 
-    competition_submissions = Submission.objects.filter(problem=problem)
-    if problem.score_preference:
-        competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
-        if int(score) > competition_best_score:
-            notify_best_score(user, user_team, score, problem)
-    else:
-        competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
-        if int(score) < competition_best_score:
-            notify_best_score(user, user_team, score, problem)
+        competition_submissions = Submission.objects.filter(problem=problem)
+        if problem.score_preference:
+            competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
+            if int(score) > competition_best_score:
+                notify_best_score(user, user_team, score, problem)
+        else:
+            competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
+            if int(score) < competition_best_score:
+                notify_best_score(user, user_team, score, problem)
+
+    elif problem.subjective and not has_judging_program(competition, problem):
+        Notification.objects.create(
+            user=user,
+            header='Your Submission',
+            body=f'Your file you uploaded has been successfully submitted.',
+        )
 
 def notify_best_score(user, team, score, problem):
     competition = problem.competition
