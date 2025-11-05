@@ -16,13 +16,13 @@
 <script>
   $(async () => {
     new QRCode($('#qrcode')[0], {
-      text: `${window.location.origin}{% url 'competitions:competition_code' competition.code %}`,
+      text: `${window.location.origin}{% url 'competition:competition_code' competition.code %}`,
       colorDark: '{{ competition.color }}',
       colorLight: '#00000000'
     });
 
     const qrCodeImg = $('#qrcode').find("img")
-    qrCodeImg.attr("alt", "{% url 'competitions:competition_code' competition.code %}")
+    qrCodeImg.attr("alt", "{% url 'competition:competition_code' competition.code %}")
     
     $('#delete-competition').on('show.bs.modal', event => {
       $('.modal-body .name').text('{{ competition.name|escapejs }}');
@@ -32,7 +32,7 @@
     
 
     $('#delete-competition .btn-danger').on('click', async () => {
-      const response = await fetch("{% url 'competitions:competition_code' competition.code %}", {
+      const response = await fetch("{% url 'competition:competition_code' competition.code %}", {
         method: 'DELETE',
         headers: {
           'X-CSRFToken': '{{ csrf_token }}'
@@ -49,7 +49,7 @@
       $('#enroll').closest('form').remove();
     }
 
-    const response = await fetch("{% url 'competitions:competition_teams' competition.code %}");
+    const response = await fetch("{% url 'competition:competition_teams' competition.code %}");
     const teams = await response.json();
 
     $('#team-name').on('input', function () {
@@ -91,12 +91,12 @@
 
 
     $('#leave-team .btn-danger').on('click', async () => {
-      const response = await fetch("{% url 'competitions:team_leave' competition.code %}", {
+      const response = await fetch("{% url 'competition:team_leave' competition.code %}", {
         headers: {
           'X-CSRFToken': '{{ csrf_token }}'
         }
       });
-      if (response.ok) location.href = "{% url 'competitions:competition_code' competition.code %}";
+      if (response.ok) location.href = "{% url 'competition:competition_code' competition.code %}";
     });
 
     '{% if team_invite_form %}'
@@ -118,7 +118,7 @@
   
       // Update the action attribute in the edit competition modal 
       $(".edit-competition-btn").click(function() {
-          let url = "{% url 'competitions:update_competition' competition.code %}"
+          let url = "{% url 'competition:update_competition' competition.code %}"
           $("#updateCompForm").attr("action", url)
       })
 
@@ -164,7 +164,7 @@
       <div class="d-flex justify-content-start py-5 w-100">
         <div>
           <h1>
-            <a class="text-decoration-none" href="{% url 'competitions:competition_code' competition.code %}">
+            <a class="text-decoration-none" href="{% url 'competition:competition_code' competition.code %}">
               {{ competition.name }}
             </a>
           </h1>
@@ -190,14 +190,14 @@
             <div class="d-flex gap-3">
               <button id="edit-button" class="edit-competition-btn btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
-              <a class="btn btn-primary" href="{% url 'competitions:admin_comp_interface' competition.code %}">MANAGE</a>
+              <a class="btn btn-primary" href="{% url 'competition:admin_comp_interface' competition.code %}">MANAGE</a>
             </div>
           {% elif user.is_authenticated %}
             {% if user_team %}
               <div class="d-flex justify-content-between">
                 <div class="me-5 pe-5">
                   <h3>
-                    <a class="text-decoration-none" href="{% url 'competitions:team_name' competition.code user_team.name %}">
+                    <a class="text-decoration-none" href="{% url 'competition:team_name' competition.code user_team.name %}">
                       {{ user_team.name }}
                     </a>
                   </h3>
@@ -218,7 +218,7 @@
       <div class="d-flex justify-content-end py-5 w-100">
         <div class="d-flex flex-column align-items-center text-center">
           <h1>Share this Competition</h1>
-          <a class="text-decoration-none" href="{% url 'competitions:competition_code' competition.code %}">
+          <a class="text-decoration-none" href="{% url 'competition:competition_code' competition.code %}">
             <div id="qrcode"  data-alt="QR code linking to the competition page">
             </div>
           </a>

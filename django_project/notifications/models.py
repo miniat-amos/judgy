@@ -1,6 +1,6 @@
 from django.db import models
 from judgy.models import User
-from competitions.models import Team
+from competition.models import Team
 
 # Create your models here.
 class Notification(models.Model):

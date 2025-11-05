@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "judgy",
     "notifications",
-    "competitions",
+    "competition",
     "rest_framework",
     "channels",
 ]

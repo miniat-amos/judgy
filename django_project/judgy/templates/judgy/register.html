@@ -190,7 +190,7 @@
                 <div class="col">
                   <a
                     class="card h-100 bg-body-tertiary text-decoration-none"
-                    href="{% url 'competitions:competition_code' competition.code %}"
+                    href="{% url 'competition:competition_code' competition.code %}"
                     data-end="{{ competition.end|date:'Y-m-d H:i:s' }}"
                   >
                     <div class="card-img-top px-1 text-end" style="background: {{ competition.color }}; height: 100px;">

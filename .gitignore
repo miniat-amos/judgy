@@ -35,7 +35,7 @@
 django_project/*
 !django_project/judgy/
 !django_project/notifications
-!django_project/competitions
+!django_project/competition
 !django_project/progcomp/
 !django_project/manage.py
 !django_project/docker-compose.languages.yml

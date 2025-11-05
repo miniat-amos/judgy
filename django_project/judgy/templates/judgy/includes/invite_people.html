@@ -1,4 +1,4 @@
-<form action="{% url 'competitions:team_invite' competition.code %}" method="post">
+<form action="{% url 'competition:team_invite' competition.code %}" method="post">
   {% csrf_token %}
   <div id="invite-people" class="modal fade">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">

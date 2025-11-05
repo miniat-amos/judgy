@@ -7,7 +7,7 @@
 <script>
 $(async () => {
 
-        const member_scores_url = "{% url 'competitions:members_scores' competition.code team.name %}"
+        const member_scores_url = "{% url 'competition:members_scores' competition.code team.name %}"
 
         const response = await fetch(member_scores_url);
         const member_scores = await response.json();

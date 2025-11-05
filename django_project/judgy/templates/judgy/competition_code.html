@@ -32,7 +32,7 @@
     '{% if submission_form %}'
       $('#submission').on('show.bs.modal', event => {
         $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
-        $('#submission').closest('form').attr('action', "{% url 'competitions:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
+        $('#submission').closest('form').attr('action', "{% url 'competition:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
       });
     '{% else %}'
       $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
@@ -63,8 +63,6 @@
 
           const data = await response.json();
 
-          console.log(data)
-
           $('#submission').modal('hide');
           form.trigger('reset');
 
@@ -73,14 +71,14 @@
           alert('Error submitting file.');
         }
 
-        return false; // stop any propagation
+        return false; 
     });
 
 
     
 
     '{% if teams %}'
-      const response = await fetch("{% url 'competitions:rankings' competition.code %}");
+      const response = await fetch("{% url 'competition:rankings' competition.code %}");
       const rankings = await response.json();
 
       
@@ -107,7 +105,7 @@
           
               <div class="card-body">
                 <h2 class="card-title">Rank: #${team.rank}</h2>
-                <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'competitions:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
+                <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'competition:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
                   ${team.team_name}
                   </a>
                 </h3>
@@ -124,6 +122,19 @@
 
     '{% endif %}'
 
+
+    const competitionCode = "{{ competition.code }}";
+    const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const scoreSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/scores/${competitionCode}/`);
+
+    scoreSocket.onopen = function(e) {
+      console.log("Connected to scores WebSocket");
+    }
+
+    scoreSocket.onmessage = function(event) {
+      const updated_scores = JSON.parse(event.data);
+      console.log(updated_scores);
+    }
 
  
   });
@@ -162,7 +173,7 @@
               <p class="card-text">{{ problem.description|truncatechars:100 }}</p> 
               {% if download and user_team or is_competition_over or user.is_superuser %}
 
-                  <a  href="{% url 'competitions:download' competition.code problem.name %}" class="d-block">
+                  <a  href="{% url 'competition:download' competition.code problem.name %}" class="d-block">
                     <h2>Download</h2>               
                   </a>
 
@@ -174,7 +185,7 @@
                      Upload
                     </button>
 
-                    <a class="mt-1 btn btn-primary" href="{% url 'competitions:output' competition.code problem.name %}">
+                    <a class="mt-1 btn btn-primary" href="{% url 'competition:output' competition.code problem.name %}">
                         View Output for {{ problem.name|escapejs }}
                     </a>
                   </div>

@@ -8,14 +8,14 @@
 <script>
   $(async () => {
 
-      const response = await fetch("{% url 'competitions:competition_teams' competition.code %}");
+      const response = await fetch("{% url 'competition:competition_teams' competition.code %}");
       const teams = await response.json();
 
       $('#teams').empty();
 
         for (const team of teams) {
 
-          const member_url = "{% url 'competitions:team_members' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+          const member_url = "{% url 'competition:team_members' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
 
           const response = await fetch(member_url);
           const members = await response.json();
@@ -35,7 +35,7 @@
               `
           }
           
-          const team_admin_url = "{% url 'competitions:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+          const team_admin_url = "{% url 'competition:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
 
           $('#teams').append(`
           <div class="card bg-body-tertiary">

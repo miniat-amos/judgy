@@ -7,7 +7,7 @@ def login_view(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('competitions:see_competitions')
+            return redirect('competition:see_competitions')
     else:
         form = AuthenticationForm()
     return render(request, 'judgy/login.html', {'form': form})
