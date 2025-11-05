@@ -81,7 +81,6 @@
       const response = await fetch("{% url 'competition:rankings' competition.code %}");
       const rankings = await response.json();
 
-      
       $('#rankings').empty();
 
         for (const team of rankings) {
@@ -131,9 +130,19 @@
       console.log("Connected to scores WebSocket");
     }
 
+    function updateScores(updated_scores)
+    {
+      const problemId = updated_scores.problem;
+
+      $(`#team-best-${problemId}`).text(updated_scores.team_best);
+      $(`#user-best-${problemId}`).text(updated_scores.user_best);
+      $(`#competition-best-${problemId}`).text(updated_scores.competition_best);
+
+    }
+
     scoreSocket.onmessage = function(event) {
       const updated_scores = JSON.parse(event.data);
-      console.log(updated_scores);
+      updateScores(updated_scores);
     }
 
  
@@ -199,14 +208,15 @@
               {% endif %}
               <br>
 
+        
               {% if user_team %}
-                    <p>Team Best: {{ problem.team_best_score|default:"--" }}</p>
-                    <br>
-                    Your Best: {{ problem.user_best_score|default:"--" }}
+                Team Best: <span id="team-best-{{ problem.id }}">{{ problem.team_best_score|default:"--" }}</span>
+                <br>
+                Your Best: <span id="user-best-{{ problem.id }}">{{ problem.user_best_score|default:"--" }}</span>
               {% endif %}
-
               <br>
-              Competition Best: {{ problem.competition_best_score|default:"--" }}
+              Competition Best: <span id="competition-best-{{ problem.id }}">{{ problem.competition_best_score|default:"--" }}</span>
+
 
             </div>
           </div>

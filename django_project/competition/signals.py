@@ -2,13 +2,11 @@ from django.db.models.signals import post_save
 from django.db.models import Max, Min
 from django.dispatch import receiver
 from competition.models import Submission
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-
-import logging
-
-logger = logging.getLogger(__name__)
-
+from competition.utils import (
+    send_competition_best, 
+    send_team_best,
+    send_user_best
+)
 
 @receiver(post_save, sender=Submission)
 def check_best_score(sender, instance, created, **kwargs):
@@ -33,23 +31,13 @@ def check_best_score(sender, instance, created, **kwargs):
     competition_best = competition_submissions.aggregate(agg_func('score'))[key_name]
     team_best = team_submissions.aggregate(agg_func('score'))[key_name]
     user_best = user_submissions.aggregate(agg_func('score'))[key_name]
-
-    logger.info("Computed bests:", competition_best, team_best, user_best)
     
-    data = [{
-        "problem": problem.name,
-        "competition_best": competition_best,
-        "team_best": team_best,
-        "user_best": user_best,
-    }]
+    
+    send_competition_best(problem, competition_best)
+    send_team_best(problem, team, team_best)
+    send_user_best(problem, user, user_best)
+    
 
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"competition_{problem.competition.code}",
-        {
-            "type": "score_update",
-            "data": data
-        }
-    )
+
 
 

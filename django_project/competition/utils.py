@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.conf import settings
 from django.utils.text import slugify
 from pathlib import Path
@@ -128,3 +130,46 @@ def make_temp_dir(user):
     user_temp_dir.mkdir(exist_ok=True)
     
     return user_temp_dir.resolve()
+
+channel_layer = get_channel_layer()
+
+def send_competition_best(problem, competition_best):
+
+        # Competition best
+    async_to_sync(channel_layer.group_send)(
+        f"competition_{problem.competition.code}",
+        {
+            "type": "score_update",
+            "data": {
+                "problem": problem.id,
+                "competition_best": competition_best,
+            }
+        }
+    )
+
+def send_team_best(problem, team, team_best):
+
+        # Competition best
+    async_to_sync(channel_layer.group_send)(
+        f"team_{team.id}",
+        {
+            "type": "score_update",
+            "data": {
+                "problem": problem.id,
+                "team_best": team_best,
+            }
+        }
+    )
+    
+def send_user_best(problem, user, user_best):
+
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user.id}",
+        {
+            "type": "score_update",
+            "data": {
+                "problem": problem.id,
+                "user_best": user_best,
+            }
+        }
+    )
