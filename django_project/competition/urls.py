@@ -3,6 +3,7 @@ from django.urls import path
 from competition.views.see_competition_view import see_competitions_view
 from competition.views.competition_create_view import competition_create_view
 from competition.views.problems_update_view import problems_update_view
+from competition.views.competition_build_image_view import build_image
 from competition.views.competition_code_view import competition_code_view
 from competition.views.competitions_view import competitions_view
 from competition.views.team_enroll_view import team_enroll_view
@@ -34,6 +35,7 @@ urlpatterns = [
     path('all-competitions', see_competitions_view, name='see_competitions'),
     path('competition/create', competition_create_view, name='competition_create'),
     path('competition/<str:code>/problems/update', problems_update_view, name='problems_update'),
+    path('competition/<str:code>/build', build_image, name='competition_build_image'),
     path('competition/<str:code>', competition_code_view, name='competition_code'),
     path('competition/<str:code>/team/enroll', team_enroll_view, name='team_enroll'),
     path('team/join/<str:id>/accept', team_join_accept_view, name='team_join_accept'),

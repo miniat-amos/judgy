@@ -88,6 +88,21 @@
       }
     });
 
+    $(".build-container-btn").click(function() {
+      let url = "{% url 'competition:competition_build_image' competition.code %}";
+      $.ajax({
+        url: url,
+        type: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        success: function(response) {
+          alert("✅ " + response.status + " (Task ID: " + response.task_id + ")");
+        },
+        error: function(xhr) {
+          alert("❌ Failed to start build. Status: " + xhr.status + "\n" + xhr.responseText);
+          console.error(xhr);
+        }
+      });
+    });
 
 
     $('#leave-team .btn-danger').on('click', async () => {
@@ -191,6 +206,9 @@
               <button id="edit-button" class="edit-competition-btn btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
               <a class="btn btn-primary" href="{% url 'competition:admin_comp_interface' competition.code %}">MANAGE</a>
+              {% if problems %}
+                <button class="btn btn-success build-container-btn">BUILD IMAGE</button>
+              {% endif %}
             </div>
           {% elif user.is_authenticated %}
             {% if user_team %}
