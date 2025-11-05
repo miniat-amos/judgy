@@ -95,10 +95,10 @@
         type: "POST",
         headers: { "X-CSRFToken": "{{ csrf_token }}" },
         success: function(response) {
-          alert("✅ " + response.status + " (Task ID: " + response.task_id + ")");
+          alert(response.status + " (Task ID: " + response.task_id + ")");
         },
         error: function(xhr) {
-          alert("❌ Failed to start build. Status: " + xhr.status + "\n" + xhr.responseText);
+          alert(" Failed to start build. Status: " + xhr.status + "\n" + xhr.responseText);
           console.error(xhr);
         }
       });
