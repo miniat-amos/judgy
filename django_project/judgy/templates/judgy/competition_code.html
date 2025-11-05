@@ -15,6 +15,15 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     border-color: white;
   }
+
+  .ranking-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ranking-card.ranking-updated {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+  }
  
   .plus-icon { 
     font-size: 200px; 
@@ -29,123 +38,212 @@
 
 <script>
   $(async () => {
-    '{% if submission_form %}'
-      $('#submission').on('show.bs.modal', event => {
-        $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
-        $('#submission').closest('form').attr('action', "{% url 'competition:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
-      });
-    '{% else %}'
-      $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
-      $('#submission').closest('form').remove();
-    '{% endif %}'
+    {% if submission_form %}
+    $('#submission').on('show.bs.modal', event => {
+      const $trigger = $(event.relatedTarget);
+      $('#submission .title').text(`${$trigger.data('number')}. ${$trigger.data('name')}`);
+      $('#submission')
+        .closest('form')
+        .attr(
+          'action',
+          "{% url 'competition:submit' competition.code 'problem.name' %}".replace(
+            'problem.name',
+            $trigger.data('name')
+          )
+        );
+    });
+    {% else %}
+    $('[data-bs-target="#submission"]').remove();
+    $('#submission').closest('form').remove();
+    {% endif %}
 
-      $('#submit-submission').on('submit', async function (e) {
-        e.preventDefault(); // stop normal form post
+    $('#submit-submission').on('submit', async function (e) {
+      e.preventDefault();
 
-        const form = $(this);
-        const actionUrl = form.closest('form').attr('action');
-        const fileInput = $("#user-submission-files")[0];
-        const files = fileInput.files;
-        const formData = new FormData();
+      const form = $(this);
+      const actionUrl = form.closest('form').attr('action');
+      const fileInput = $('#user-submission-files')[0];
+      const files = fileInput.files;
+      const formData = new FormData();
 
-        for (let i = 0; i < files.length; i++) {
-          formData.append('files', files[i]);
-        }
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
 
-        try {
-          const response = await fetch(actionUrl, {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: formData
-          });
+      try {
+        const response = await fetch(actionUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+          body: formData,
+        });
 
-          const data = await response.json();
+        await response.json();
+        $('#submission').modal('hide');
+        form.trigger('reset');
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert('Error submitting file.');
+      }
 
-          $('#submission').modal('hide');
-          form.trigger('reset');
-
-        } catch (err) {
-          console.error('Upload error:', err);
-          alert('Error submitting file.');
-        }
-
-        return false; 
+      return false;
     });
 
+    const competitionCode = '{{ competition.code }}';
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const scoreSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/scores/${competitionCode}/`);
+    const rankingsContainer = $('#rankings');
+    const teamUrlTemplate = "{% url 'competition:team_name' competition.code 'team.name' %}";
 
-    
+    function teamUrl(teamName) {
+      return teamUrlTemplate.replace('team.name', encodeURIComponent(teamName));
+    }
 
-    '{% if teams %}'
-      const response = await fetch("{% url 'competition:rankings' competition.code %}");
-      const rankings = await response.json();
-
-      $('#rankings').empty();
-
-        for (const team of rankings) {
-          const members = team.members
-          let membersHTML = ""
-
-          for (const member of members) {
-            membersHTML += `
-              <div class="col">
-                <div class="text-center">
-                  <i class="bi bi-person-circle" style="font-size: 4rem"></i>
-                  <h4>${member}</h4>
-                </div>
-              </div>
-              `
-          }
-          $('#rankings').append(`
-            <div
-              class="card  bg-body-tertiary"
-            >
-          
-              <div class="card-body">
-                <h2 class="card-title">Rank: #${team.rank}</h2>
-                <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'competition:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
-                  ${team.team_name}
-                  </a>
-                </h3>
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                  ${membersHTML}
-
-                </div>
-              </div>
+    function buildMembersHtml(members) {
+      if (!members || !members.length) {
+        return `
+          <div class="col">
+            <div class="text-center text-muted">
+              <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+              <h4>—</h4>
             </div>
           </div>
-          <br>
-          `);
+        `;
+      }
+
+      return members
+        .map(
+          (member) => `
+        <div class="col">
+          <div class="text-center">
+            <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+            <h4>${member}</h4>
+          </div>
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    function updateRankingCard($card, team) {
+      $card.attr('data-team-id', team.team_id);
+      $card.attr('data-rank', team.rank);
+      $card.find('.team-rank').text(`Rank: #${team.rank}`);
+      const $teamLink = $card.find('.team-name');
+      $teamLink.text(team.team_name);
+      $teamLink.attr('href', teamUrl(team.team_name));
+      $card.find('.rank-members').html(buildMembersHtml(team.members));
+    }
+
+    function createRankingCard(team) {
+      const $card = $(`
+        <div class="card bg-body-tertiary ranking-card mb-3" data-team-id="${team.team_id}" data-rank="${team.rank}">
+          <div class="card-body">
+            <h2 class="card-title team-rank"></h2>
+            <h3 class="card-title">
+              Team:
+              <a class="text-decoration-none team-name" href="#"></a>
+            </h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 rank-members"></div>
+          </div>
+        </div>
+      `);
+      updateRankingCard($card, team);
+      return $card;
+    }
+
+    function renderRankings(rankings) {
+      if (!rankingsContainer.length) {
+        return;
+      }
+
+      const existingCards = new Map();
+      rankingsContainer.children('[data-team-id]').each(function () {
+        const $card = $(this);
+        existingCards.set($card.data('team-id'), $card);
+      });
+
+      const seenTeams = new Set();
+
+      rankings.forEach((team) => {
+        const teamId = team.team_id;
+        let $card = existingCards.get(teamId);
+
+        if ($card) {
+          updateRankingCard($card, team);
+        } else {
+          $card = createRankingCard(team);
         }
 
-    '{% endif %}'
+        seenTeams.add(teamId);
+        rankingsContainer.append($card);
+        $card.addClass('ranking-updated');
+        setTimeout(() => $card.removeClass('ranking-updated'), 350);
+      });
 
-
-    const competitionCode = "{{ competition.code }}";
-    const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-    const scoreSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/scores/${competitionCode}/`);
-
-    scoreSocket.onopen = function(e) {
-      console.log("Connected to scores WebSocket");
+      existingCards.forEach(($card, teamId) => {
+        if (!seenTeams.has(teamId)) {
+          $card.remove();
+        }
+      });
     }
 
-    function updateScores(updated_scores)
-    {
-      const problemId = updated_scores.problem;
-
-      $(`#team-best-${problemId}`).text(updated_scores.team_best);
-      $(`#user-best-${problemId}`).text(updated_scores.user_best);
-      $(`#competition-best-${problemId}`).text(updated_scores.competition_best);
-
+    async function fetchRankings() {
+      try {
+        const response = await fetch("{% url 'competition:rankings' competition.code %}");
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        renderRankings(data);
+      } catch (err) {
+        console.error('Rankings fetch error:', err);
+      }
     }
 
-    scoreSocket.onmessage = function(event) {
-      const updated_scores = JSON.parse(event.data);
-      updateScores(updated_scores);
+    {% if teams %}
+    await fetchRankings();
+    {% endif %}
+
+    function updateScores(updatedScores) {
+      if (!updatedScores || !updatedScores.problem) {
+        return;
+      }
+
+      const problemId = updatedScores.problem;
+
+      if (updatedScores.team_best !== undefined) {
+        $(`#team-best-${problemId}`).text(updatedScores.team_best ?? '--');
+      }
+      if (updatedScores.user_best !== undefined) {
+        $(`#user-best-${problemId}`).text(updatedScores.user_best ?? '--');
+      }
+      if (updatedScores.competition_best !== undefined) {
+        $(`#competition-best-${problemId}`).text(updatedScores.competition_best ?? '--');
+      }
     }
 
- 
+    scoreSocket.onopen = () => {
+      console.log('Connected to scores WebSocket');
+    };
+
+    scoreSocket.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.rankings) {
+          renderRankings(payload.rankings);
+        } else {
+          updateScores(payload);
+        }
+      } catch (err) {
+        console.error('WebSocket message error:', err);
+      }
+    };
+
+    scoreSocket.onclose = () => {
+      console.warn('Scores WebSocket connection closed');
+    };
   });
 </script>
 
@@ -245,5 +343,3 @@
 {% include 'judgy/includes/submission.html' %}
 
 {% endblock %}
-
-
