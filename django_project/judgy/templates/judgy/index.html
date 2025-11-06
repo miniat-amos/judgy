@@ -1,8 +1,19 @@
-{% extends 'judgy/base.html' %}
-
-{% block style %}
+{% extends 'judgy/base.html' %} {% block style %}
+<link
+  href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap"
+  rel="stylesheet"
+/>
 
 <style>
+  body {
+    background: linear-gradient(
+        315deg,
+        rgba(255, 255, 255, 0.04),
+        /* Subtle white gradient */ rgb(33, 37, 41)
+      ),
+      #212529; /* Original background color */
+    color: #fff; /* Ensure text is readable */
+  }
 
   .vl {
     border-left: 2px solid gray;
@@ -17,19 +28,27 @@
     width: 200px;
     padding: 10px 20px;
     color: white;
-    border-radius: 5px;
+    border-radius: 25px; /* Rounded corners */
+    background: #007bff;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .index-container .btn:hover {
+    transform: scale(1.1); /* Slight zoom effect */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add shadow */
   }
 
   .account-buttons {
     position: absolute;
-    right: 55%; 
+    right: 55%;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 10px; 
+    gap: 10px;
   }
-  
+
   .competition-button {
     position: absolute;
     left: 55%;
@@ -38,28 +57,21 @@
     display: flex;
     flex-direction: column;
   }
-  
-  
+
+
 </style>
-
-{% endblock %}
-
-{% block script %}
-
+{% endblock %} {% block script %}
 <script>
-
-
+  // Add any JavaScript if needed
 </script>
-
-{% endblock %}
-
-{% block main %}
 
 <div class="index-container">
   <div class="vl"></div>
-  
+
   <div class="account-buttons">
-    <a href="{% url 'judgy:register' %}" class="btn btn-primary">Create Account</a>
+    <a href="{% url 'judgy:register' %}" class="btn btn-primary"
+      >Create Account</a
+    >
     <a href="{% url 'judgy:login' %}" class="btn btn-primary">Login</a>
   </div>
 
@@ -67,8 +79,4 @@
     <a href="{% url 'competition:see_competitions' %}" class="btn btn-primary">View Competitions</a>
   </div>
 </div>
-
-
-
-
 {% endblock %}
