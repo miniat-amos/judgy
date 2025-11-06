@@ -47,7 +47,7 @@ def process_submission(code, problem, team, user, file_paths):
         )
         
         if problem.show_output:
-            output_url = reverse('comptitions:output', kwargs={'code': code, 'problem_name': problem.name})
+            output_url = reverse('competition:output', kwargs={'code': code, 'problem_name': problem.name})
             body = format_html(
                 f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".<br>'
                 f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',

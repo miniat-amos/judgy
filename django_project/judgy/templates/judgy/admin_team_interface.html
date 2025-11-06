@@ -38,7 +38,8 @@ $(async () => {
           </table>
         `;
 
-        for (const [email, member] of Object.entries(member_scores.members)) {
+        $.each(member_scores.members, function(email, member) {
+       
   
           let subjectiveProblemHtml = $(scoresTable).attr('id', 'subjective-table');
           let autoJudgedProblemHtml = $(scoresTable).attr('id', 'auto-judged-table');
@@ -53,37 +54,42 @@ $(async () => {
 
             `;
             
-            for (const [submission, submission_data] of Object.entries(member.submissions))
+            $.each(member.problems, function(problemName, problemData)
             {
-                let inputScore = `
-                  <div class="input-group mb-3">
-                    <input class="form-control score-input" data-submission-id=${submission_data.submission_id} type="text" class="form-control" placeholder="Input Score" aria-label="Input Score" aria-describedby="button-addon2">
-                    <button class="btn btn-success submit-score" type="button" id="button-addon2">Submit</button>
-                  </div>
-                `
-                
-                scoresHTML = `
-                  <tr>
-                    <td>${submission_data.submission_number}</td>
-                    <td>${submission_data.problem_number}</td>
-                    <td>${submission_data.problem_name}</td>
-                    <td>${submission_data.score_preference === true ? ` <i class="bi bi-arrow-up"></i> Higher Score is Better` : `<i class="bi bi-arrow-down"></i> Lower Score is Better`}</td>
-                    <td>${submission_data.score !== "" ? submission_data.score : "--"}</td>
-                    <td></td>
-                    <td>${inputScore}</td>
-                  </tr>
-                `;
-
-                if (submission_data.subjective === true)
+                $.each(problemData.submissions, function(i, submission)
                 {
-                    subjectiveProblemHtml.find('tbody').append(scoresHTML);
-                }
-                else
-                {
-                    autoJudgedProblemHtml.find('tbody').append(scoresHTML);
 
-                }
-            }
+                  let inputScore = `
+                    <div class="input-group mb-3">
+                      <input class="form-control score-input" data-submission-id=${submission.submission_id} type="text" class="form-control" placeholder="Input Score" aria-label="Input Score" aria-describedby="button-addon2">
+                      <button class="btn btn-success submit-score" type="button" id="button-addon2">Submit</button>
+                    </div>
+                  `
+                  
+                  scoresHTML = `
+                    <tr>
+                      <td>${submission.submission_number}</td>
+                      <td>${submission.problem_number}</td>
+                      <td>${submission.problem_name}</td>
+                      <td>${submission.score_preference === true ? ` <i class="bi bi-arrow-up"></i> Higher Score is Better` : `<i class="bi bi-arrow-down"></i> Lower Score is Better`}</td>
+                      <td>${submission.score !== "" ? submission.score : "--"}</td>
+                      <td></td>
+                      <td>${inputScore}</td>
+                    </tr>
+                  `;
+  
+                  if (submission.subjective === true)
+                  {
+                      subjectiveProblemHtml.find('tbody').append(scoresHTML);
+                  }
+                  else
+                  {
+                      autoJudgedProblemHtml.find('tbody').append(scoresHTML);
+  
+                  }
+
+                });
+            });
 
             $('#team-members').append(`
               <div class="card bg-body-tertiary">
@@ -103,7 +109,7 @@ $(async () => {
               <br>
             `);
                 
-        }
+        });
 
 
         $(".submit-score").on("click", function() {

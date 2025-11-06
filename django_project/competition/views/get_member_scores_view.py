@@ -19,15 +19,23 @@ def get_member_scores(request, code, name):
         member_scores['members'][email] = {
             'first_name': member['first_name'],
             'last_name': member['last_name'],
-            'submissions': {}
+            'problems': {}
         }
 
+        member_scores['members'][email]['problems'] = {}
+        
         for problem in problems:
+            member_scores['members'][email]['problems'][problem.name] ={
+                'submissions': {}    
+            }
+                
+            
+            
             user_submissions = Submission.objects.filter(problem=problem, team=team, user=member['id']).order_by('-time')
         
             if user_submissions:
                     total_submissions = len(user_submissions)
-                    member_scores['members'][email]['submissions'] = [
+                    member_scores['members'][email]['problems'][problem.name]['submissions'] = [
                     {
                         "submission_id": submission.id,
                         "submission_number": total_submissions - i,
