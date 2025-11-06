@@ -1,6 +1,5 @@
-from django.db.models import Min, Max
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from competition.models import Competition, Team, Problem, Submission
 
 
@@ -20,29 +19,27 @@ def get_member_scores(request, code, name):
         member_scores['members'][email] = {
             'first_name': member['first_name'],
             'last_name': member['last_name'],
-            'scores': {}
+            'submissions': {}
         }
 
         for problem in problems:
-            user_submissions = Submission.objects.filter(problem=problem, team=team, user=member['id'])
-            latest_submission = Submission.objects.filter(problem=problem, team=team, user=member['id']).order_by('-pk').first()
-            if problem.score_preference: # Higher Score is Better
-                user_best_score = user_submissions.order_by('-score').first()
-            else: # Lower Score is Better
-                user_best_score = user_submissions.order_by('score').first()
-            
-            if user_submissions:
-                member_scores['members'][email]['scores'][problem.name] = (
-                {
-                    "latest_submission_id": latest_submission.id,
-                    "problem_number": problem.number,
-                    "score_preference": problem.score_preference,
-                    "member_current_score": str(latest_submission.score) if latest_submission else "",
-                    "member_best_score": str(user_best_score.score) if user_best_score else "",
-                    "subjective": problem.subjective,
-                }
+            user_submissions = Submission.objects.filter(problem=problem, team=team, user=member['id']).order_by('-time')
         
-        )
+            if user_submissions:
+                    total_submissions = len(user_submissions)
+                    member_scores['members'][email]['submissions'] = [
+                    {
+                        "submission_id": submission.id,
+                        "submission_number": total_submissions - i,
+                        "problem_number": problem.number,
+                        "problem_name": problem.name,
+                        "score_preference": problem.score_preference,
+                        "score": submission.score,
+                        "subjective": problem.subjective,
+                    }
+                    for i, submission in enumerate(user_submissions)
+            
+                ]
 
 
     return JsonResponse(member_scores, safe=False)
