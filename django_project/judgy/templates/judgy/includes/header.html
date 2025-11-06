@@ -11,7 +11,17 @@
 
           {% if user.is_authenticated %}
           
-            <a href="{% url 'notifications:notification_center' %}" style="text-decoration: none; color: white">
+            <a href="{% url 'notifications:notification_center' %}"  style="
+              border-radius: 50%;
+              padding: 0.5rem;
+              margin-left: 0.75rem;
+              width: 3rem;
+              height: 3rem;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            "
+          class="notification-bell ">
               <i class="bi bi-bell" style="font-size: 1.5rem"></i> 
             </a>
             
@@ -84,6 +94,7 @@
 </header>
 
 <style>
+  /* Custom styles for profile icon */
   .profile-icon {
     border: 2px solid rgba(255, 255, 255, 0.5); /* Add a visible border */
     background-color: transparent; /* Ensure no background color */
@@ -96,6 +107,23 @@
   }
 
   .profile-icon:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: rgba(255, 255, 255, 1); /* Highlight border on focus */
+  }
+
+  /* Custom styles for notification bell */
+  .notification-bell {
+    border: 2px solid transparent; /* Add a visible border */
+    background-color: transparent; /* Ensure no background color */
+    transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  }
+
+  .notification-bell:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
+    border-color: rgba(255, 255, 255, 0.8); /* Change border color on hover */
+  }
+
+  .notification-bell:focus {
     outline: none; /* Remove default focus outline */
     border-color: rgba(255, 255, 255, 1); /* Highlight border on focus */
   }
