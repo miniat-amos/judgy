@@ -1,4 +1,6 @@
 import math
+import os
+import shutil
 from datetime import timedelta
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -95,7 +97,7 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                 for chunk in file.chunks():
                     f.write(chunk)
 
-def create_user_dir(code, user, problem, team):
+def create_user_dir(code, user, problem, team, subjective=False):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
     submissions_directory = comp_directory / 'problems' / problem / 'submissions'
@@ -104,13 +106,45 @@ def create_user_dir(code, user, problem, team):
     user_directory = submissions_directory / team_name / str(user.email) 
     user_directory.mkdir(parents=True, exist_ok=True)
 
-    submission_directory = user_directory / 'submission'
-    submission_directory.mkdir(exist_ok=True)
+    if subjective:
+        # Look for existing submission folders
+        existing_submissions = [
+            d for d in os.listdir(user_directory)
+            if (user_directory / d).is_dir() and d.startswith("submission_")
+        ]
 
-    output_directory = user_directory / 'output'
-    output_directory.mkdir(exist_ok=True)
+        # Determine next submission number
+        existing_nums = [
+            int(d.split("_")[1]) for d in existing_submissions if d.split("_")[1].isdigit()
+        ]
+        next_num = max(existing_nums, default=-1) + 1
 
-    return submission_directory.resolve(), output_directory.resolve()
+        # Create new submission folder
+        submission_directory = user_directory / f"submission_{next_num}"
+        submission_directory.mkdir(exist_ok=True)
+
+        return submission_directory.resolve()
+    
+    else:
+        submission_directory = user_directory / 'submission'
+        submission_directory.mkdir(exist_ok=True)
+
+        output_directory = user_directory / 'output'
+        output_directory.mkdir(exist_ok=True)
+
+        return submission_directory.resolve(), output_directory.resolve()
+
+def overwrite_submission_dirfiles(submission_dir):
+    if os.path.exists(submission_dir):
+        # Loop through each item in the directory
+            for item in os.listdir(submission_dir):
+                item_path = os.path.join(submission_dir, item)
+                # Check if it's a file or directory and remove accordingly
+                if os.path.isfile(item_path) or os.path.islink(item_path):
+                    os.unlink(item_path)  # Remove file or symbolic link
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+
 
 def team_add_user(competition, team, user):
     current_team = Team.objects.filter(competition=competition, members=user).first()
@@ -281,6 +315,17 @@ def calculate_rankings(competition):
         for team in rankings
     ]
 
+def store_submissions(files, submission_dir):
+    submitted_files = []
+    for file_path_str in files:  # files is now a list of strings
+        file_path = Path(submission_dir) / Path(file_path_str).name
+        # If you need to copy the file to submission_dir
+        with open(file_path_str, "rb") as source_file:
+            with open(file_path, "wb") as destination_file:
+                destination_file.write(source_file.read())
+        submitted_files.append(file_path)  # Track all file paths
+
+    return submitted_files
 
 def send_competition_best(problem, competition_best):
 
