@@ -16,11 +16,11 @@ from competition.utils import make_temp_dir
 def submit_view(request, code, problem_name):
     competition = get_object_or_404(Competition, code=code)
     problem = get_object_or_404(Problem, competition=competition, name=problem_name)
-    user_team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
     user = request.user
+    team = Team.objects.filter(competition=competition, members=request.user).first() if request.user.is_authenticated else None
 
     if request.method == 'POST':
-        if competition.start <= timezone.now() < competition.end and user_team:
+        if competition.start <= timezone.now() < competition.end and team:
             form = SubmissionForm(request.POST, request.FILES)
             if form.is_valid():
                 files = request.FILES.getlist('files')
@@ -40,15 +40,10 @@ def submit_view(request, code, problem_name):
                             dest.write(chunk)
                     file_paths.append(save_path)
 
-                process_submission.delay(code, competition.code, problem.id, problem_name, user_team.id, request.user.id, file_paths)
+                process_submission.delay(code, problem.id, team.id, user.id, file_paths)
 
-                # latest_submission = Submission.objects.filter(user=user, problem=problem).first
-                
-                user_submission = {
-                    "problem": problem.name,
-                }
-                
-                return JsonResponse(user_submission, safe=False)
+                    
+                return JsonResponse({})
             else:
                 print('Some field was incorrectly filled out.')
                 print('form.errors:\n', form.errors)

@@ -8,7 +8,18 @@
       </div>
       <div class="d-flex justify-content-end w-100">
         <div class="align-items-center d-flex">
+          
           {% include 'judgy/includes/search.html' %}
+
+          {% if user.is_authenticated %}
+          
+            <a href="{% url 'notifications:notification_center' %}" style="text-decoration: none; color: white">
+              <i class="bi bi-bell" style="font-size: 1.5rem"> Notifications</i> 
+            </a>
+            
+
+          
+          {% endif %}
 
           <div class="dropdown">
             <button class="btn" data-bs-toggle="dropdown">

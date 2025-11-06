@@ -3,10 +3,12 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.utils.text import slugify
 from pathlib import Path
+from judgy.models import (
+    User
+)
 from competition.models import (
   Team
 )
-
 from notifications.models import (
     Notification
 )
@@ -135,7 +137,6 @@ channel_layer = get_channel_layer()
 
 def send_competition_best(problem, competition_best):
 
-        # Competition best
     async_to_sync(channel_layer.group_send)(
         f"competition_{problem.competition.code}",
         {
@@ -149,7 +150,6 @@ def send_competition_best(problem, competition_best):
 
 def send_team_best(problem, team, team_best):
 
-        # Competition best
     async_to_sync(channel_layer.group_send)(
         f"team_{team.id}",
         {
@@ -173,3 +173,15 @@ def send_user_best(problem, user, user_best):
             }
         }
     )
+    
+def notify_best_score(competition, user, team, score, problem):
+    superusers = User.objects.filter(is_superuser=True)
+    participants = User.objects.filter(teams__competition=competition)
+    header = 'New Best Score'
+    body = f'{user.first_name} from team "{team.name}" has achieved a new best score of {score} in "{problem.name}" for competition "{competition.name}"!'
+    for user in superusers:
+        Notification.objects.create(user=user, header=header, body=body)
+    for user in participants:
+        Notification.objects.create(user=user, header=header, body=body)
+    
+

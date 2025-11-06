@@ -1,0 +1,142 @@
+{% extends 'judgy/base.html' %}
+
+{% block script %}
+
+<script>
+    $(async () => {
+        const $container = $("#notification-container .row");
+        const csrfToken = "{{ csrf_token }}";
+
+        // 1. Helper: create a notification card HTML
+        function createNotificationCard(notification) {
+            const actions = {
+            0: "",
+            1: `
+                <div class="border-top mt-2 pt-2">
+                <div class="d-flex justify-content-between">
+                    <button class="accept btn btn-success w-50 me-1">Accept</button>
+                    <button class="decline btn btn-danger w-50 ms-1">Decline</button>
+                </div>
+                </div>
+            `,
+            };
+
+            return `
+            <div class="col" id="notification-${notification.id}">
+                <div class="card h-100 shadow-sm notification-card"
+                    data-id="${notification.id}"
+                    data-type="${notification.type}"
+                    data-header="${notification.header}">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <i class="bi bi-bell me-2"></i>
+                    <strong class="me-auto">${notification.header}</strong>
+                    <button class="btn-close"></button>
+                </div>
+                <div class="card-body">
+                    ${notification.body}
+                    ${actions[notification.type] || ""}
+                </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // 2. Render a notification only if it doesn’t exist
+        function displayNotifications(notifications) {
+            for (const notification of notifications) {
+                if (!$(`#notification-${notification.id}`).length) {
+                    $container.prepend(createNotificationCard(notification));
+                }
+            }
+        }
+
+        // 3. Handle clicks via event delegation (bind once)
+        $container.on("click", ".btn-close", async function () {
+            const $card = $(this).closest(".notification-card");
+            const id = $card.data("id");
+            const type = $card.data("type");
+
+            if (type === 0) {
+            await fetch(
+                "{% url 'notifications:notification_clear' 'id' %}".replace("id", id),
+                { headers: { "X-CSRFToken": csrfToken } }
+            );
+            $(`#notification-${id}`).remove();
+            }
+        });
+
+        $container.on("click", ".accept", async function () {
+            const $card = $(this).closest(".notification-card");
+            const id = $card.data("id");
+            const header = $card.data("header");
+
+            const urls = {
+                "Join Request": "{% url 'competition:team_join_accept' 'id' %}",
+                "Team Invite": "{% url 'competition:team_invite_accept' 'id' %}",
+            };
+
+            if (urls[header]) {
+                await fetch(urls[header].replace("id", id), {
+                    headers: { "X-CSRFToken": csrfToken },
+                });
+                $(`#notification-${id}`).remove();
+            }
+        });
+
+        $container.on("click", ".decline", async function () {
+            const $card = $(this).closest(".notification-card");
+            const id = $card.data("id");
+            const header = $card.data("header");
+
+            const urls = {
+                "Join Request": "{% url 'competition:team_join_decline' 'id' %}",
+                "Team Invite": "{% url 'competition:team_invite_decline' 'id' %}",
+            };
+
+            if (urls[header]) {
+                await fetch(urls[header].replace("id", id), {
+                    headers: { "X-CSRFToken": csrfToken },
+                });
+                $(`#notification-${id}`).remove();
+            }
+    });
+
+    // 4. Initial load
+    const response = await fetch("{% url 'notifications:all_notifications' %}");
+    const notifications = await response.json();
+    displayNotifications(notifications);
+
+    // 5. Live updates via WebSocket
+    if (window.notificationsSocket) {
+        window.notificationsSocket.addEventListener("message", function (event) {
+        const newNotifications = JSON.parse(event.data);
+        displayNotifications(newNotifications);
+        });
+    }
+    });
+
+
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+
+<div id="notification-container" class="container mt-5 mb-5">
+    <h1 class="text-center">Notifications</h1>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">      
+        
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
+{% endblock %}

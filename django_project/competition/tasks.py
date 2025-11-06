@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from pathlib import Path
 from judgy.models import User
 from competition.functions import run_submission
+from competition.utils import notify_best_score
 from competition.models import (
     Competition,
     Problem,
@@ -16,17 +17,18 @@ from competition.models import (
 from notifications.models import Notification
 
 
+
 @shared_task
 def create_images_task(competition_code):
     docker_image_script = Path(settings.BASE_DIR) / "docker_setup.sh"
     subprocess.run(f"bash {docker_image_script} {competition_code.lower()}", shell=True)
 
 @shared_task
-def process_submission(code, competition, problem_id, problem_name, team_id, user_id, file_paths):
-    competition = Competition.objects.get(code=competition)
-    problem = Problem.objects.get(id=problem_id)
-    user_team = Team.objects.get(id=team_id)
-    user = User.objects.get(id=user_id)
+def process_submission(code, problem, team, user, file_paths):
+    competition = Competition.objects.get(code=code)
+    problem = Problem.objects.get(id=problem)
+    user_team = Team.objects.get(id=team)
+    user = User.objects.get(id=user)
     
     score_file, output_file, language, file_name = run_submission(code, problem, user_team, user, file_paths)
     
@@ -35,20 +37,11 @@ def process_submission(code, competition, problem_id, problem_name, team_id, use
     with open(output_file, 'r') as f:
         file_output = f.read()
 
-    Submission.objects.create(
-        problem=problem,
-        team=user_team,
-        user=user,
-        language=language,
-        file_name=file_name,
-        output=file_output,
-        score=score
-    )
     
     if problem.show_output:
-        output_url = f'/competition/{code}/{problem_name}/submission/output'
+        output_url = f'/competition/{code}/{problem.name}/submission/output'
         body = format_html(
-            f'You got a score of {score} in the problem "{problem_name}" for the competition "{competition.name}".<br>'
+            f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".<br>'
             f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
         )
     else:
@@ -66,17 +59,19 @@ def process_submission(code, competition, problem_id, problem_name, team_id, use
     if problem.score_preference:
         competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
         if int(score) > competition_best_score:
-            notify_best_score(user, user_team, score, problem)
+            notify_best_score(competition, user, user_team, score, problem)
     else:
         competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
         if int(score) < competition_best_score:
-            notify_best_score(user, user_team, score, problem)
+            notify_best_score(competition, user, user_team, score, problem)
 
-def notify_best_score(user, team, score, problem):
-    competition = problem.competition
-    superusers = User.objects.filter(is_superuser=True)
-    participants = User.objects.filter(teams__competition=competition)
-    header = 'New Best Score'
-    body = f'{user.first_name} from team "{team}" has achieved a new best score of {score} in "{problem.name}" for competition "{competition.name}"!'
-    for u in superusers.union(participants):
-        Notification.objects.create(user=u, header=header, body=body)
+
+    Submission.objects.create(
+        problem=problem,
+        team=user_team,
+        user=user,
+        language=language,
+        file_name=file_name,
+        output=file_output,
+        score=score
+    )

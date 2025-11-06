@@ -1,6 +1,6 @@
 {% extends 'judgy/base.html' %}
 
-<!-- {% block title %}Output for {{ problem.name }}{% endblock %} -->
+{% block title %}Output for {{ problem.name }}{% endblock %}
 
 {% block style %}
 
@@ -30,7 +30,22 @@
 
 {% endblock %}
 
+{% block script %}
+
+<script>
+  $(() => {
+     $('.submission-output-card').on('click', function() {
+        $(this).toggleClass('expanded');
+  });
+
+  }) 
+</script>
+
+
+{% endblock %}
+
 {% block main %}
+
 
 <div class="container mt-5 mb-5">
   <h1 class="text-center">{{ competition.name }}</h1>
@@ -62,15 +77,6 @@
   {% endif %}
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.submission-output-card').forEach(function (card) {
-      card.addEventListener('click', function () {
-        card.classList.toggle('expanded');
-      });
-    });
-  });
-</script>
 
 
 {% endblock %}
