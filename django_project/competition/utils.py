@@ -97,7 +97,7 @@ def create_problem(code, name, description, judge_py, other_files, dist):
                 for chunk in file.chunks():
                     f.write(chunk)
 
-def create_user_dir(code, user, problem, team, subjective=False):
+def create_user_dir(code, user, problem, team, submission = None, subjective = False):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()
     submissions_directory = comp_directory / 'problems' / problem / 'submissions'
@@ -107,20 +107,9 @@ def create_user_dir(code, user, problem, team, subjective=False):
     user_directory.mkdir(parents=True, exist_ok=True)
 
     if subjective:
-        # Look for existing submission folders
-        existing_submissions = [
-            d for d in os.listdir(user_directory)
-            if (user_directory / d).is_dir() and d.startswith("submission_")
-        ]
-
-        # Determine next submission number
-        existing_nums = [
-            int(d.split("_")[1]) for d in existing_submissions if d.split("_")[1].isdigit()
-        ]
-        next_num = max(existing_nums, default=-1) + 1
-
+   
         # Create new submission folder
-        submission_directory = user_directory / f"submission_{next_num}"
+        submission_directory = user_directory / f"{submission.id}"
         submission_directory.mkdir(exist_ok=True)
 
         return submission_directory.resolve()
@@ -133,17 +122,6 @@ def create_user_dir(code, user, problem, team, subjective=False):
         output_directory.mkdir(exist_ok=True)
 
         return submission_directory.resolve(), output_directory.resolve()
-
-def overwrite_submission_dirfiles(submission_dir):
-    if os.path.exists(submission_dir):
-        # Loop through each item in the directory
-            for item in os.listdir(submission_dir):
-                item_path = os.path.join(submission_dir, item)
-                # Check if it's a file or directory and remove accordingly
-                if os.path.isfile(item_path) or os.path.islink(item_path):
-                    os.unlink(item_path)  # Remove file or symbolic link
-                elif os.path.isdir(item_path):
-                    shutil.rmtree(item_path)
 
 
 def team_add_user(competition, team, user):
@@ -326,6 +304,18 @@ def store_submissions(files, submission_dir):
         submitted_files.append(file_path)  # Track all file paths
 
     return submitted_files
+
+
+def overwrite_submission_dirfiles(submission_dir):
+    if os.path.exists(submission_dir):
+        # Loop through each item in the directory
+            for item in os.listdir(submission_dir):
+                item_path = os.path.join(submission_dir, item)
+                # Check if it's a file or directory and remove accordingly
+                if os.path.isfile(item_path) or os.path.islink(item_path):
+                    os.unlink(item_path)  # Remove file or symbolic link
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
 
 def send_competition_best(problem, competition_best):
 

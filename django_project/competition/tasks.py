@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from pathlib import Path
 from judgy.models import User
 from competition.functions import run_submission
-from competition.utils import notify_best_score, notify_admin_submission
+from competition.utils import notify_best_score, notify_admin_submission, create_user_dir, store_submissions
 from competition.models import (
     Competition,
     Problem,
@@ -16,8 +16,6 @@ from competition.models import (
     Submission,
 )
 from notifications.models import Notification
-from .functions import has_judging_program
-
 
 @shared_task
 def create_images_task(competition_code):
@@ -31,10 +29,9 @@ def process_submission(code, problem, team, user, file_paths):
     user_team = Team.objects.get(id=team)
     user = User.objects.get(id=user)
     
-    score_file, output_file, language, file_name = run_submission(code, problem, user_team, user, file_paths)
-    
-
     if not problem.subjective:
+        
+        score_file, output_file, language, file_name = run_submission(code, problem, user_team, user, file_paths)
 
         with open(score_file, 'r') as f:
             score = f.read().split(' ')[0]
@@ -78,7 +75,22 @@ def process_submission(code, problem, team, user, file_paths):
             if int(score) < competition_best_score:
                 notify_best_score(user, user_team, score, problem)
 
-    elif problem.subjective and not has_judging_program(competition, problem):
+    else:
+        submission = Submission.objects.create(
+            problem=problem,
+            team=user_team,
+            user=user,
+            language="",
+            file_name="",
+            output=None,
+            score=0
+        )
+
+        
+        submission_dir = create_user_dir(code, user, problem.name, user_team, submission, subjective=problem.subjective)
+
+        submitted_files = store_submissions(file_paths, submission_dir)
+        
         Notification.objects.create(
             user=user,
             header='Your Submission',
@@ -88,12 +100,4 @@ def process_submission(code, problem, team, user, file_paths):
         notify_admin_submission(competition, user, user_team, problem)
 
       
-    Submission.objects.create(
-        problem=problem,
-        team=user_team,
-        user=user,
-        language=language,
-        file_name=file_name,
-        output=file_output,
-        score=score
-    )
+  
