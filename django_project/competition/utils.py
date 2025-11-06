@@ -2,6 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.utils.text import slugify
+from django.urls import reverse
 from pathlib import Path
 from judgy.models import (
     User
@@ -178,10 +179,23 @@ def notify_best_score(competition, user, team, score, problem):
     superusers = User.objects.filter(is_superuser=True)
     participants = User.objects.filter(teams__competition=competition)
     header = 'New Best Score'
-    body = f'{user.first_name} from team "{team.name}" has achieved a new best score of {score} in "{problem.name}" for competition "{competition.name}"!'
+    body = f'"{user.first_name}" from team "{team.name}" has achieved a new best score of {score} in "{problem.name}" for competition "{competition.name}"!'
     for user in superusers:
         Notification.objects.create(user=user, header=header, body=body)
     for user in participants:
         Notification.objects.create(user=user, header=header, body=body)
     
 
+def notify_admin_submission(competition, user, team, problem):
+    superusers = User.objects.filter(is_superuser=True)
+    header = 'New Submission'
+    admin_team_interface = reverse('competition:admin_team_interface', kwargs={'code': competition.code, 'name': team.name})
+    body = (
+            f'"{user.first_name}" from team "{team.name}" '
+            f'has sent a new submission for "{problem.name}" ' 
+            f'for competition "{competition.name}"! '
+            f'See here <a href="{admin_team_interface}" target="_blank">here</a>'
+            )
+    
+    for user in superusers:
+        Notification.objects.create(user=user, header=header, body=body)

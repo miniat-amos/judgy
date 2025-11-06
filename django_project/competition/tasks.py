@@ -7,7 +7,7 @@ from django.utils.html import format_html
 from pathlib import Path
 from judgy.models import User
 from competition.functions import run_submission
-from competition.utils import notify_best_score
+from competition.utils import notify_best_score, notify_admin_submission
 from competition.models import (
     Competition,
     Problem,
@@ -65,6 +65,8 @@ def process_submission(code, problem, team, user, file_paths):
         if int(score) < competition_best_score:
             notify_best_score(competition, user, user_team, score, problem)
 
+    if problem.subjective:
+        notify_admin_submission(competition, user, user_team, problem)
 
     Submission.objects.create(
         problem=problem,
