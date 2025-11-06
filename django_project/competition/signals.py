@@ -11,9 +11,7 @@ from competition.utils import (
 
 @receiver(post_save, sender=Submission)
 def check_best_score(sender, instance, created, **kwargs):
-    if not created:
-        return
-    
+
     problem = instance.problem
     team = instance.team
     user = instance.user

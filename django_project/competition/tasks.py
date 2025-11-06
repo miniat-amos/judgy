@@ -1,14 +1,12 @@
-import math
 import subprocess
 from celery import shared_task
 from django.conf import settings
-from django.db.models import Min, Max
 from django.urls import reverse
 from django.utils.html import format_html
 from pathlib import Path
 from judgy.models import User
 from competition.functions import run_submission
-from competition.utils import notify_best_score, notify_admin_submission, create_user_dir, store_submissions
+from competition.utils import notify_admin_submission, create_user_dir, store_submissions, check_competition_best
 from competition.models import (
     Competition,
     Problem,
@@ -65,15 +63,8 @@ def process_submission(code, problem, team, user, file_paths):
 
         Notification.objects.create(user=user, header='Your Score', body=body)
 
-        competition_submissions = Submission.objects.filter(problem=problem)
-        if problem.score_preference:
-            competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
-            if int(score) > competition_best_score:
-                notify_best_score(user, user_team, score, problem)
-        else:
-            competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
-            if int(score) < competition_best_score:
-                notify_best_score(user, user_team, score, problem)
+        check_competition_best(problem, score, user, user_team)
+
 
     else:
         submission = Submission.objects.create(

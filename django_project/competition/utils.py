@@ -1,6 +1,7 @@
 import math
 import os
 import shutil
+from django.db.models import Min, Max
 from datetime import timedelta
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -367,7 +368,18 @@ def send_rankings_update(competition):
             },
         },
     )
-    
+
+def check_competition_best(problem, score, user, user_team):
+    competition_submissions = Submission.objects.filter(problem=problem)
+    if problem.score_preference:
+        competition_best_score = competition_submissions.aggregate(Max('score'))['score__max'] or -math.inf
+        if int(score) > competition_best_score:
+            notify_best_score(user, user_team, score, problem)
+    else:
+        competition_best_score = competition_submissions.aggregate(Min('score'))['score__min'] or +math.inf
+        if int(score) < competition_best_score:
+            notify_best_score(user, user_team, score, problem)
+
 def notify_best_score(competition, user, team, score, problem):
     superusers = User.objects.filter(is_superuser=True)
     participants = User.objects.filter(teams__competition=competition)
