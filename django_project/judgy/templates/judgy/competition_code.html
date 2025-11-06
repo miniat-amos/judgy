@@ -15,7 +15,27 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     border-color: white;
   }
- 
+
+  .rankings-wrapper {
+    position: relative;
+  }
+
+  .ranking-card {
+    position: relative;
+    transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scale, 1));
+    transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 420ms ease;
+    will-change: transform;
+  }
+
+  .ranking-card.ranking-floating {
+    z-index: 5;
+    box-shadow: 0 22px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .ranking-card .card-body {
+    transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
   .plus-icon { 
     font-size: 200px; 
   }
@@ -29,123 +49,322 @@
 
 <script>
   $(async () => {
-    '{% if submission_form %}'
-      $('#submission').on('show.bs.modal', event => {
-        $('#submission .title').text(`${$(event.relatedTarget).data('number')}. ${$(event.relatedTarget).data('name')}`);
-        $('#submission').closest('form').attr('action', "{% url 'competition:submit' competition.code 'problem.name' %}".replace('problem.name', $(event.relatedTarget).data('name')));
-      });
-    '{% else %}'
-      $('[data-bs-target="#submission"]').remove();$(event.relatedTarget).data('name')
-      $('#submission').closest('form').remove();
-    '{% endif %}'
+    {% if submission_form %}
+    $('#submission').on('show.bs.modal', event => {
+      const $trigger = $(event.relatedTarget);
+      $('#submission .title').text(`${$trigger.data('number')}. ${$trigger.data('name')}`);
+      $('#submission')
+        .closest('form')
+        .attr(
+          'action',
+          "{% url 'competition:submit' competition.code 'problem.name' %}".replace(
+            'problem.name',
+            $trigger.data('name')
+          )
+        );
+    });
+    {% else %}
+    $('[data-bs-target="#submission"]').remove();
+    $('#submission').closest('form').remove();
+    {% endif %}
 
-      $('#submit-submission').on('submit', async function (e) {
-        e.preventDefault(); // stop normal form post
+    $('#submit-submission').on('submit', async function (e) {
+      e.preventDefault();
 
-        const form = $(this);
-        const actionUrl = form.closest('form').attr('action');
-        const fileInput = $("#user-submission-files")[0];
-        const files = fileInput.files;
-        const formData = new FormData();
+      const form = $(this);
+      const actionUrl = form.closest('form').attr('action');
+      const fileInput = $('#user-submission-files')[0];
+      const files = fileInput.files;
+      const formData = new FormData();
 
-        for (let i = 0; i < files.length; i++) {
-          formData.append('files', files[i]);
-        }
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
 
-        try {
-          const response = await fetch(actionUrl, {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: formData
-          });
+      try {
+        const response = await fetch(actionUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+          body: formData,
+        });
 
-          const data = await response.json();
+        await response.json();
+        $('#submission').modal('hide');
+        form.trigger('reset');
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert('Error submitting file.');
+      }
 
-          $('#submission').modal('hide');
-          form.trigger('reset');
-
-        } catch (err) {
-          console.error('Upload error:', err);
-          alert('Error submitting file.');
-        }
-
-        return false; 
+      return false;
     });
 
+    const competitionCode = '{{ competition.code }}';
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const scoreSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/scores/${competitionCode}/`);
+    const rankingsContainer = $('#rankings');
+    const teamUrlTemplate = "{% url 'competition:team_name' competition.code 'team.name' %}";
+    const transitionTiming = '420ms cubic-bezier(0.23, 1, 0.32, 1)';
 
-    
+    function teamUrl(teamName) {
+      return teamUrlTemplate.replace('team.name', encodeURIComponent(teamName));
+    }
 
-    '{% if teams %}'
-      const response = await fetch("{% url 'competition:rankings' competition.code %}");
-      const rankings = await response.json();
-
-      $('#rankings').empty();
-
-        for (const team of rankings) {
-          const members = team.members
-          let membersHTML = ""
-
-          for (const member of members) {
-            membersHTML += `
-              <div class="col">
-                <div class="text-center">
-                  <i class="bi bi-person-circle" style="font-size: 4rem"></i>
-                  <h4>${member}</h4>
-                </div>
-              </div>
-              `
-          }
-          $('#rankings').append(`
-            <div
-              class="card  bg-body-tertiary"
-            >
-          
-              <div class="card-body">
-                <h2 class="card-title">Rank: #${team.rank}</h2>
-                <h3 class="card-title">Team: <a class="text-decoration-none" href=${"{% url 'competition:team_name' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.team_name))}>
-                  ${team.team_name}
-                  </a>
-                </h3>
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                  ${membersHTML}
-
-                </div>
-              </div>
+    function buildMembersHtml(members) {
+      if (!members || !members.length) {
+        return `
+          <div class="col">
+            <div class="text-center text-muted">
+              <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+              <h4>—</h4>
             </div>
           </div>
-          <br>
-          `);
+        `;
+      }
+
+      return members
+        .map(
+          (member) => `
+        <div class="col">
+          <div class="text-center">
+            <i class="bi bi-person-circle" style="font-size: 4rem"></i>
+            <h4>${member}</h4>
+          </div>
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    function setRankText(card, rank) {
+      card.querySelector('.team-rank').textContent = `Rank: #${rank}`;
+    }
+
+    function updateRankingCard(card, team, { deferRankUpdate = false } = {}) {
+      card.dataset.teamId = team.team_id;
+      card.dataset.pendingRank = team.rank;
+      card.querySelector('.team-name').textContent = team.team_name;
+      card.querySelector('.team-name').href = teamUrl(team.team_name);
+      card.querySelector('.rank-members').innerHTML = buildMembersHtml(team.members);
+
+      if (!deferRankUpdate) {
+        setRankText(card, team.rank);
+      }
+    }
+
+    function createRankingCard(team) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card bg-body-tertiary ranking-card mb-3';
+      wrapper.setAttribute('data-team-id', team.team_id);
+      wrapper.setAttribute('data-rank', team.rank);
+      wrapper.innerHTML = `
+        <div class="card-body">
+          <h2 class="card-title team-rank"></h2>
+          <h3 class="card-title">
+            Team:
+            <a class="text-decoration-none team-name" href="#"></a>
+          </h3>
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 rank-members"></div>
+        </div>
+      `;
+      updateRankingCard(wrapper, team);
+      return wrapper;
+    }
+
+    function measurePositions(container) {
+      const map = new Map();
+      container.querySelectorAll('[data-team-id]').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        map.set(card.dataset.teamId, {
+          rect,
+          rank: Number(card.dataset.rank || 0),
+        });
+      });
+      return map;
+    }
+
+    function applyFlip(card, prevRect, nextRect, rankChanged) {
+      const deltaX = prevRect.rect.left - nextRect.rect.left;
+      const deltaY = prevRect.rect.top - nextRect.rect.top;
+
+      if (!deltaX && !deltaY) {
+        if (rankChanged) {
+          setRankText(card, card.dataset.pendingRank);
+          card.dataset.rank = card.dataset.pendingRank;
+        }
+        return;
+      }
+
+      card.style.transition = 'none';
+      card.style.setProperty('--translate-x', `${deltaX}px`);
+      card.style.setProperty('--translate-y', `${deltaY}px`);
+
+      requestAnimationFrame(() => {
+        card.classList.add('ranking-floating');
+        card.style.transition = `transform ${transitionTiming}, box-shadow ${transitionTiming}`;
+        card.style.setProperty('--translate-x', '0px');
+        card.style.setProperty('--translate-y', '0px');
+        card.style.setProperty('--scale', rankChanged ? '1.06' : '1');
+
+        let finalized = false;
+
+        const finalize = () => {
+          if (finalized) {
+            return;
+          }
+          finalized = true;
+          card.classList.remove('ranking-floating');
+          card.style.removeProperty('--scale');
+
+          if (rankChanged) {
+            setRankText(card, card.dataset.pendingRank);
+          }
+          card.dataset.rank = card.dataset.pendingRank;
+        };
+
+        const onEnd = (event) => {
+          if (event.propertyName !== 'transform') return;
+          card.removeEventListener('transitionend', onEnd);
+          finalize();
+        };
+        card.addEventListener('transitionend', onEnd, { once: true });
+        setTimeout(finalize, 480);
+      });
+    }
+
+    function renderRankings(rankings) {
+      if (!rankingsContainer.length) {
+        return;
+      }
+
+      const containerEl = rankingsContainer[0];
+      const previousPositions = measurePositions(containerEl);
+      const cardsById = new Map();
+      containerEl.querySelectorAll('[data-team-id]').forEach(card => {
+        cardsById.set(card.dataset.teamId, card);
+      });
+
+      const fragment = document.createDocumentFragment();
+      const seenIds = new Set();
+
+      rankings.forEach(team => {
+        const teamId = String(team.team_id);
+        let card = cardsById.get(teamId);
+        const prevRank = card ? Number(card.dataset.rank || 0) : null;
+        const rankChanged = prevRank !== null && prevRank !== team.rank;
+
+        if (!card) {
+          card = createRankingCard(team);
+        } else {
+          updateRankingCard(card, team, { deferRankUpdate: rankChanged });
         }
 
-    '{% endif %}'
+        card.dataset.rank = team.rank;
+        card.dataset.pendingRank = team.rank;
+        card.dataset.rankChanged = rankChanged ? '1' : '0';
+        fragment.appendChild(card);
+        seenIds.add(teamId);
+      });
 
+      cardsById.forEach((card, id) => {
+        if (!seenIds.has(id)) {
+          card.remove();
+        }
+      });
 
-    const competitionCode = "{{ competition.code }}";
-    const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-    const scoreSocket = new WebSocket(`${ws_scheme}://${window.location.host}/ws/scores/${competitionCode}/`);
+      containerEl.appendChild(fragment);
 
-    scoreSocket.onopen = function(e) {
-      console.log("Connected to scores WebSocket");
+      const nextPositions = measurePositions(containerEl);
+      containerEl.querySelectorAll('[data-team-id]').forEach(card => {
+        const teamId = card.dataset.teamId;
+        const prevRect = previousPositions.get(teamId);
+        const nextRect = nextPositions.get(teamId);
+        const rankChanged = card.dataset.rankChanged === '1';
+
+        if (prevRect && nextRect) {
+          applyFlip(card, prevRect, nextRect, rankChanged);
+        } else {
+          card.style.transition = 'none';
+          card.style.setProperty('--translate-y', '20px');
+          card.style.setProperty('--scale', '0.92');
+          requestAnimationFrame(() => {
+            card.classList.add('ranking-floating');
+            card.style.transition = `transform ${transitionTiming}, box-shadow ${transitionTiming}`;
+            card.style.setProperty('--translate-y', '0px');
+            card.style.setProperty('--scale', '1');
+            setRankText(card, card.dataset.pendingRank);
+
+            const onEnd = (event) => {
+              if (event.propertyName !== 'transform') return;
+              card.removeEventListener('transitionend', onEnd);
+              card.classList.remove('ranking-floating');
+              card.style.removeProperty('--scale');
+            };
+            card.addEventListener('transitionend', onEnd, { once: true });
+          });
+        }
+
+        delete card.dataset.rankChanged;
+      });
     }
 
-    function updateScores(updated_scores)
-    {
-      const problemId = updated_scores.problem;
-
-      $(`#team-best-${problemId}`).text(updated_scores.team_best);
-      $(`#user-best-${problemId}`).text(updated_scores.user_best);
-      $(`#competition-best-${problemId}`).text(updated_scores.competition_best);
-
+    async function fetchRankings() {
+      try {
+        const response = await fetch("{% url 'competition:rankings' competition.code %}");
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        renderRankings(data);
+      } catch (err) {
+        console.error('Rankings fetch error:', err);
+      }
     }
 
-    scoreSocket.onmessage = function(event) {
-      const updated_scores = JSON.parse(event.data);
-      updateScores(updated_scores);
+    {% if teams %}
+    await fetchRankings();
+    {% endif %}
+
+    function updateScores(updatedScores) {
+      if (!updatedScores || !updatedScores.problem) {
+        return;
+      }
+
+      const problemId = updatedScores.problem;
+
+      if (updatedScores.team_best !== undefined) {
+        $(`#team-best-${problemId}`).text(updatedScores.team_best ?? '--');
+      }
+      if (updatedScores.user_best !== undefined) {
+        $(`#user-best-${problemId}`).text(updatedScores.user_best ?? '--');
+      }
+      if (updatedScores.competition_best !== undefined) {
+        $(`#competition-best-${problemId}`).text(updatedScores.competition_best ?? '--');
+      }
     }
 
- 
+    scoreSocket.onopen = () => {
+      console.log('Connected to scores WebSocket');
+    };
+
+    scoreSocket.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.rankings) {
+          renderRankings(payload.rankings);
+        } else {
+          updateScores(payload);
+        }
+      } catch (err) {
+        console.error('WebSocket message error:', err);
+      }
+    };
+
+    scoreSocket.onclose = () => {
+      console.warn('Scores WebSocket connection closed');
+    };
   });
 </script>
 
@@ -226,12 +445,12 @@
 
   </div>
 
-  <div class="mt-1">
+  <div class="mt-5">
     <h1 class="text-center">Rankings</h1>
   </div>
   <div class="row row-cols-1 g-4">
     {% if teams %}
-    <div id="rankings">
+    <div id="rankings" class="rankings-wrapper">
     </div>
     {% else %}
       <h2 class="text-center">No Teams</h2>
@@ -245,5 +464,3 @@
 {% include 'judgy/includes/submission.html' %}
 
 {% endblock %}
-
-

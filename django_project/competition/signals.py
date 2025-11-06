@@ -5,7 +5,8 @@ from competition.models import Submission
 from competition.utils import (
     send_competition_best, 
     send_team_best,
-    send_user_best
+    send_user_best,
+    send_rankings_update,
 )
 
 @receiver(post_save, sender=Submission)
@@ -36,8 +37,8 @@ def check_best_score(sender, instance, created, **kwargs):
     send_competition_best(problem, competition_best)
     send_team_best(problem, team, team_best)
     send_user_best(problem, user, user_best)
+    send_rankings_update(problem.competition)
     
-
 
 
 
