@@ -418,7 +418,7 @@ def notify_admin_submission(competition, user, team, problem):
             f'"{user.first_name}" from team "{team.name}" '
             f'has sent a new submission for "{problem.name}" ' 
             f'for competition "{competition.name}"! '
-            f'See here <a href="{admin_team_interface}" target="_blank">here</a>'
+            f'See <a href="{admin_team_interface}" target="_blank">here</a>'
             )
     
     for user in superusers:
