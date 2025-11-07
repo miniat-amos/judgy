@@ -56,6 +56,7 @@ django_project/*
 !docker-compose.web.yml
 !Dockerfile
 !entrypoint.sh
+!uvicorn_config.py
 
 # Requirements files
 !requirements.in
