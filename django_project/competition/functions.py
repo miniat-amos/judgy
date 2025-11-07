@@ -14,17 +14,6 @@ languages = {
     ".java": {"image": "java", "type": "compiled-and-interpreted", "compiler": "javac", "interpreter": "java", "language": "Java"}
 }
 
-# def has_judging_program(competition, problem):
-#     project_root = os.path.dirname(settings.BASE_DIR)
-#     judging_dir = os.path.join(
-#         project_root,
-#         "competitions",
-#         competition.name,
-#         "problems",
-#         problem.name,
-#         "judging_program"
-#     )
-#     return os.path.isdir(judging_dir) and any(os.scandir(judging_dir))
 
 def run_submission(code, problem, team, user, files):
     # Variables for local machine

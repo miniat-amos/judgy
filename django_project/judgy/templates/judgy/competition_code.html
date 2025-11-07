@@ -50,22 +50,22 @@
 <script>
   $(async () => {
     {% if submission_form %}
-    $('#submission').on('show.bs.modal', event => {
-      const $trigger = $(event.relatedTarget);
-      $('#submission .title').text(`${$trigger.data('number')}. ${$trigger.data('name')}`);
-      $('#submission')
-        .closest('form')
-        .attr(
-          'action',
-          "{% url 'competition:submit' competition.code 'problem.name' %}".replace(
-            'problem.name',
-            $trigger.data('name')
-          )
-        );
-    });
+      $('#submission').on('show.bs.modal', event => {
+        const $trigger = $(event.relatedTarget);
+        $('#submission .title').text(`${$trigger.data('number')}. ${$trigger.data('name')}`);
+        $('#submission')
+          .closest('form')
+          .attr(
+            'action',
+            "{% url 'competition:submit' competition.code 'problem.name' %}".replace(
+              'problem.name',
+              $trigger.data('name')
+            )
+          );
+      });
     {% else %}
-    $('[data-bs-target="#submission"]').remove();
-    $('#submission').closest('form').remove();
+      $('[data-bs-target="#submission"]').remove();
+      $('#submission').closest('form').remove();
     {% endif %}
 
     $('#submit-submission').on('submit', async function (e) {
@@ -324,7 +324,7 @@
     }
 
     {% if teams %}
-    await fetchRankings();
+      await fetchRankings();
     {% endif %}
 
     function updateScores(updatedScores) {
@@ -345,10 +345,10 @@
       }
     }
 
-    scoreSocket.onopen = () => {
+    scoreSocket.addEventListener('open', () => {
       console.log('Connected to scores WebSocket');
-    };
-
+    });
+    
     scoreSocket.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);

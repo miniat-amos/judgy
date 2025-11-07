@@ -1,6 +1,8 @@
 from rest_framework import generics
 from competition.models import Submission
 from competition.serializers import SubmissionScoreSerializer
+from competition.utils import check_competition_best
+from competition.models import Team
 from notifications.models import Notification
 from rest_framework.response import Response
 
@@ -16,14 +18,20 @@ class ScoreUpdate(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+        
+        
+        user = instance.user
+        new_score = serializer.validated_data.get('score', instance.score)
+        problem = instance.problem
+        competition = instance.problem.competition
+        
+        team = Team.objects.filter(competition=competition, members=user).first()
+        
+        check_competition_best(competition, problem, new_score, user, team) 
+        
         self.perform_update(serializer)
 
-        user = instance.user
-        score = instance.score
-        problem_name = instance.problem.name
-        competition_name = instance.problem.competition.name
-        body=f'You got a score of {score} in the problem "{problem_name}" for the competition "{competition_name}".'
-
+        body=f'You got a score of {new_score} in the problem "{problem.name}" for the competition "{competition.name}".'
 
         # Create your notification
         Notification.objects.create(
@@ -31,6 +39,7 @@ class ScoreUpdate(generics.RetrieveUpdateDestroyAPIView):
             header="Your Score",
             body=body
         )
+        
 
         return Response(serializer.data)
 

@@ -35,17 +35,7 @@ def process_submission(code, problem, team, user, file_paths):
             score = f.read().split(' ')[0]
         with open(output_file, 'r') as f:
             file_output = f.read()
-
-        Submission.objects.create(
-            problem=problem,
-            team=user_team,
-            user=user,
-            language=language,
-            file_name=file_name,
-            output=file_output,
-            score=score
-        )
-        
+     
         if problem.show_output:
             output_url = reverse('competition:output', kwargs={'code': code, 'problem_name': problem.name})
             body = format_html(
@@ -61,10 +51,17 @@ def process_submission(code, problem, team, user, file_paths):
             body=body,
         )
 
-        Notification.objects.create(user=user, header='Your Score', body=body)
-
-        check_competition_best(problem, score, user, user_team)
-
+        check_competition_best(competition, problem, score, user, user_team)
+        
+        Submission.objects.create(
+            problem=problem,
+            team=user_team,
+            user=user,
+            language=language,
+            file_name=file_name,
+            output=file_output,
+            score=score
+        )
 
     else:
         submission = Submission.objects.create(
