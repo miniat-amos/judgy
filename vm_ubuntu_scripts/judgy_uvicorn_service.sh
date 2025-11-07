@@ -26,4 +26,4 @@ EOF
     sudo systemctl enable --now /etc/systemd/system/judgyuvicorn.service
 }
 
-judgygunicorn
+judgyuvicorn
