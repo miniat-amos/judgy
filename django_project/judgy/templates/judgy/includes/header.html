@@ -10,7 +10,6 @@
         {% include 'judgy/includes/search.html' %}
 
           {% if user.is_authenticated %}
-          
             <a href="{% url 'notifications:notification_center' %}"  style="
               border-radius: 50%;
               padding: 0.5rem;
@@ -20,13 +19,12 @@
               display: flex;
               justify-content: center;
               align-items: center;
+              position: relative;
             "
-          class="notification-bell ">
+              class="notification-bell">
               <i class="bi bi-bell" style="font-size: 1.5rem"></i> 
+              <span class="notification-indicator"></span>
             </a>
-            
-
-          
           {% endif %}
 
         <!-- Profile Icon -->
@@ -109,6 +107,42 @@
   .profile-icon:focus {
     outline: none; /* Remove default focus outline */
     border-color: rgba(255, 255, 255, 1); /* Highlight border on focus */
+  }
+
+  .notification-indicator {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.3rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    box-shadow: 0 0 6px rgba(13, 110, 253, 0.75);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .notification-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+    animation: notification-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes notification-pulse {
+    0% {
+      box-shadow: 0 0 6px rgba(13, 110, 253, 0.75);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 12px rgba(13, 110, 253, 0.9);
+      transform: scale(1.15);
+    }
+    100% {
+      box-shadow: 0 0 6px rgba(13, 110, 253, 0.75);
+      transform: scale(1);
+    }
   }
 
   /* Custom styles for notification bell */
