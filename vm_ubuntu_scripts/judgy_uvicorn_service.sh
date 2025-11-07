@@ -16,7 +16,12 @@ After=network.target
 User=webmaster
 Group=webmaster
 WorkingDirectory=/home/webmaster/judgy/django_project
-ExecStart=/home/webmaster/judgy/env/bin/uvicorn --config uvicorn_config.py progcomp.wsgi:application
+ExecStart=/home/webmaster/judgy/env/bin/uvicorn progcomp.asgi:application \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 9 \
+    --log-level info \
+    --proxy-headers
 
 [Install]
 WantedBy=multi-user.target 
