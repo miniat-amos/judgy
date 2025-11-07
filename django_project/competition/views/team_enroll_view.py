@@ -4,6 +4,7 @@ from judgy.decorators import verified_required
 from competition.forms import TeamEnrollForm
 from competition.models import Competition, Team
 from notifications.models import TeamJoinNotification
+from django.contrib import messages
 from competition.utils import team_add_user
 
 @verified_required
@@ -28,5 +29,6 @@ def team_enroll_view(request, code):
                         TeamJoinNotification.objects.create(user=user, body=body, request_user=request.user, team=team)
                 return redirect('competition:team_name', code=team.competition.code, name=team.name)
             else:
-                print('Some field was not correctly filled.')
-                print('form.errors:\n', form.errors)
+                messages.error(request, "No HTML tags allowed in team names.")
+              
+    return redirect('competition:competition_code', code=code)

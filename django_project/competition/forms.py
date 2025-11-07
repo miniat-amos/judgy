@@ -1,3 +1,4 @@
+import bleach
 from django.utils.html import strip_tags
 from django import forms
 from django.utils import timezone
@@ -271,10 +272,8 @@ class TeamEnrollForm(forms.ModelForm):
         )
         
     def clean_name(self):
-        """Strip HTML tags and validate the team name."""
         name = self.cleaned_data.get('name', '')
-
-        name = strip_tags(name).strip()
+        name = bleach.clean(name, tags=[], attributes={}, strip=True).strip()
 
         return name
 
