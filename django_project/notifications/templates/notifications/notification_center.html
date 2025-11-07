@@ -104,14 +104,12 @@
     // 4. Initial load
     const response = await fetch("{% url 'notifications:all_notifications' %}");
     const notifications = await response.json();
-    console.log(notifications)
     displayNotifications(notifications);
 
     // 5. Live updates via WebSocket
     if (window.notificationsSocket) {
         window.notificationsSocket.addEventListener("message", function (event) {
         const newNotifications = JSON.parse(event.data);
-        console.log(newNotifications)
         displayNotifications(newNotifications);
         });
     }
