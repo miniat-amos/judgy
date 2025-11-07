@@ -1,5 +1,6 @@
 import docker
 import os
+import shlex
 from pathlib import Path
 from competition.utils import make_file, create_user_dir, overwrite_submission_dirfiles, store_submissions
 from competition.models import Problem, Competition
@@ -71,6 +72,8 @@ def run_submission(code, problem, team, user, files):
         container_user_file = container_main_directory / problem_name / first_file.name
         volumes[str(first_file)] = {"bind": str(container_user_file), "mode": "rw"}
         judgy_source_file = os.path.basename(container_user_file)
+        judgy_source_file = shlex.quote(judgy_source_file)
+
     
     if languages[file_extension]["type"] == "compiled-and-interpreted":
         # Directory where Java files are stored in the container
@@ -92,8 +95,10 @@ def run_submission(code, problem, team, user, files):
         main_file = find_main_file()
         classes = classes_list()
         judgy_source_file = os.path.basename(main_file)
+        judgy_source_file = shlex.quote(judgy_source_file)
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
+            f'export JUDGY_SOURCE_FILE={judgy_source_file};'
             f'{compiler} ' + " ".join([f'\\"{cls}\\"' for cls in classes]) + '; '
             f'status=$?; '
             f'if [ $status -ne 0 ]; then '
@@ -122,7 +127,7 @@ def run_submission(code, problem, team, user, files):
         command = (
             f'bash -c "cd \\"/app/{problem_name}\\" && '
             f'export JUDGY_SOURCE_FILE={judgy_source_file};'
-            f'output=$(timeout 60s python3 judge.py {interpreter} \\"{container_user_file}\\"); '
+            f'output=$(timeout 60s python3 judge.py {interpreter} \\"{judgy_source_file}\\"); '
             f'status=$?; '
             f'if [ $status -eq 124 ]; then '
             f'  echo {timeout_score} > {container_score_path}; '
@@ -172,12 +177,7 @@ def run_submission(code, problem, team, user, files):
         container.wait()  
     finally:
         container.stop()
-        container.remove()
+        # container.remove()
 
-    # elif problem.subjective and not has_judging_program(competition, problem):
-    #     # Creates .../problem_name/submission/teamname/useremail/submission_n+1 dir
-    #     submission_dir = create_user_dir(code, user, problem_name, team, subjective=True)
-    #     submitted_files = store_submissions(files, submission_dir)
-    #     score_file, output_file, judgy_source_file  = None
 
     return score_file, output_file, language, judgy_source_file
