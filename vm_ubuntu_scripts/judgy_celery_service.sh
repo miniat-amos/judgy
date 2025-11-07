@@ -27,3 +27,5 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable --now /etc/systemd/system/judgycelery.service
 }
+
+judgycelery
