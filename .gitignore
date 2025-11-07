@@ -31,6 +31,8 @@
 #                                      #
 ########################################
 
+!vm_ubuntu_scripts
+
 !django_project/
 django_project/*
 !django_project/test_devs
