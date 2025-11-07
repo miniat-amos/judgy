@@ -62,6 +62,8 @@ def get_submission_dir(code, team, user, problem, submission):
     
     submission_directory = user_directory / submission
     
+    
+    
     return submission_directory.resolve()
         
 
@@ -131,7 +133,7 @@ def create_user_dir(code, user, problem, team, submission = None, subjective = F
         # Create new submission folder
         submission_directory = user_directory / f"{submission.id}"
         submission_directory.mkdir(exist_ok=True)
-
+        
         return submission_directory.resolve()
     
     else:

@@ -5,7 +5,7 @@ from competition.utils import get_submission_dir
 from django.contrib.auth.decorators import user_passes_test
 
 @user_passes_test(lambda u: u.is_superuser)
-def download_submission_view(request, code, problem_name, team_name, email, submission_id, submission_number):
+def download_submission_view(request, code, problem_name, team_name, email, submission_id):
         submission_dir = get_submission_dir(code, team_name, email, problem_name, submission_id)
 
         submission_zip = f'/tmp/{email}.zip'
@@ -21,7 +21,7 @@ def download_submission_view(request, code, problem_name, team_name, email, subm
         with open(submission_zip, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/zip')
             # Set the Content-Disposition header to prompt the user to download the file
-            response['Content-Disposition'] = f'attachment; filename="{email}_submission-{submission_number}.zip"'
+            response['Content-Disposition'] = f'attachment; filename="{email}_submission-{submission_id}.zip"'
 
         os.remove(submission_zip)
 

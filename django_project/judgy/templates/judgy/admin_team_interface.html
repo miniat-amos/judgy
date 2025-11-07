@@ -83,7 +83,7 @@ $(async () => {
                   const competitionCode = "{{ competition.code|escapejs }}";
                   const teamName = "{{ team.name|escapejs }}";
 
-                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/${encodeURIComponent(teamName)}/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/${encodeURIComponent(submission.submission_number)}/download/`;
+                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/${encodeURIComponent(teamName)}/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/download`;
 
                   atag = `<a href="${downloadUrl}">Download Submission</a>`;
 
