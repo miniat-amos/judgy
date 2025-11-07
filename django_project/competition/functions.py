@@ -177,7 +177,7 @@ def run_submission(code, problem, team, user, files):
         container.wait()  
     finally:
         container.stop()
-        # container.remove()
+        container.remove()
 
 
     return score_file, output_file, language, judgy_source_file
