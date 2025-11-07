@@ -87,12 +87,7 @@
         let notifications = [];
         function update_notifications(updated_notifications) {
   
-          for (const notification of notifications) {
-            if (!updated_notifications.some(n => n.id == notification.id)) {
-              $(`[data-id="${notification.id}"]`).remove();
-            }
-          }
-
+        
           for (const notification of updated_notifications) {
             if (!notifications.some(n => n.id == notification.id)) {
               $('.toast-container').append(`
