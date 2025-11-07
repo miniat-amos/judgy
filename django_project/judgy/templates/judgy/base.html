@@ -78,6 +78,12 @@
         };
 
       
+        function setNotificationIndicator(active) {
+          const indicator = document.querySelector('.notification-indicator');
+          if (!indicator) return;
+          indicator.classList.toggle('show', active);
+        }
+
         let notifications = [];
         function update_notifications(updated_notifications) {
   
@@ -172,6 +178,7 @@
           });
 
           notifications = updated_notifications;
+          setNotificationIndicator(updated_notifications.length > 0);
         };
 
         notificationsSocket.onmessage = function(event) {
