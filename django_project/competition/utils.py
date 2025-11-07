@@ -56,7 +56,7 @@ def get_submission_dir(code, team, user, problem, submission):
     
     submissions_directory = problem_directory / 'submissions'
     
-    team_directory = submissions_directory / team
+    team_directory = submissions_directory / slugify(str(team))
     
     user_directory = team_directory / user
     
