@@ -68,6 +68,8 @@ $(async () => {
                       <button class="btn btn-success submit-score" type="button" id="button-addon2">Submit</button>
                     </div>
                   `
+
+                  const atag = ""
                   
                   if(submission.subjective === true)
                   {
@@ -76,7 +78,7 @@ $(async () => {
 
                   const downloadUrl = `/competition/${competitionCode}/download/${encodeURIComponent(submission.problem_name)}/${encodeURIComponent(teamName)}/${encodeURIComponent(email)}/${encodeURIComponent(submission.submission_id)}/${encodeURIComponent(submission.submission_number)}/`;
 
-                  const atag = `<a href="${downloadUrl}">Download Submission</a>`;
+                  atag = `<a href="${downloadUrl}">Download Submission</a>`;
 
                   }
                   else
