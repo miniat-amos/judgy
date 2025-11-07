@@ -21,7 +21,8 @@ ExecStart=/home/webmaster/judgy/env/bin/uvicorn progcomp.asgi:application \
     --port 8000 \
     --workers 9 \
     --log-level info \
-    --proxy-headers
+    --proxy-headers \
+    --lifespan off
 
 [Install]
 WantedBy=multi-user.target 
