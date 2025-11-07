@@ -7,6 +7,13 @@
 <script>
 $(async () => {
 
+          function safeUrlSegment(str) {
+            return encodeURIComponent(str)    // encode special characters
+                .replace(/%20/g, '_')        // replace spaces with underscores
+                .replace(/'/g, '')           // remove apostrophes
+                .replace(/,/g, '');          // remove commas (optional)
+        }
+
         const competitionCode = "{{ competition.code|escapejs }}";
         const teamName = "{{ team.name|escapejs }}";
 
@@ -75,8 +82,12 @@ $(async () => {
                   {
                  const competitionCode = "{{ competition.code|escapejs }}";
                   const teamName = "{{ team.name|escapejs }}";
+                  const problemName = "{{ submission.problem_name|escapejs }}";
+                  const email = "{{ email|escapejs }}";
+                  const submissionId = "{{ submission.submission_id }}";
+                  const submissionNumber = "{{ submission.submission_number }}";
 
-                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/${encodeURIComponent(teamName)}/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/${encodeURIComponent(submission.submission_number)}/download/`;
+                  const downloadUrl = `/competition/${safeUrlSegment(competitionCode)}/${safeUrlSegment(problemName)}/team/${safeUrlSegment(teamName)}/user/${encodeURIComponent(email)}/submission/${submissionId}/${submissionNumber}/download/`;
 
                   atag = `<a href="${downloadUrl}">Download Submission</a>`;
 
