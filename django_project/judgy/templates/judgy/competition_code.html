@@ -420,11 +420,22 @@
               {% endif %}
             </div>
             <div class="card-footer">
-              {% if problem.score_preference %}
-                <i class="bi bi-arrow-up"></i> Higher Score is Better
-              {% else %}
-                <i class="bi bi-arrow-down"></i> Lower Score is Better
-              {% endif %}
+              <div>
+                {% if problem.score_preference %}
+                  <i class="bi bi-arrow-up"></i> Higher Score is Better
+                {% else %}
+                  <i class="bi bi-arrow-down"></i> Lower Score is Better
+                {% endif %}
+              </div>
+
+              <div>
+                {% if problem.subjective %}
+                  <i class="bi bi-pencil"></i> Manual Scoring
+                {% else %}
+                  <i class="bi bi-robot"></i> Auto Scoring
+                {% endif %}
+              </div>
+
               <br>
 
         
