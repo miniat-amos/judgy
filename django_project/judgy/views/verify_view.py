@@ -1,6 +1,8 @@
 from judgy.forms import AccountVerificationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from judgy.tasks import send_6dc_email_task
+
 
 def verify_view(request):
     if request.method == 'POST':
@@ -16,4 +18,6 @@ def verify_view(request):
             print('form.errors:\n', form.errors)
     else:
         form = AccountVerificationForm()
+        send_6dc_email_task.delay(request.user.id, request.user.email)
+
     return render(request, 'judgy/verify.html', {'form': form})
