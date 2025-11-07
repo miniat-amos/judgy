@@ -126,16 +126,7 @@
             }
           }
 
-          $('.toast .btn-close').on('click', function () {
-            if ($(this).closest('.toast').data('type') == 0) {
-              fetch("{% url 'notifications:notification_clear' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
-                headers: {
-                  'X-CSRFToken': '{{ csrf_token }}'
-                }
-              });
-            }
-          });
-
+      
           $('.toast .accept').on('click', function () {
             if ($(this).closest('.toast').data('header') == 'Join Request') {
               fetch("{% url 'competition:team_join_accept' 'id' %}".replace('id', $(this).closest('.toast').data('id')), {
