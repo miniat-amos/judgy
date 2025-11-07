@@ -71,7 +71,7 @@ def process_submission(code, problem, team, user, file_paths):
             language="",
             file_name="",
             output=None,
-            score=0
+            score=None
         )
         
         submission_dir = create_user_dir(code, user, problem.name, user_team, submission, subjective=problem.subjective)
