@@ -33,6 +33,7 @@
 
 !django_project/
 django_project/*
+!django_project/test_devs
 !django_project/judgy/
 !django_project/notifications
 !django_project/competition

@@ -4,7 +4,7 @@
 
 <script>
     $(async () => {
-        const $container = $("#notification-container .row");
+        const $container = $("#notification-row");
         const csrfToken = "{{ csrf_token }}";
 
         // 1. Helper: create a notification card HTML
@@ -13,10 +13,10 @@
             0: "",
             1: `
                 <div class="border-top mt-2 pt-2">
-                <div class="d-flex justify-content-between">
-                    <button class="accept btn btn-success w-50 me-1">Accept</button>
-                    <button class="decline btn btn-danger w-50 ms-1">Decline</button>
-                </div>
+                    <div class="d-flex justify-content-between">
+                        <button class="accept btn btn-success w-50 me-1">Accept</button>
+                        <button class="decline btn btn-danger w-50 ms-1">Decline</button>
+                    </div>
                 </div>
             `,
             };
@@ -44,7 +44,7 @@
         // 2. Render a notification only if it doesn’t exist
         function displayNotifications(notifications) {
             for (const notification of notifications) {
-                if (!$(`#notification-${notification.id}`).length) {
+                if ($(`#notification-${notification.id}`).length === 0) {
                     $container.prepend(createNotificationCard(notification));
                 }
             }
@@ -104,12 +104,14 @@
     // 4. Initial load
     const response = await fetch("{% url 'notifications:all_notifications' %}");
     const notifications = await response.json();
+    console.log(notifications)
     displayNotifications(notifications);
 
     // 5. Live updates via WebSocket
     if (window.notificationsSocket) {
         window.notificationsSocket.addEventListener("message", function (event) {
         const newNotifications = JSON.parse(event.data);
+        console.log(newNotifications)
         displayNotifications(newNotifications);
         });
     }
@@ -126,7 +128,7 @@
 <div id="notification-container" class="container mt-5 mb-5">
     <h1 class="text-center">Notifications</h1>
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">      
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="notification-row"">      
         
     </div>
 
