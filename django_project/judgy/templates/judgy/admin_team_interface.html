@@ -65,6 +65,16 @@ $(async () => {
                     </div>
                   `
                   
+                  if(submission.subjective === true)
+                  {
+                    downloadUrl = "{% url 'competition:download_submission' competition.code 'problem_name' team.name 'email' 'submission_id' 'submission_number' %}".replace('problem_name', submission.problem_name).replace('email', email).replace('submission_id', submission.submission_id).replace('submission_number', submission.submission_number);
+                    atag = `<a href="${downloadUrl}"">Download Submission</a>`;
+                  }
+                  else
+                  {
+                    atag = "";
+                  }
+                  
                   scoresHTML = `
                     <tr>
                       <td>${submission.submission_number}</td>
@@ -72,7 +82,7 @@ $(async () => {
                       <td>${submission.problem_name}</td>
                       <td>${submission.score_preference === true ? ` <i class="bi bi-arrow-up"></i> Higher Score is Better` : `<i class="bi bi-arrow-down"></i> Lower Score is Better`}</td>
                       <td>${submission.score !== "" ? submission.score : "--"}</td>
-                      <td></td>
+                      <td>${atag}</td>
                       <td>${inputScore}</td>
                     </tr>
                   `;

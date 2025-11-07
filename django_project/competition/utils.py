@@ -47,6 +47,25 @@ def get_dist_dir(code, problem):
         
     return distributed_directory.resolve()
 
+def get_submission_dir(code, team, user, problem, submission):
+    main_directory = parent_dir / 'competitions'
+    
+    comp_directory = main_directory / code.lower()
+        
+    problem_directory = comp_directory / 'problems' / problem
+    
+    submissions_directory = problem_directory / 'submissions'
+    
+    team_directory = submissions_directory / team
+    
+    user_directory = team_directory / user
+    
+    submission_directory = user_directory / submission
+    
+    return submission_directory.resolve()
+        
+
+
 def create_problem(code, name, description, judge_py, other_files, dist):
     main_directory = parent_dir / 'competitions'
     comp_directory = main_directory / code.lower()

@@ -15,6 +15,7 @@ from competition.views.team_invite_accept_view import team_invite_accept_view
 from competition.views.team_invite_decline_view import team_invite_decline_view
 from competition.views.team_name_view import team_name_view
 from competition.views.download_view import download_view
+from competition.views.download_submission_view import download_submission_view
 from competition.views.submit_view import submit_view
 from competition.views.rankings_view import rankings_view
 from competition.views.output_view import output_view
@@ -46,6 +47,7 @@ urlpatterns = [
     path('team/invite/<str:id>/decline', team_invite_decline_view, name='team_invite_decline'),
     path('competition/<str:code>/team/<str:name>', team_name_view, name='team_name'),
     path('competition/<str:code>/<str:problem_name>/download', download_view, name='download'),
+    path('competition/<str:code>/<str:problem_name>/team/<str:team_name>/user/<str:email>/submission/<str:submission_id>/<str:submission_number>/download', download_submission_view, name='download_submission'),
     path('competition/<str:code>/<str:problem_name>/submit', submit_view, name='submit'),
     path('competition/<str:code>/rankings', rankings_view, name='rankings'),
     path('competition/<str:code>/<str:problem_name>/submission/output', output_view, name='output'),
