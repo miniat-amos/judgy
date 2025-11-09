@@ -8,7 +8,8 @@ def admin_comp_interface(request, code):
     competition = get_object_or_404(Competition, code=code)
     
     context = {
-        'competition': competition
+        'competition': competition,
+        'problems': competition.problem_set.all().order_by("number"),
     }
 
 

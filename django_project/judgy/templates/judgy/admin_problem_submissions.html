@@ -1,0 +1,94 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }} • {{ problem.name }} Submissions{% endblock %}
+
+{% block main %}
+<div class="container py-5">
+  <div class="mb-4">
+    <a class="btn btn-link px-0" href="{% url 'competition:admin_comp_interface' competition.code %}">
+      <i class="bi bi-arrow-left"></i> Back to {{ competition.name }} admin view
+    </a>
+  </div>
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="mb-1">{{ problem.name }}</h1>
+      <p class="text-muted mb-0">Problem {{ problem.number }} • {{ submission_count }} submission{{ submission_count|pluralize }}</p>
+    </div>
+    <span class="badge {% if problem.subjective %}text-bg-warning text-dark{% else %}text-bg-primary{% endif %}">
+      {% if problem.subjective %}Subjective{% else %}Auto Judged{% endif %}
+    </span>
+  </div>
+
+  <form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-12 col-md-5">
+      <label for="teamFilter" class="form-label">Team name</label>
+      <select class="form-select" id="teamFilter" name="team">
+        <option value="">All teams</option>
+        {% for team in teams %}
+          <option value="{{ team.name }}" {% if team.name == team_filter %}selected{% endif %}>{{ team.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label for="orderFilter" class="form-label">Sort by</label>
+      <select class="form-select" id="orderFilter" name="order">
+        <option value="latest" {% if order == 'latest' %}selected{% endif %}>Latest submitted</option>
+        <option value="earliest" {% if order == 'earliest' %}selected{% endif %}>Earliest submitted</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">Apply filters</button>
+      <a class="btn btn-outline-secondary" href="{% url 'competition:admin_problem_submissions' competition.code problem.name %}">Reset</a>
+    </div>
+  </form>
+
+  {% if submissions %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Team</th>
+            <th scope="col">Member</th>
+            <th scope="col">Language</th>
+            <th scope="col">Score</th>
+            <th scope="col">Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ submission.time|date:"Y-m-d H:i:s T" }}</td>
+              <td>
+                <a href="{% url 'competition:admin_team_interface' competition.code submission.team.name %}">{{ submission.team.name }}</a>
+              </td>
+              <td>
+                {{ submission.user.first_name }} {{ submission.user.last_name }}<br>
+                <small class="text-muted">{{ submission.user.email }}</small>
+              </td>
+              <td>{{ submission.language|default:"-" }}</td>
+              <td>{{ submission.score|default:"--" }}</td>
+              <td>
+                {% if problem.subjective %}
+                  <a href="{% url 'competition:download_submission' competition.code problem.name submission.team.name submission.user.email submission.id %}" class="btn btn-sm btn-outline-primary">
+                    Download
+                  </a>
+                {% else %}
+                  <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info mb-0">
+      No submissions found for the selected filters.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
