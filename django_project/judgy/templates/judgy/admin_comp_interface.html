@@ -5,106 +5,214 @@
 
 {% block main %}
 
+<style>
+  .admin-hero-card {
+    background-color: var(--bs-body-tertiary-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .admin-hero-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+  .problem-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  }
+  .problem-card {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .member-chip {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+  }
+  .team-card {
+    border: none;
+    background: var(--bs-tertiary-bg);
+    color: #f8fafc;
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+  .team-card a {
+    color: inherit;
+  }
+  .badge-soft {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f8fafc;
+  }
+  @media (max-width: 576px) {
+    .admin-hero-card .stat-value {
+      font-size: 1.4rem;
+    }
+  }
+</style>
+
 <script>
   $(async () => {
+    const teamsEndpoint = "{% url 'competition:competition_teams' competition.code %}";
+    const memberEndpointTemplate = "{% url 'competition:team_members' competition.code 'team.name' %}";
+    const teamAdminTemplate = "{% url 'competition:admin_team_interface' competition.code 'team.name' %}";
+    const $grid = $('#teams-grid');
+    const $emptyState = $('#teams-empty');
 
-      const response = await fetch("{% url 'competition:competition_teams' competition.code %}");
-      const teams = await response.json();
+    $grid.empty();
+    $emptyState.addClass('d-none');
 
-      $('#teams').empty();
+    try {
+      const teamResponse = await fetch(teamsEndpoint);
+      const teams = await teamResponse.json();
 
-        for (const team of teams) {
+      if (!teams.length) {
+        $emptyState.removeClass('d-none');
+        return;
+      }
 
-          const member_url = "{% url 'competition:team_members' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+      const teamBundles = await Promise.all(
+        teams.map(async (team) => {
+          const memberUrl = memberEndpointTemplate.replace('team.name', encodeURIComponent(team.name));
+          const memberResponse = await fetch(memberUrl);
+          const members = await memberResponse.json();
+          return { team, members };
+        })
+      );
 
-          const response = await fetch(member_url);
-          const members = await response.json();
-
-          let membersHTML = ""
-
-          for (const member of members) {
-            membersHTML += `
-              <div class="col">
-                <div class="text-center">
-                  
-                  <i class="bi bi-person-circle" style="font-size: 4rem"></i>
-                  <h4>${member.first_name}</h4>
-                  <h5>${member.email}</h5>
-                </div>
+      for (const { team, members } of teamBundles) {
+        const membersHTML = members
+          .map((member) => `
+            <div class="col">
+              <div class="member-chip h-100">
+                <div class="fw-semibold mb-1">${member.first_name || ''} ${member.last_name || ''}</div>
+                <small class="text-muted">${member.email}</small>
               </div>
-              `
-          }
-          
-          const team_admin_url = "{% url 'competition:admin_team_interface' competition.code 'team.name' %}".replace('team.name', encodeURIComponent(team.name));
+            </div>
+          `)
+          .join('');
 
-          $('#teams').append(`
-          <div class="card bg-body-tertiary">
-                <a href=${team_admin_url} style="text-decoration: none; color: white;">
-              <div class="card-body">
-                    <h3 class="card-title">Team: 
-                    ${team.name}
-                    </h3>
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                  ${membersHTML}
+        const teamAdminUrl = teamAdminTemplate.replace('team.name', encodeURIComponent(team.name));
+
+        $grid.append(`
+          <div class="col">
+            <div class="team-card h-100">
+              <div class="card-body bg-body-tertiary d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                  <div>
+                    <p class="text-uppercase text-muted fw-semibold mb-1">Team</p>
+                    <h4 class="mb-0">${team.name}</h4>
+                    <span class="badge badge-soft mt-2">${members.length} member${members.length === 1 ? '' : 's'}</span>
+                  </div>
+                  <a class="btn btn-outline-light btn-sm" href="${teamAdminUrl}">
+                    Manage<i class="bi bi-arrow-up-right ms-2"></i>
+                  </a>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 g-3">
+                  ${membersHTML || '<div class="col text-muted fst-italic">No members yet</div>'}
                 </div>
               </div>
             </div>
-            </a>
           </div>
-          <br>
-          `);
-        }
-
+        `);
+      }
+    } catch (err) {
+      console.error(err);
+      $emptyState.removeClass('d-none').text('Unable to load teams right now.');
+    }
   });
 </script>
 
-
-
 <div class="container py-5">
-  
-    <div class="mb-5">
-        <h1 class="text-center">Admin Interface for {{ competition.name }}</h1>
+  <div class="card admin-hero-card text-white bg-body-tertiary p-4 p-md-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
+      <div>
+        <p class="text-uppercase text-light mb-2">Admin Control Center</p>
+        <h1 class="display-5 fw-semibold mb-3">{{ competition.name }}</h1>
+        <p class="lead text-light mb-0">{{ competition.description }}</p>
+      </div>
+      <div class="row row-cols-2 g-3 text-center">
+        <div class="col">
+          <div class="stat-value">{{ competition.problem_set.count }}</div>
+          <p class="text-uppercase text-muted mb-0">Problems</p>
+        </div>
+        <div class="col">
+          <div class="stat-value">{{ competition.team_set.count }}</div>
+          <p class="text-uppercase text-muted mb-0">Teams</p>
+        </div>
+        <div class="col">
+          <div class="stat-value">{{ competition.start|date:"M d" }}</div>
+          <p class="text-uppercase text-muted mb-0">Start</p>
+        </div>
+        <div class="col">
+          <div class="stat-value">{{ competition.end|date:"M d" }}</div>
+          <p class="text-uppercase text-muted mb-0">End</p>
+        </div>
+      </div>
     </div>
-
-  <div class="mt-1 mb-3">
-    <h1 class="text-center">Problems</h1>
   </div>
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
-    {% for problem in problems %}
-      <div class="col">
-        <a class="text-decoration-none text-reset" href="{% url 'competition:admin_problem_submissions' competition.code problem.name %}">
-          <div class="card h-100 bg-body-tertiary">
-            <div class="card-body d-flex flex-column gap-2">
-              <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Problem {{ problem.number }}</h4>
-                {% if problem.subjective %}
-                  <span class="badge text-bg-warning text-dark">Subjective</span>
-                {% else %}
-                  <span class="badge text-bg-primary">Auto Judged</span>
-                {% endif %}
+
+  <section class="mt-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+      <div>
+        <p class="text-uppercase text-muted small mb-1">Submissions</p>
+        <h2 class="mb-0">Problems</h2>
+      </div>
+      <span class="text-muted">Tap a problem to inspect submissions and download files.</span>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      {% for problem in problems %}
+        <div class="col">
+          <a class="text-decoration-none text-reset" href="{% url 'competition:admin_problem_submissions' competition.code problem.name %}">
+            <div class="card problem-card bg-body-tertiary h-100 border-0 shadow-sm">
+              <div class="card-body d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="badge bg-dark-subtle text-muted">#{{ problem.number }}</span>
+                  {% if problem.subjective %}
+                    <span class="badge text-bg-warning text-dark">Subjective</span>
+                  {% else %}
+                    <span class="badge text-bg-primary">Auto Judged</span>
+                  {% endif %}
+                </div>
+                <div>
+                  <h4 class="fw-semibold mb-1">{{ problem.name }}</h4>
+                  <p class="text-muted mb-0">Score preference: {{ problem.score_preference|yesno:"Higher is better,Lower is better" }}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 text-primary">
+                  <span>View submissions</span>
+                  <i class="bi bi-arrow-right"></i>
+                </div>
               </div>
-              <h5 class="fw-semibold">{{ problem.name }}</h5>
-              <p class="text-muted mb-0">Click to review submissions</p>
             </div>
-          </div>
-        </a>
-      </div>
-    {% empty %}
-      <div class="col">
-        <div class="alert alert-info mb-0">No problems have been added yet.</div>
-      </div>
-    {% endfor %}
-  </div>
-
-  <div class="mt-1">
-    <h1 class="text-center">Teams</h1>
-  </div>
-  <div class="row row-cols-1 g-4">
-    <div id="teams">
+          </a>
+        </div>
+      {% empty %}
+        <div class="col">
+          <div class="alert alert-info mb-0">No problems have been added yet.</div>
+        </div>
+      {% endfor %}
     </div>
-  </div>
+  </section>
+
+  <section class="mt-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+      <div>
+        <p class="text-uppercase text-muted small mb-1">Participants</p>
+        <h2 class="mb-0">Teams</h2>
+      </div>
+      <span class="text-muted">Real-time view of teams and members.</span>
+    </div>
+    <div class="row row-cols-1 row-cols-lg-2 g-4" id="teams-grid">
+      <div class="col">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body text-center text-muted">
+            Loading teams...
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="teams-empty" class="alert alert-info d-none mt-3">
+      No teams have joined this competition yet.
+    </div>
+  </section>
 </div>
-
-
 
 {% endblock %}
