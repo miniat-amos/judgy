@@ -22,7 +22,7 @@
     });
 
     const qrCodeImg = $('#qrcode').find("img")
-    qrCodeImg.attr("alt", "{% url 'competition:competition_code' competition.code %}")
+    qrCodeImg.attr("alt", "QR code linking to {{ competition.name|escapejs }} competition page");
     
     $('#delete-competition').on('show.bs.modal', event => {
       $('.modal-body .name').text('{{ competition.name|escapejs }}');
@@ -51,10 +51,14 @@
 
     const response = await fetch("{% url 'competition:competition_teams' competition.code %}");
     const teams = await response.json();
+    const $teamList = $('.teams').attr({
+      role: 'listbox',
+      'aria-live': 'polite',
+      'aria-label': 'Matching teams'
+    });
 
     $('#team-name').on('input', function () {
       const input = $(this).val().trim();
-      const $teamList = $('.teams');
       $teamList.empty();
 
       if (input) {
@@ -67,8 +71,8 @@
 
           if (regex.test(teamName)) {
             const $item = $(`
-              <li>
-                <div class="dropdown-item" data-team-name="${$('<div>').text(teamName).text()}">
+              <li role="presentation">
+                <div class="dropdown-item" role="option" tabindex="-1" data-team-name="${$('<div>').text(teamName).text()}">
                   ${$('<div>').text(teamName).html()}
                 </div>
               </li>
@@ -160,7 +164,12 @@
       const now = new Date();
 
       const progress = constrain(map(now, start, end, 0, 100), 0, 100);
-      $('.progress-bar').css('width', `${progress}%`);
+      $('.progress-bar')
+        .css('width', `${progress}%`)
+        .attr({
+          'aria-valuenow': Math.round(progress),
+          'aria-valuetext': `${Math.round(progress)} percent complete`
+        });
 
       if (progress == 100) clearInterval(intervalID);
     };
@@ -197,15 +206,26 @@
           <br>
           <div>Team Size Limit: {{ competition.team_size_limit }}</div>
           <br>
-          <div class="progress" role="progressbar">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
+          <p id="competition-progress-description" class="visually-hidden">
+            Competition time progress from start to end.
+          </p>
+          <div class="progress" aria-labelledby="competition-progress-description">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-valuetext="0 percent complete"
+              style="width: 0%"
+            ></div>
           </div>
           <br>
           {% if user.is_superuser %}
             <div class="d-flex gap-3">
               <button id="edit-button" class="edit-competition-btn btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-competition">EDIT</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-competition">DELETE</button>
-              <a class="btn btn-primary" href="{% url 'competition:admin_comp_interface' competition.code %}">MANAGE</a>
+              <a class="btn btn-primary" href="{% url 'competition:admin_comp_interface' competition.code %}">TEAMS</a>
               {% if problems %}
                 <button class="btn btn-success build-container-btn">BUILD IMAGE</button>
               {% endif %}
@@ -236,8 +256,18 @@
       <div class="d-flex justify-content-end py-5 w-100">
         <div class="d-flex flex-column align-items-center text-center">
           <h1>Share this Competition</h1>
-          <a class="text-decoration-none" href="{% url 'competition:competition_code' competition.code %}">
-            <div id="qrcode"  data-alt="QR code linking to the competition page">
+          <a
+            class="text-decoration-none"
+            href="{% url 'competition:competition_code' competition.code %}"
+            aria-label="Open the {{ competition.name }} competition page"
+          >
+            <div
+              id="qrcode"
+              role="img"
+              aria-live="polite"
+              aria-label="QR code with link to the {{ competition.name }} competition page"
+              data-alt="QR code linking to the competition page"
+            >
             </div>
           </a>
           <br>

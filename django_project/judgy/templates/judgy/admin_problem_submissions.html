@@ -20,7 +20,14 @@
     </span>
   </div>
 
-  <form method="get" class="row g-3 align-items-end mb-4">
+  <p id="submission-summary" class="text-muted" aria-live="polite">
+    Displaying {{ submissions|length }} of {{ submission_count }} submission{{ submission_count|pluralize }} for {{ problem.name }}.
+  </p>
+  <p id="filter-help" class="visually-hidden">
+    Adjust the following filters to limit submissions by team or submission order.
+  </p>
+
+  <form method="get" class="row g-3 align-items-end mb-4" aria-describedby="filter-help submission-summary">
     <div class="col-12 col-md-5">
       <label for="teamFilter" class="form-label">Team name</label>
       <select class="form-select" id="teamFilter" name="team">
@@ -45,7 +52,8 @@
 
   {% if submissions %}
     <div class="table-responsive">
-      <table class="table table-striped align-middle">
+      <table class="table table-striped align-middle" aria-describedby="submission-summary">
+        <caption class="text-muted">Submission details for {{ problem.name }}.</caption>
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -60,7 +68,7 @@
         <tbody>
           {% for submission in submissions %}
             <tr>
-              <td>{{ forloop.counter }}</td>
+              <th scope="row">{{ forloop.counter }}</th>
               <td>{{ submission.time|date:"Y-m-d H:i:s T" }}</td>
               <td>
                 <a href="{% url 'competition:admin_team_interface' competition.code submission.team.name %}">{{ submission.team.name }}</a>
@@ -73,7 +81,11 @@
               <td>{{ submission.score|default:"--" }}</td>
               <td>
                 {% if problem.subjective %}
-                  <a href="{% url 'competition:download_submission' competition.code problem.name submission.team.name submission.user.email submission.id %}" class="btn btn-sm btn-outline-primary">
+                  <a
+                    href="{% url 'competition:download_submission' competition.code problem.name submission.team.name submission.user.email submission.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                    aria-label="Download submission {{ forloop.counter }} from team {{ submission.team.name }} member {{ submission.user.email }}"
+                  >
                     Download
                   </a>
                 {% else %}
