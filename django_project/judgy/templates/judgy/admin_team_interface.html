@@ -7,17 +7,10 @@
 <script>
 $(async () => {
 
-        function safeUrlSegment(str) {
-          return encodeURIComponent(str)    // encode special characters
-              .replace(/%20/g, '_')        // replace spaces with underscores
-              .replace(/'/g, '')           // remove apostrophes
-              .replace(/,/g, '');          // remove commas (optional)
-      }
-
         const competitionCode = "{{ competition.code|escapejs }}";
         const teamName = "{{ team.name|escapejs }}";
 
-        const member_scores_url = `/competition/${competitionCode}/team/${encodeURIComponent(teamName)}/members-scores`;
+        const member_scores_url = `/competition/${competitionCode}/team/teamName/members-scores`;
 
 
         const response = await fetch(member_scores_url);
@@ -83,7 +76,7 @@ $(async () => {
                   const competitionCode = "{{ competition.code|escapejs }}";
                   const teamName = "{{ team.name|escapejs }}";
 
-                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/${encodeURIComponent(teamName)}/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/download`;
+                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/teamName/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/download`;
 
                   atag = `<a href="${downloadUrl}">Download Submission</a>`;
 

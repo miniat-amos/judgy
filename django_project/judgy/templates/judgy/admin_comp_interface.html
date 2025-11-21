@@ -83,7 +83,7 @@
 
       const teamBundles = await Promise.all(
         teams.map(async (team) => {
-          const memberUrl = memberEndpointTemplate.replace('team.name', encodeURIComponent(team.name));
+          const memberUrl = memberEndpointTemplate.replace('team.name', team.name);
           const memberResponse = await fetch(memberUrl);
           const members = await memberResponse.json();
           return { team, members };
@@ -103,7 +103,7 @@
           `)
           .join('');
 
-        const teamAdminUrl = teamAdminTemplate.replace('team.name', encodeURIComponent(team.name));
+        const teamAdminUrl = teamAdminTemplate.replace('team.name', team.name);
 
         $grid.append(`
           <div class="col" role="listitem">
