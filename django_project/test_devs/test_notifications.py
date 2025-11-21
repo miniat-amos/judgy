@@ -10,10 +10,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "progcomp.settings")
 django.setup()
 
 from django.shortcuts import redirect, get_object_or_404
-from judgy.models import User, Team, Competition
+from competition.models import User, Team, Competition
 from notifications.models import Notification
 
-code = "d515"
+code = "247F"
 
 competition = get_object_or_404(Competition, code=code)
 

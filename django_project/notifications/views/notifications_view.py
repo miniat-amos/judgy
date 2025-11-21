@@ -4,4 +4,4 @@ from notifications.models import Notification
 
 @verified_required
 def notifications_view(request):
-    return JsonResponse(list(Notification.objects.filter(user=request.user).values().order_by('id')), safe=False)
+    return JsonResponse(list(Notification.objects.filter(user=request.user).values().order_by('-id')), safe=False)
