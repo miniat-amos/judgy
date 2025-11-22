@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from pathlib import Path
 from judgy.models import User
-from competition.functions import run_submission
+from competition.functions import run_submission, get_language
 from competition.utils import notify_admin_submission, create_user_dir, store_submissions, check_competition_best
 from competition.models import (
     Competition,
@@ -64,11 +64,12 @@ def process_submission(code, problem, team, user, file_paths):
         )
 
     else:
+        _, language = get_language(file_paths)
         submission = Submission.objects.create(
             problem=problem,
             team=user_team,
             user=user,
-            language="",
+            language=language,
             file_name="",
             output=None,
             score=0
