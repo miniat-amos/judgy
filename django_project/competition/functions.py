@@ -16,12 +16,16 @@ languages = {
 }
 
 
+def get_language(files):
+    file_extension = os.path.splitext(files[0])[1]
+    language = languages[file_extension]["language"]
+    return file_extension, language
+
 def run_submission(code, problem, team, user, files):
     # Variables for local machine
-    # Get file extension
-    file_extension = os.path.splitext(files[0])[1]
+    # Get file extension and language
+    file_extension, language = get_language(files)
     submitted_image = languages[file_extension]["image"]
-    language = languages[file_extension]["language"]
     
     problem_name = problem.name
     
