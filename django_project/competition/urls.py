@@ -25,6 +25,7 @@ from competition.views.get_member_scores_view import get_member_scores
 from competition.views.admin_comp_interface_view import admin_comp_interface
 from competition.views.admin_team_interface_view import admin_team_interface
 from competition.views.admin_problem_submissions_view import admin_problem_submissions
+from competition.views.admin_all_subjproblem_submissions_view import admin_all_subjective_problem_submissions
 from competition.views.admin_score_input_view import ScoreUpdate
 from competition.views.compUpdate_view import CompUpdate
 
@@ -58,6 +59,7 @@ urlpatterns = [
     path('competition/<str:code>/admin-interface', admin_comp_interface, name="admin_comp_interface"),
     path('competition/<str:code>/team/<str:name>/admin-interface', admin_team_interface, name="admin_team_interface"),
     path('competition/<str:code>/problem/<str:problem_name>/submissions', admin_problem_submissions, name="admin_problem_submissions"),
+    path('competition/<str:code>/all_subjective_problems/submissions', admin_all_subjective_problem_submissions, name="admin_all_subjective_problem_submissions"),
     path('competition/<str:code>/update', CompUpdate.as_view(), name="update_competition"),
     path('score/<int:pk>/update', ScoreUpdate.as_view(), name="update_score")
 

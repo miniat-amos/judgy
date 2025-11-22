@@ -1,0 +1,196 @@
+{% extends 'judgy/base.html' %}
+
+{% block title %}{{ competition.name }} • {{ problem.name }} Submissions{% endblock %}
+
+{% block script %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    
+      let updateModal = new bootstrap.Modal(document.getElementById("updateScoreModal"));
+      let scoreInput = document.getElementById("scoreInput");
+      let submissionIdInput = document.getElementById("submissionIdInput");
+    
+      // When clicking update button
+      document.querySelectorAll(".update-score-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+          let submissionId = this.dataset.submissionId;
+          let currentScore = this.dataset.currentScore;
+    
+          scoreInput.value = currentScore !== "None" ? currentScore : "";
+          submissionIdInput.value = submissionId;
+    
+          updateModal.show();
+        });
+      });
+    
+      // Save button inside modal
+      document.getElementById("saveScoreBtn").addEventListener("click", function() {
+    
+        const newScore = scoreInput.value;
+        const submissionId = submissionIdInput.value;
+    
+        fetch(`/score/${submissionId}/update`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({ score: newScore })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Update score displayed on screen
+          document.getElementById(`score-${submissionId}`).textContent = newScore;
+    
+          updateModal.hide();
+        })
+        .catch(err => console.error(err));
+      });
+    
+    });
+    </script>
+
+{% endblock %}
+
+{% block main %}
+<div class="container py-5">
+  <div class="mb-4">
+    <a class="btn btn-link px-0" href="{% url 'competition:admin_comp_interface' competition.code %}">
+      <i class="bi bi-arrow-left"></i> Back to {{ competition.name }} admin view
+    </a>
+  </div>
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="mb-1">{{ problem.name }}</h1>
+      <p class="text-muted mb-0">All subjective problems • {{ submission_count }} submission{{ submission_count|pluralize }}</p>
+    </div>
+    <span class="badge {% if problem.subjective %}text-bg-warning text-dark{% else %}text-bg-primary{% endif %}">
+      {% if problem.subjective %}Subjective{% else %}Auto Judged{% endif %}
+    </span>
+  </div>
+
+  <p id="submission-summary" class="text-muted" aria-live="polite">
+    Displaying {{ submissions|length }} of {{ submission_count }} submission{{ submission_count|pluralize }} for all subjective problems.
+  </p>
+  <p id="filter-help" class="visually-hidden">
+    Adjust the following filters to limit submissions by team or submission order.
+  </p>
+
+  <form method="get" class="row g-3 align-items-end mb-4" aria-describedby="filter-help submission-summary">
+    <div class="col-12 col-md-5">
+      <label for="teamFilter" class="form-label">Team name</label>
+      <select class="form-select" id="teamFilter" name="team">
+        <option value="">All teams</option>
+        {% for team in teams %}
+          <option value="{{ team.name }}" {% if team.name == team_filter %}selected{% endif %}>{{ team.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label for="orderFilter" class="form-label">Sort by</label>
+      <select class="form-select" id="orderFilter" name="order">
+        <option value="latest" {% if order == 'latest' %}selected{% endif %}>Latest submitted</option>
+        <option value="earliest" {% if order == 'earliest' %}selected{% endif %}>Earliest submitted</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">Apply filters</button>
+      <a class="btn btn-outline-secondary" href="{% url 'competition:admin_all_subjective_problem_submissions' competition.code %}">Reset</a>
+    </div>
+  </form>
+
+  {% if submissions %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle" aria-describedby="submission-summary">
+        <caption class="text-muted">Submission details for all subjective problem submissions.</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Problem</th>
+            <th scope="col">Team</th>
+            <th scope="col">Member</th>
+            <th scope="col">Language</th>
+            <th scope="col">Score</th>
+            <th scope="col">Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td>{{ submission.time|date:"Y-m-d H:i:s T" }}</td>
+              <td>
+                {{ submission.problem.name }}
+              </td>
+              <td>
+                <a href="{% url 'competition:admin_team_interface' competition.code submission.team.name %}">{{ submission.team.name }}</a>
+              </td>
+              <td>
+                {{ submission.user.first_name }} {{ submission.user.last_name }}<br>
+                <small class="text-muted">{{ submission.user.email }}</small>
+              </td>
+              <td>{{ submission.language|default:"-" }}</td>
+              <td>
+                <span class="score-value" id="score-{{ submission.id }}">
+                  {{ submission.score|default:"--" }}
+                </span>
+              
+                {% if submission.problem.subjective %}
+                  <button 
+                    class="btn btn-sm btn-outline-success ms-2 update-score-btn"
+                    data-submission-id="{{ submission.id }}"
+                    data-current-score="{{ submission.score }}"
+                  >
+                    Update
+                  </button>
+                {% endif %}
+              </td>              
+              <td>
+                {% if submission.problem.subjective %}
+                  <a
+                    href="{% url 'competition:download_submission' competition.code submission.problem.name submission.team.name submission.user.email submission.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                    aria-label="Download submission {{ forloop.counter }} from team {{ submission.team.name }} member {{ submission.user.email }}"
+                  >
+                    Download
+                  </a>
+                {% else %}
+                  <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info mb-0">
+      No submissions found for the selected filters.
+    </div>
+  {% endif %}
+    <!-- Update Score Modal -->
+    <div class="modal fade" id="updateScoreModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Update Score</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+    
+            <div class="modal-body">
+            <input type="number" class="form-control" id="scoreInput" placeholder="Enter new score">
+            <input type="hidden" id="submissionIdInput">
+            </div>
+    
+            <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-primary" id="saveScoreBtn">Save</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
