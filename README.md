@@ -1,3 +1,5 @@
+# README IS STILL IN PROGRESS AS WE FINISH SEMESTER
+
 # Instructions and Tools for the developers of the judgy Programming Competition site
 
 ---
