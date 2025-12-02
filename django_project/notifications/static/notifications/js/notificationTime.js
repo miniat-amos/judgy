@@ -9,7 +9,16 @@ function calculateNotificationTime(dateString)
         hour: 3600,
         minute: 60,
         second: 1
-    }
+    };
+
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric', 
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+    };
 
     const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
 
@@ -18,7 +27,7 @@ function calculateNotificationTime(dateString)
         if (seconds >= interval) {
             if (unit === "day") {
                 // For notifications older than a day, show the date
-                return date.toLocaleString();
+                return date.toLocaleString(undefined, options);
             }
             else {
                 const value = Math.floor(seconds / interval);
