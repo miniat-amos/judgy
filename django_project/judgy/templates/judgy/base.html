@@ -25,6 +25,7 @@
 
     <script src="{% static 'judgy/js/qrcode.min.js' %}"></script>
 
+
     <style>
       ::selection {
         color: var(--bs-primary);
@@ -79,9 +80,9 @@
 
       
         function setNotificationIndicator(active) {
-          const indicator = document.querySelector('.notification-indicator');
+          const indicator = $('.notification-indicator');
           if (!indicator) return;
-          indicator.classList.toggle('show', active);
+          indicator.toggleClass('show', active);
         }
 
         let notifications = [];
