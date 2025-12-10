@@ -4,7 +4,6 @@ import shlex
 from pathlib import Path
 from competition.utils import make_file, create_user_dir, overwrite_submission_dirfiles, store_submissions
 from competition.models import Problem, Competition
-from django.conf import settings
 
 languages = {
     ".py": {"image": "python", "type": "interpreted", "interpreter": "python3", "language": "Python"},
@@ -33,7 +32,6 @@ def run_submission(code, problem, team, user, files):
     competition = Competition.objects.get(code=code)
     problem = Problem.objects.get(name=problem, competition=competition)
 
-    # Determine if problem is subjective or not before doing anything
     # Make submissions dir
     submission_dir, output_dir = create_user_dir(code, user, problem_name, team)
 
