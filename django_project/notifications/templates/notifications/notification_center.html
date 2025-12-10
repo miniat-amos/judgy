@@ -1,6 +1,9 @@
 {% extends 'judgy/base.html' %}
+{% load static %}
 
 {% block script %}
+
+<script src="{% static 'notifications/js/notificationTime.js' %}"></script>
 
 <script>
     $(async () => {
@@ -21,31 +24,38 @@
             `,
             };
 
+            const notificationTimeStamp = calculateNotificationTime(notification.created_at);
+
             return `
             <div class="col" id="notification-${notification.id}">
                 <div class="card h-100 shadow-sm notification-card"
                     data-id="${notification.id}"
                     data-type="${notification.type}"
                     data-header="${notification.header}">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <i class="bi bi-bell me-2"></i>
-                    <strong class="me-auto">${notification.header}</strong>
-                    <button class="btn-close"></button>
-                </div>
-                <div class="card-body">
-                    ${notification.body}
-                    ${actions[notification.type] || ""}
-                </div>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <i class="bi bi-bell me-2"></i>
+                        <strong class="me-auto">${notification.header}</strong>
+                        <button class="btn-close"></button>
+                    </div>
+                    <div class="card-body">
+                        ${notification.body}
+                        ${actions[notification.type] || ""}
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <strong class="me-auto">${notificationTimeStamp}</strong>
+                    </div>
+
                 </div>
             </div>
             `;
         }
 
+       
         // 2. Render a notification only if it doesn’t exist
         function displayNotifications(notifications) {
             for (const notification of notifications) {
                 if ($(`#notification-${notification.id}`).length === 0) {
-                    $container.prepend(createNotificationCard(notification));
+                    $container.append(createNotificationCard(notification));
                 }
             }
         }
