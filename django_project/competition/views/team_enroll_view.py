@@ -29,6 +29,6 @@ def team_enroll_view(request, code):
                         TeamJoinNotification.objects.create(user=user, body=body, request_user=request.user, team=team)
                 return redirect('competition:team_name', code=team.competition.code, name=team.name)
             else:
-                messages.error(request, "No HTML tags allowed in team names.")
+                messages.error(request, "Team name may contain only letters and numbers.")
               
     return redirect('competition:competition_code', code=code)

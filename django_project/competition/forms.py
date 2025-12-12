@@ -1,6 +1,6 @@
-import bleach
-from django.utils.html import strip_tags
+import re
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from competition.models import Competition, Problem, Submission, Team
 
@@ -272,8 +272,10 @@ class TeamEnrollForm(forms.ModelForm):
         )
         
     def clean_name(self):
-        name = self.cleaned_data.get('name', '')
-        name = bleach.clean(name, tags=[], attributes={}, strip=True).strip()
+        name = self.cleaned_data.get('name', '').strip()
+
+        if not re.match(r'^[a-zA-Z0-9]+$', name):
+            raise ValidationError("Team name may contain only letters and numbers.")
 
         return name
 

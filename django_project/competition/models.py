@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.core.validators import RegexValidator
 from judgy.models import User
 
 # Create your models here.
@@ -46,7 +47,10 @@ class Problem(models.Model):
 
 class Team(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        validators=[RegexValidator(r'^[a-zA-Z0-9]+$', 'Only letters and numbers allowed.')]
+    )
     members = models.ManyToManyField(User, related_name='teams')
 
     class Meta:

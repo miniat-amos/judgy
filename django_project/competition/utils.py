@@ -62,11 +62,8 @@ def get_submission_dir(code, team, user, problem, submission):
     
     submission_directory = user_directory / submission
     
-    
-    
     return submission_directory.resolve()
         
-
 
 def create_problem(code, name, description, judge_py, other_files, dist):
     main_directory = parent_dir / 'competitions'
@@ -129,7 +126,6 @@ def create_user_dir(code, user, problem, team, submission = None, subjective = F
     user_directory.mkdir(parents=True, exist_ok=True)
 
     if subjective:
-   
         # Create new submission folder
         submission_directory = user_directory / f"{submission.id}"
         submission_directory.mkdir(exist_ok=True)
