@@ -105,7 +105,7 @@ This env file holds credentials for the MySQL DB, Email auth and misc. Django se
 #### Key
 
 - This is the Django secret key that is used for cryptographic uses.
-- The easiest way to get a key is by creating one from this website and pasting it in the .env file.
+- The easiest way to get a key is by creating one from this website and pasting it in the .env file: https://djecrety.ir/
 
 #### Debug
 
