@@ -72,7 +72,7 @@ We need to then install the dependencies into this new virtual environment: `pip
 
 ---
 
-## Docker Commands for running the mySQL container
+## Docker Commands for running the MySQL container
 
 #### _Prerequisites - Docker and Docker Compose installed on system_
 
