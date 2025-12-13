@@ -57,7 +57,7 @@ EOF
 loginctl enable-linger "$USER_NAME"
 
 # Reload and enable service
-sudo -u "$USER_NAME" systemctl --user daemon-reload
-sudo -u "$USER_NAME" systemctl --user enable --now judgyuvicorn.service
+systemctl --user daemon-reload
+systemctl --user enable --now judgyuvicorn.service
 
 echo "Uvicorn service for $USER_NAME has been created and started."
