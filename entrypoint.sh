@@ -48,8 +48,6 @@ python_commands
 # Give permissions to docker scripts
 chmod +x ./docker_setup.sh ./docker_delete.sh
 
-
-
 echo "Starting nginx"
 # Create the nginx container to start web server
 docker compose -f ../docker-compose.web.yml up --build nginx -d

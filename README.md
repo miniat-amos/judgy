@@ -129,6 +129,11 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 - Example using apt: `sudo apt install redis-server`
 - Starting redis: `sudo systemctl enable --now redis`
 
+#### Add these export variables into your .bashrc
+
+- export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+- export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+
 ### Run the entrypoint.sh
 
 **Make sure the user are you are doing this setup on has sudo privileges**
