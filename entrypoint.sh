@@ -24,7 +24,7 @@ echo "Setting up uvicorn service"
 ./judgy_uvicorn_service.sh ${SERVER_PORT}
 
 echo "Setting up celery service"
-./judgy_celery_service.sh $USER
+./judgy_celery_service.sh
 
 sudo loginctl enable-linger $USER
 
