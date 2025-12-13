@@ -150,6 +150,12 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 2. It will start Celery on your host system.
 3. These both will start as user systemd services.
 
+To check their statuses:
+
+`systemctl --user status judgyuvicorn.service`
+
+`systemctl --user status judgycelery.service`
+
 ##### Start MySQL in a container
 ##### Start Nginx in a container
 
