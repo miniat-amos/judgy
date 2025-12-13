@@ -26,8 +26,6 @@ echo "Setting up uvicorn service"
 echo "Setting up celery service"
 ./judgy_celery_service.sh
 
-echo "Installing mysql server" 
-sudo apt install mysql-server
 
 echo "Enabling linger for user $USER"
 sudo loginctl enable-linger $USER

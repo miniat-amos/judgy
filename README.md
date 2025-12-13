@@ -129,6 +129,10 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 - Example using apt: `sudo apt install redis-server`
 - Starting redis: `sudo systemctl enable --now redis`
 
+#### Install mysqladmin
+
+- Example using apt: `sudo apt install mysql-server`
+
 #### Add these export variables into your .bashrc
 
 - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
