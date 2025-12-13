@@ -109,7 +109,7 @@ This env file holds credentials for the MySQL DB, Email auth and misc. Django se
 
 #### Debug
 
-- **LEAVE THIS AS IS IT NEEDS TO STAY FALSE AND OUT OF QUOTES**
+- **LEAVE THIS AS IS, IT NEEDS TO STAY FALSE AND OUT OF QUOTES**
 
 ## Starting up the Web Server
 
