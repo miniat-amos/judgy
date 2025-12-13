@@ -19,46 +19,47 @@ This will install a software called pyenv. An environment to install Python vers
 1. We need to create a Python virtual environment to install the project dependencies: `python3 -m venv env`
 2. Then we need to activate the virtual environment: `source ./env/bin/activate`
 
+**You need to activate this virtual environment everytime you go to work on the project.**
+
 ### Installing the dependencies
 
 We need to then install the dependencies into this new virtual environment: `pip3 install -r requirements.txt`
 
 ---
 
-### `pipreqs --savepath=requirements.in && pip-compile`
+## Development Commands
 
-- REQUIRED:
-  - `pip3 install pipreqs`
-  - `pip3 install pip-tools`
-- Creates the requirements.in file which will then apply all dependencies to requirements.txt
-- This is for when you install new dependencies in your virtual env while developing
+### Start the dev environment
 
----
+#### Prerequisites
 
-## Django Basic Commands
+##### Staticfiles
+We use uvicorn to start the dev server and it does not handle static files by default.
 
-### `python3 manage.py runserver`
+`cd django_project && python3 manage.py collectstatic`
 
-- Starts the development server.
+##### Install redis server and start it
 
----
-## Redis and Celery
+- Example using apt: `sudo apt install redis-server`
+- Starting redis: `sudo systemctl enable --now redis`
 
-#### In a seperate terminal, in the parent judgy folder:
+#### Start Uvicorn
 
-### `redis-server`
+In a terminal inside of `judgy/django_project` start uvicorn.
 
-- Starts the redis server, which celery uses as a message broker.
-- Run this before starting the celery worker.
+The command to start the webserver on localhost is:
 
-#### In another terminal, in judgy/django_project:
+`uvicorn progcomp.asgi:application --reload --reload-include '*.html' --port 8000`
 
-### `celery -A progcomp worker -l info`
+Then go to localhost:8000 on your browser, if your port 8000 is being used, then change it to any other port (1024>).
 
-- Starts celery worker for progcomp.
-- `-l info` logs info for useful runtime output.
+#### Start Celery
 
----
+In another terminal inside of `judgy/django_project` start celery.
+
+- `celery -A progcomp worker -l info`
+
+
 
 ## Django Database Migrations Commands
 
