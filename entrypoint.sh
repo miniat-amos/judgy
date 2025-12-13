@@ -26,6 +26,8 @@ echo "Setting up uvicorn service"
 echo "Setting up celery service"
 ./judgy_celery_service.sh $USER
 
+sudo loginctl enable-linger $USER
+
 echo "Entering django project directory"
 
 cd ./django_project
