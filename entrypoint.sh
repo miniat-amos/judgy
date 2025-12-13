@@ -21,7 +21,7 @@ export $(grep -v '^#' .env | xargs)
 chmod +x ./judgy_celery_service.sh ./judgy_uvicorn_service.sh
 
 echo "Setting up uvicorn service"
-./judgy_uvicorn_service.sh $USER ${SERVER_PORT}
+./judgy_uvicorn_service.sh ${SERVER_PORT}
 
 echo "Setting up celery service"
 ./judgy_celery_service.sh $USER
