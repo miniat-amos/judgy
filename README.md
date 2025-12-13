@@ -135,8 +135,8 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 
 #### Add these export variables into your .bashrc
 
-- export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-- export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+- `export XDG_RUNTIME_DIR="/run/user/$(id -u)`
+- `export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"`
 
 ### Run the entrypoint.sh
 
