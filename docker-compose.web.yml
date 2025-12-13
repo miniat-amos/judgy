@@ -31,7 +31,6 @@ services:
       - ./django_project/staticfiles:/app/staticfiles
       - ./certs:/etc/nginx/certs:ro
       - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
-      - acme-challenge:/app/acme-challenges
     network_mode: "host"
 
 

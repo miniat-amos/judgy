@@ -31,8 +31,6 @@
 #                                      #
 ########################################
 
-!vm_ubuntu_scripts
-
 !django_project/
 django_project/*
 !django_project/test_devs
@@ -58,6 +56,8 @@ django_project/*
 !docker-compose.web.yml
 !Dockerfile
 !entrypoint.sh
+!judgy_uvicorn_service.sh
+!judgy_celery_service.sh
 !uvicorn_config.py
 
 # Requirements files
@@ -67,6 +67,7 @@ django_project/*
 # Other
 **/__pycache__
 !README.md
+!developer-README.md
 !migrations
 !.gitignore
 !.env.example
