@@ -136,7 +136,7 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 
 ### Run the entrypoint.sh
 
-**Make sure the user are you are doing this setup on has sudo privileges**
+**Make sure the user you are doing this setup on has sudo privileges**
 
 - `chmod +x entrypoint.sh`
 
@@ -152,7 +152,6 @@ We have created a nice script that starts up Django, MySQL, and Nginx.
 
 ##### Start MySQL in a container
 ##### Start Nginx in a container
-
 
 ## Create a super user
 
