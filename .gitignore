@@ -53,7 +53,7 @@ django_project/*
 ########################################
 
 # Files for server setup
-!docker-compose.web.yml
+!docker-compose.yml
 !Dockerfile
 !entrypoint.sh
 !judgy_uvicorn_service.sh

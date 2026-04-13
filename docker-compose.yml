@@ -1,0 +1,99 @@
+services:
+
+  web:
+    build: .
+    container_name: judgy_web
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./staticfiles:/app/staticfiles
+      - ./competitions:/app/competitions
+    command: |
+      sh -c "
+      python manage.py migrate --no-input &&
+      python manage.py collectstatic --no-input &&
+      uvicorn progcomp.asgi:application --host 0.0.0.0 --port 8000 --workers 2 --proxy-headers
+      "
+    expose:
+      - "8000"
+    depends_on:
+      - redis
+      - db
+    networks:
+      - prod
+  
+  celery:
+    build: .
+    container_name: judgy_celery
+    restart: always
+    env_file:
+      - .env
+    command: >
+      celery -A progcomp worker
+      --loglevel=info
+      --concurrency=8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./competitions:/app/competitions
+    depends_on:
+      - redis
+    networks:
+      - prod
+
+  redis:
+    image: redis:7
+    container_name: judgy_redis
+    restart: always
+    expose:
+      - "6379"
+    networks:
+      - prod
+
+  db:
+    image: mysql/mysql-server:8.0
+    container_name: judgy_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - "3306"
+    volumes:
+      - prod_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - prod
+
+  nginx:
+    container_name: judgy_nginx
+    build: ./nginx
+    restart: always
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx/default.conf:/etc/nginx/templates/default.template.conf
+    depends_on:
+      - web
+    networks:
+      - prod
+
+networks:
+  prod:
+    driver: bridge
+
+volumes:
+  prod_data:

@@ -1,8 +1,7 @@
 services:
   python_app:
     build:
-      context: ..
-      dockerfile: ./django_project/Dockerfile
+      context: .
       args:
         BASE_IMAGE: python:latest
         COMP_CODE: ${COMP_CODE}
@@ -10,8 +9,7 @@ services:
 
   ruby_app:
     build:
-      context: ..
-      dockerfile: ./django_project/Dockerfile
+      context: .
       args:
         BASE_IMAGE: ruby:latest
         COMP_CODE: ${COMP_CODE}
@@ -19,8 +17,7 @@ services:
 
   gcc_app:
     build:
-      context: ..
-      dockerfile: ./django_project/Dockerfile
+      context: .
       args:
         BASE_IMAGE: gcc:latest
         COMP_CODE: ${COMP_CODE}
@@ -28,8 +25,7 @@ services:
 
   node_app:
     build:
-      context: ..
-      dockerfile: ./django_project/Dockerfile
+      context: .
       args:
         BASE_IMAGE: node:latest
         COMP_CODE: ${COMP_CODE}
@@ -37,8 +33,7 @@ services:
 
   java_app:
     build:
-      context: ..
-      dockerfile: ./django_project/Dockerfile
+      context: .
       args:
         BASE_IMAGE: eclipse-temurin:17-jdk-jammy
         COMP_CODE: ${COMP_CODE}

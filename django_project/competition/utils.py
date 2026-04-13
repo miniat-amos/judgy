@@ -23,6 +23,7 @@ from notifications.models import (
 
 parent_dir = Path(settings.BASE_DIR).parent
 
+
 def make_file(dir, file):
     new_file = Path(dir) / file
     new_file.touch(exist_ok=True)
@@ -30,6 +31,7 @@ def make_file(dir, file):
     return new_file
 
 def create_comp_dir(code):
+    print(parent_dir)
     main_directory = parent_dir / 'competitions'
     main_directory.mkdir(exist_ok=True)
 
