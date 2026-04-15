@@ -1,0 +1,102 @@
+services:
+
+  web:
+    build: 
+      context: ..
+      dockerfile: development/Dockerfile
+    container_name: judgy_dev_web
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../django_project:/app/django_project
+      - ../staticfiles:/app/staticfiles
+      - ../competitions:/app/competitions
+    command: |
+      sh -c "
+      python manage.py migrate --no-input &&
+      python manage.py collectstatic --no-input &&
+      uvicorn progcomp.asgi:application --reload --host 0.0.0.0 --port 8000 
+      "
+    expose:
+      - "8000"
+    depends_on:
+      - redis
+      - db
+    networks:
+      - dev
+  
+  celery:
+    build: 
+      context: ..
+      dockerfile: development/Dockerfile
+    container_name: judgy_dev_celery
+    restart: always
+    env_file:
+      - .env
+    command: >
+      celery -A progcomp worker
+      --loglevel=info
+      --concurrency=8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../django_project:/app/django_project
+      - ../competitions:/app/competitions
+    depends_on:
+      - redis
+    networks:
+      - dev
+
+  redis:
+    image: redis:7
+    container_name: judgy_dev_redis
+    restart: always
+    expose:
+      - "6379"
+    networks:
+      - dev
+
+  db:
+    image: mysql/mysql-server:8.0
+    container_name: judgy_dev_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - "3306"
+    volumes:
+      - dev_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - dev
+
+  nginx:
+    image: nginx:stable
+    container_name: judgy_dev_nginx
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:80"
+    volumes:
+      - ../staticfiles:/app/staticfiles
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+    networks:
+      - dev
+
+networks:
+  dev:
+    driver: bridge
+
+volumes:
+  dev_data:

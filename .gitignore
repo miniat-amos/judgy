@@ -20,6 +20,19 @@
 
 ########################################
 #                                      #
+#                 Misc.                #
+#                                      #
+########################################
+
+
+!development/
+development/*
+!development/docker-compose.yml
+!development/Dockerfile
+!development/nginx/
+
+########################################
+#                                      #
 #           Nginx Directory            #
 #                                      #
 ########################################
