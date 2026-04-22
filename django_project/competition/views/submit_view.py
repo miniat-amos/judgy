@@ -1,4 +1,5 @@
 import os
+import tempfile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.http import JsonResponse
@@ -8,9 +9,10 @@ from competition.models import (
     Competition,
     Problem,
     Team,
+    Submission
 )
-from competition.tasks import process_submission
-from competition.utils import make_temp_dir
+from competition.tasks import celery_process_submission
+from competition.utils import create_user_dirs, store_user_submission
 
 @verified_required
 def submit_view(request, code, problem_name):
@@ -23,26 +25,31 @@ def submit_view(request, code, problem_name):
         if competition.start <= timezone.now() < competition.end and team:
             form = SubmissionForm(request.POST, request.FILES)
             if form.is_valid():
-                files = request.FILES.getlist('files')
-
-                file_paths = []
-                save_dir = make_temp_dir(user)
+                user_files = request.FILES.getlist('files')
                 
-                for existing in os.listdir(save_dir):
-                    file_path = os.path.join(save_dir, existing)
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
-                        
-                for f in files:
-                    save_path = os.path.join(save_dir, f.name)
-                    with open(save_path, 'wb+') as dest:
-                        for chunk in f.chunks():
-                            dest.write(chunk)
-                    file_paths.append(save_path)
+                submission = Submission.objects.create(
+                    problem=problem,
+                    team=team,
+                    user=user,
+                    language="",
+                    file_name="",
+                    output=None,
+                    score=None
+                )
+                
+                user_directories = create_user_dirs(code, user, problem_name, team, submission)
+                user_submission = store_user_submission(user_files, user_directories["submission_dir"], user, problem_name, code)
 
-                process_submission.delay(code, problem.id, team.id, user.id, file_paths)
-
-                    
+                celery_process_submission.delay(
+                    code, 
+                    problem.id, 
+                    team.id, 
+                    user.id,
+                    submission.id,
+                    user_directories,
+                    user_submission
+                )
+                                    
                 return JsonResponse({})
             else:
                 print('Some field was incorrectly filled out.')
