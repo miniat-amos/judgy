@@ -1,6 +1,4 @@
 import math
-import os
-import shutil
 from django.db.models import Min, Max
 from datetime import timedelta
 from asgiref.sync import async_to_sync
@@ -21,40 +19,36 @@ from notifications.models import (
     Notification
 )
 
-parent_dir = Path(settings.BASE_DIR).parent
+parent_dir = Path("/data")
 
 
 def make_file(dir, file):
     new_file = Path(dir) / file
     new_file.touch(exist_ok=True)
-    new_file.open('w').close()
     return new_file
 
 def create_comp_dir(code):
-    print(parent_dir)
-    main_directory = parent_dir / 'competitions'
-    main_directory.mkdir(exist_ok=True)
+    comp_directory = parent_dir / 'competitions' / code.lower()
+    comp_directory.mkdir(parents=True, exist_ok=True)
+    
+    return comp_directory.resolve()
+    
+def get_comp_dir(code):
+    comp_directory = parent_dir / 'competitions' / code.lower()
 
-    comp_directory = main_directory / code.lower()
-    comp_directory.mkdir(exist_ok=True)
-    
-def get_dist_dir(code, problem):
-    main_directory = parent_dir / 'competitions'
-    
-    comp_directory = main_directory / code.lower()
+    return comp_directory.resolve()
+
+def get_problem_dir(code, problem):
+    comp_directory = get_comp_dir(code)
         
     problem_directory = comp_directory / 'problems' / problem
     
-    distributed_directory = problem_directory / 'dist'
-        
-    return distributed_directory.resolve()
-
-def get_submission_dir(code, team, user, problem, submission):
-    main_directory = parent_dir / 'competitions'
+    return problem_directory.resolve()
     
-    comp_directory = main_directory / code.lower()
-        
-    problem_directory = comp_directory / 'problems' / problem
+
+def get_user_submission_dir(code, team, user, problem, submission):
+
+    problem_directory = get_problem_dir(code, problem)    
     
     submissions_directory = problem_directory / 'submissions'
     
@@ -65,83 +59,123 @@ def get_submission_dir(code, team, user, problem, submission):
     submission_directory = user_directory / submission
     
     return submission_directory.resolve()
-        
 
-def create_problem(code, name, description, judge_py, other_files, dist):
-    main_directory = parent_dir / 'competitions'
-    comp_directory = main_directory / code.lower()
+
+def create_problem_dir(code, problem_name, description, judging_program, other_files, dist_files):
+    comp_directory = create_comp_dir(code)
 
     problems_directory = comp_directory / 'problems'
     problems_directory.mkdir(exist_ok=True)
 
-    problem = problems_directory / name
+    problem = problems_directory / problem_name
     problem.mkdir(exist_ok=True)
     
     submissions = problem / "submissions"
     submissions.mkdir(exist_ok=True)
     
-    dist_dir = problem / 'dist'
-    dist_dir.mkdir(exist_ok=True)
+    create_problem_description_dir(problem, description)
+    create_judging_prog_dir(problem, judging_program)
+    create_other_files_dir(problem, other_files)
+    create_problem_dist_dir(problem, dist_files)
 
+   
+def create_problem_description_dir(problem, description):
     description_dir = problem / 'problem_description'
     description_dir.mkdir(exist_ok=True)
-
+    
     with open(description_dir / description.name, 'wb') as f:
         for chunk in description.chunks():
             f.write(chunk)
-    if description.name in dist:
-        with open(dist_dir / description.name, 'wb') as f:
-            for chunk in description.chunks():
-                f.write(chunk)
 
-    judge_py_dir = problem / 'judging_program'
-    judge_py_dir.mkdir(exist_ok=True)
-
-    if(judge_py):
-        with open(judge_py_dir / judge_py.name, 'wb') as f:
-            for chunk in judge_py.chunks():
-                f.write(chunk)
-        if judge_py.name in dist:
-            with open(dist_dir / judge_py.name, 'wb') as f:
-                for chunk in judge_py.chunks():
-                    f.write(chunk)
+def create_judging_prog_dir(problem, judging_program):
+    judging_prog_dir = problem / 'judging_program'
+    judging_prog_dir.mkdir(exist_ok=True)
     
+    if judging_program:
+        with open(judging_prog_dir / judging_program.name, 'wb') as f:
+            for chunk in judging_program.chunks():
+                f.write(chunk)
+
+def create_other_files_dir(problem, other_files):
     other_files_dir = problem / 'other_files'
     other_files_dir.mkdir(exist_ok=True)
-
+    
     for file in other_files:
         with open(other_files_dir / file.name, 'wb') as f:
             for chunk in file.chunks():
                 f.write(chunk)
-        if file.name in dist:
-            with open(dist_dir / file.name, 'wb') as f:
-                for chunk in file.chunks():
-                    f.write(chunk)
-
-def create_user_dir(code, user, problem, team, submission = None, subjective = False):
-    main_directory = parent_dir / 'competitions'
-    comp_directory = main_directory / code.lower()
-    submissions_directory = comp_directory / 'problems' / problem / 'submissions'
-
+    
+def create_problem_dist_dir(problem, dist_files):
+    dist_dir = problem / 'dist'
+    dist_dir.mkdir(exist_ok=True)
+    
+    for file in dist_files:
+        with open(dist_dir / file.name, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+                
+    
+def create_user_dirs(code, user, problem, team, submission=None):
+  
+    comp_directory = get_comp_dir(code)
+    submissions_directory = comp_directory / "problems" / str(problem) / "submissions"
+    
     team_name = slugify(str(team.name))
-    user_directory = submissions_directory / team_name / str(user.email) 
+    user_directory = submissions_directory / team_name / str(user.email)
     user_directory.mkdir(parents=True, exist_ok=True)
 
-    if subjective:
-        # Create new submission folder
-        submission_directory = user_directory / f"{submission.id}"
-        submission_directory.mkdir(exist_ok=True)
-        
-        return submission_directory.resolve()
+    submission_directory = user_directory / str(submission.id)
+    submission_directory.mkdir(exist_ok=True)
+
+    output_directory = user_directory / "output"
+
+    submission_directory.mkdir(exist_ok=True)
+    output_directory.mkdir(exist_ok=True)
+
+    return {
+        "submission_dir": str(submission_directory.resolve()),
+        "output_dir": str(output_directory.resolve())
+    }
     
-    else:
-        submission_directory = user_directory / 'submission'
-        submission_directory.mkdir(exist_ok=True)
+    
+def create_formatted_name(vars: list, delimiter: str) -> str:
+    
+    formatted_name = ""
+         
+    for index, var in enumerate(vars):
+        if index == len(vars) - 1:
+            formatted_name = formatted_name + str(var)
+        else:
+            var = str(var) + str(delimiter)
+            formatted_name = formatted_name + var
+    
+    return formatted_name
+        
+    
+def store_user_submission(files, submission_dir, user, problem_name, code):
+    submitted_files = []
+    
+    submission_dir = Path(submission_dir)
+    
+    for uploaded_file in files:
+        
+        ext = Path(uploaded_file.name).suffix
+        
+        email = user.email.split('@')[0]
+        formatted_name = [email, problem_name.replace(' ', '-'), code.lower()]
+        uploaded_file.name = create_formatted_name(formatted_name, "-")
+                
+        file_path = submission_dir / (uploaded_file.name + ext)
+        
+        
+        with open(file_path, "wb+") as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
 
-        output_directory = user_directory / 'output'
-        output_directory.mkdir(exist_ok=True)
+        submitted_files.append(file_path.resolve())
 
-        return submission_directory.resolve(), output_directory.resolve()
+    return [str(p) for p in submitted_files]
+
 
 
 def team_add_user(competition, team, user):
@@ -160,17 +194,6 @@ def team_add_user(competition, team, user):
     team.members.add(user)
 
 
-def make_temp_dir(user):
-    main_directory = Path('/tmp')
-    temp_dir = main_directory / 'judgy_tmp'
-    temp_dir.mkdir(exist_ok=True)
-    
-    user_temp_dir = temp_dir / str(user.email)
-    user_temp_dir.mkdir(exist_ok=True)
-    
-    return user_temp_dir.resolve()
-
-channel_layer = get_channel_layer()
 
 def _format_timedelta(value):
     if value is None:
@@ -244,9 +267,14 @@ def calculate_rankings(competition):
     for team in rankings:
         for problem in problems:
             score = team[problem.name]["best_score"]
-            team[problem.name]["best_score"] = score if math.isfinite(score) else None
+            
+            if score == None:
+                team[problem.name]["best_score"] = None 
+            elif math.isfinite(score):
+                team[problem.name]["best_score"] = score 
+                
             team[problem.name]["best_time"] = _format_timedelta(
-                team[problem.name]["best_time"]
+            team[problem.name]["best_time"]
             )
 
     ranked_attempts = sorted(
@@ -313,29 +341,8 @@ def calculate_rankings(competition):
         for team in rankings
     ]
 
-def store_submissions(files, submission_dir):
-    submitted_files = []
-    for file_path_str in files:  # files is now a list of strings
-        file_path = Path(submission_dir) / Path(file_path_str).name
-        # If you need to copy the file to submission_dir
-        with open(file_path_str, "rb") as source_file:
-            with open(file_path, "wb") as destination_file:
-                destination_file.write(source_file.read())
-        submitted_files.append(file_path)  # Track all file paths
 
-    return submitted_files
-
-
-def overwrite_submission_dirfiles(submission_dir):
-    if os.path.exists(submission_dir):
-        # Loop through each item in the directory
-            for item in os.listdir(submission_dir):
-                item_path = os.path.join(submission_dir, item)
-                # Check if it's a file or directory and remove accordingly
-                if os.path.isfile(item_path) or os.path.islink(item_path):
-                    os.unlink(item_path)  # Remove file or symbolic link
-                elif os.path.isdir(item_path):
-                    shutil.rmtree(item_path)
+channel_layer = get_channel_layer()
 
 def send_competition_best(problem, competition_best):
 
