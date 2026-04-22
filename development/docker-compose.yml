@@ -10,13 +10,14 @@ services:
       - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../django_project:/app/django_project
-      - ../staticfiles:/app/staticfiles
-      - ../competitions:/app/competitions
+      - ../django_project:/app
+      - ../staticfiles:/static/staticfiles
+      - ../competitions:/data/competitions
     command: |
       sh -c "
       python manage.py migrate --no-input &&
       python manage.py collectstatic --no-input &&
+      python manage.py create_initial_superuser &&
       uvicorn progcomp.asgi:application --reload --host 0.0.0.0 --port 8000 
       "
     expose:
@@ -36,13 +37,14 @@ services:
     env_file:
       - .env
     command: >
-      celery -A progcomp worker
+      watchfiles --filter python
+      "celery -A progcomp worker
       --loglevel=info
-      --concurrency=8
+      --concurrency=8"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../django_project:/app/django_project
-      - ../competitions:/app/competitions
+      - ../django_project:/app
+      - ../competitions:/data/competitions
     depends_on:
       - redis
     networks:
@@ -85,7 +87,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:80"
+      - "${HOST_PORT}:80"
     volumes:
       - ../staticfiles:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf

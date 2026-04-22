@@ -1,8 +1,10 @@
 FROM python:3.12-slim
 
-RUN mkdir -p /app/django_project
+RUN mkdir /app && \
+    mkdir /data && \
+    mkdir /static
 
-WORKDIR /app/django_project
+WORKDIR /app
 
 # Set environment variables 
 # Prevents Python from writing pyc files to disk
@@ -12,6 +14,6 @@ ENV PYTHONUNBUFFERED=1
 
 RUN pip install --upgrade pip
 
-COPY requirements.txt /app/django_project
+COPY requirements.txt /app
 
 RUN pip install --no-cache-dir -r requirements.txt

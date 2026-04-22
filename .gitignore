@@ -30,6 +30,7 @@ development/*
 !development/docker-compose.yml
 !development/Dockerfile
 !development/nginx/
+!development/.env.dev-example
 
 ########################################
 #                                      #
@@ -79,6 +80,7 @@ django_project/*
 
 # Other
 **/__pycache__
+dump.rdb
 !README.md
 !developer-README.md
 !migrations
