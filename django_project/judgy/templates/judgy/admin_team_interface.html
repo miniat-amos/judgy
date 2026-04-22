@@ -10,7 +10,7 @@ $(async () => {
         const competitionCode = "{{ competition.code|escapejs }}";
         const teamName = "{{ team.name|escapejs }}";
 
-        const member_scores_url = `/competition/${competitionCode}/team/teamName/members-scores`;
+        const member_scores_url = `/competition/${competitionCode}/team/${teamName}/members-scores`;
 
 
         const response = await fetch(member_scores_url);
