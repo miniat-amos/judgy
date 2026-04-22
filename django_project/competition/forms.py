@@ -1,5 +1,6 @@
 import re
 from django import forms
+from django.forms.widgets import ClearableFileInput
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from competition.models import Competition, Problem, Submission, Team
@@ -233,7 +234,7 @@ class ProblemForm(forms.ModelForm):
         )
         
 class SubmissionForm(forms.ModelForm):
-    files = forms.FileField()
+    files = forms.FileField(widget=ClearableFileInput)
 
     class Meta:
         model = Submission
@@ -248,9 +249,15 @@ class SubmissionForm(forms.ModelForm):
             {
                 'id': 'user-submission-files',
                 'class': 'form-control',
-                'multiple': True
+                'multiple': False
             }
         )
+    
+    def clean_files(self):
+        file = self.cleaned_data.get('files')
+        if isinstance(file, list):
+            raise forms.ValidationError("Only one file is allowed.")
+        return file
 
 class TeamEnrollForm(forms.ModelForm):
     class Meta:
@@ -275,7 +282,7 @@ class TeamEnrollForm(forms.ModelForm):
         name = self.cleaned_data.get('name', '').strip()
 
         if not re.match(r'^[a-zA-Z0-9]+$', name):
-            raise ValidationError("Team name may contain only letters and numbers.")
+            raise ValidationError("Team name may contain only letters, numbers and no spaces.")
 
         return name
 
