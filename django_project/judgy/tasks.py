@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 
 
 @shared_task
-def send_6dc_email_task(user_id, user_email):
+def celery_send_verification_email(user_id, user_email):
 
     User = get_user_model()
     user = User.objects.get(id=user_id)

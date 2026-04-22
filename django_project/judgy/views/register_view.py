@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from judgy.forms import CustomUserCreationForm
 from competition.models import Competition
-from judgy.tasks import send_6dc_email_task
+from judgy.tasks import celery_send_verification_email
 
 def register_view(request):
     now = timezone.now()
@@ -14,7 +14,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            send_6dc_email_task.delay(user.id, user.email)
+            celery_send_verification_email.delay(user.id, user.email)
             return redirect('judgy:verify')
         else:
             print('Any field in the registration form was not filled out right.')
