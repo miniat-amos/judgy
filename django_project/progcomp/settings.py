@@ -11,17 +11,22 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import pymysql
+import os
+import docker
 from decouple import config
 from pathlib import Path
-import os
 
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path("/app")
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_DIR = Path("/static")
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = STATIC_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "judgy/static",
     BASE_DIR / "notifications/static",
@@ -96,9 +101,9 @@ ASGI_APPLICATION = "progcomp.asgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": config("MYSQL_BACKEND"),
-        "HOST": config("MYSQL_HOST", default="localhost"),
-        "PORT": config("MYSQL_PORT", default="3306"),
+        "ENGINE": "django.db.backends.mysql",
+        "HOST": "db",
+        "PORT": "3306",
         "NAME": config("MYSQL_DATABASE"),
         "USER": config("MYSQL_USER"),
         "PASSWORD": config("MYSQL_PASSWORD"),
@@ -125,10 +130,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -159,4 +161,3 @@ CHANNEL_LAYERS = {
         "CONFIG": {"hosts": [("redis", 6379)]},
     },
 }
-
