@@ -1,12 +1,13 @@
 import os
 import zipfile
 from django.http import HttpResponse
-from competition.utils import get_submission_dir
+from competition.utils import get_user_submission_dir
 from django.contrib.auth.decorators import user_passes_test
+from competition.utils import create_formatted_name
 
 @user_passes_test(lambda u: u.is_superuser)
 def download_submission_view(request, code, problem_name, team_name, email, submission_id):
-        submission_dir = get_submission_dir(code, team_name, email, problem_name, submission_id)
+        submission_dir = get_user_submission_dir(code, team_name, email, problem_name, submission_id)
 
         submission_zip = f'/tmp/{email}.zip'
 
@@ -21,7 +22,10 @@ def download_submission_view(request, code, problem_name, team_name, email, subm
         with open(submission_zip, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/zip')
             # Set the Content-Disposition header to prompt the user to download the file
-            response['Content-Disposition'] = f'attachment; filename="{email}_submission-{submission_id}.zip"'
+            
+            name_vars = [email.split('@')[0], problem_name.replace(" ", "_"), submission_id, ".zip"]
+            formatted_name = create_formatted_name(name_vars, "_")
+            response['Content-Disposition'] = f'attachment; filename="{formatted_name}"'
 
         os.remove(submission_zip)
 
