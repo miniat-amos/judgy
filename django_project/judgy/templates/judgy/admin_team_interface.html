@@ -71,21 +71,15 @@ $(async () => {
 
                   let atag = ""
                   
-                  if(submission.subjective === true)
-                  {
+
                   const competitionCode = "{{ competition.code|escapejs }}";
                   const teamName = "{{ team.name|escapejs }}";
 
-                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/teamName/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/download`;
+                  const downloadUrl = `/competition/${competitionCode}/${encodeURIComponent(submission.problem_name)}/team/${teamName}/user/${encodeURIComponent(email)}/submission/${encodeURIComponent(submission.submission_id)}/download`;
 
                   atag = `<a href="${downloadUrl}">Download Submission</a>`;
 
-                  }
-                  else
-                  {
-                    atag = "";
-                  }
-                  
+                
                   scoresHTML = `
                     <tr>
                       <td>${submission.submission_number}</td>

@@ -80,7 +80,6 @@
               <td>{{ submission.language|default:"-" }}</td>
               <td>{{ submission.score|default:"--" }}</td>
               <td>
-                {% if problem.subjective %}
                   <a
                     href="{% url 'competition:download_submission' competition.code problem.name submission.team.name submission.user.email submission.id %}"
                     class="btn btn-sm btn-outline-primary"
@@ -88,9 +87,6 @@
                   >
                     Download
                   </a>
-                {% else %}
-                  <span class="text-muted">N/A</span>
-                {% endif %}
               </td>
             </tr>
           {% endfor %}
