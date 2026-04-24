@@ -1,4 +1,5 @@
 import math
+import os
 from django.db.models import Min, Max
 from datetime import timedelta
 from asgiref.sync import async_to_sync
@@ -22,9 +23,13 @@ from notifications.models import (
 parent_dir = Path("/data")
 
 
-def make_file(dir, file):
+def make_file(dir, file, owner_ship=0):
     new_file = Path(dir) / file
     new_file.touch(exist_ok=True)
+    
+    if owner_ship:
+        os.chown(new_file, owner_ship, owner_ship)
+        
     return new_file
 
 def create_comp_dir(code):
@@ -131,6 +136,8 @@ def create_user_dirs(code, user, problem, team, submission=None):
 
     submission_directory.mkdir(exist_ok=True)
     output_directory.mkdir(exist_ok=True)
+
+    os.chown(output_directory, 1001, 1001)
 
     return {
         "submission_dir": str(submission_directory.resolve()),
