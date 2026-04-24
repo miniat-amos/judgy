@@ -33,34 +33,60 @@ def celery_process_submission(code, problem, team, user, submission, user_direct
         score_file, output_file, language, file_name = run_submission.run_submission(code, user, problem, user_submission, user_directories)
 
         with open(score_file, 'r') as f:
-            submission_score = int(f.read().split(' ')[0])
+            submission_score = f.read()
         with open(output_file, 'r') as f:
             submission_output = f.read()
-        
-        if problem.show_output:
+            
+        split_score = submission_score.split(' ')[0]
+            
+
+        if split_score == "FAILED:":
+            error = submission_score.split('FAILED: ')[1]
+            submission_score = None
+            
             output_url = reverse('competition:output', kwargs={'code': code, 'problem_name': problem.name})
             body = format_html(
-                f'You got a score of {submission_score} in the problem "{problem.name}" for the competition "{competition.name}".<br>'
-                f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
+                f'Your program failed with the error: "{error}" in the problem "{problem.name}" for the competition "{competition.name}".<br>'
+                f'Click <a href="{output_url}" target="_blank">here</a> to see more details.',
             )
+                
+            Notification.objects.create(
+                user=user,
+                header='Your Error',
+                body=body,
+            )
+
         else:
-            body=f'You got a score of {submission_score} in the problem "{problem.name}" for the competition "{competition.name}".'
+            try:
+                score = int(split_score)
+            except ValueError:
+                print("error")
+            else:
+                submission.score = score
+                if problem.show_output:
+                    output_url = reverse('competition:output', kwargs={'code': code, 'problem_name': problem.name})
+                    body = format_html(
+                        f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".<br>'
+                        f'Click <a href="{output_url}" target="_blank">here</a> to see the output.',
+                    )
+                else:
+                    body = f'You got a score of {score} in the problem "{problem.name}" for the competition "{competition.name}".'
 
-        Notification.objects.create(
-            user=user,
-            header='Your Score',
-            body=body,
-        )
+                Notification.objects.create(
+                    user=user,
+                    header='Your Score',
+                    body=body,
+                )
 
+                check_competition_best(competition, problem, score, user, user_team)
         
         submission.language = language
         submission.file_name = file_name
         submission.output = submission_output
-        submission.score = submission_score
         
         submission.save(update_fields=['language', 'file_name', 'output', 'score'])
         
-        check_competition_best(competition, problem, submission_score, user, user_team)
+
     else:
     
         Notification.objects.create(
