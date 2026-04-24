@@ -9,7 +9,6 @@ services:
     env_file:
       - .env
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ../django_project:/app
       - ../staticfiles:/static/staticfiles
       - ../competitions:/data/competitions
@@ -42,7 +41,7 @@ services:
       --loglevel=info
       --concurrency=8"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ../django_project:/app
       - ../competitions:/data/competitions
     depends_on:

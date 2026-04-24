@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 RUN mkdir /app && \
-    mkdir /data && \
+    mkdir -p /data/competition && \
     mkdir /static
 
 WORKDIR /app
