@@ -3,8 +3,6 @@ from django.conf import settings
 from pathlib import Path
 
 
-docker_client = docker.from_env()
-
 def build_judgy_images(code=False):
     
     container_build_path = Path(__file__).resolve().parent
