@@ -339,7 +339,7 @@ def calculate_rankings(competition):
             **{
                 f"{problem.name}": {
                     "score_rank": team[problem.name]["score_rank"],
-                    "best_score": team[problem.name]["best_score"],
+                    "best_score": str(team[problem.name]["best_score"]),
                     "best_time": team[problem.name]["best_time"],
                 }
                 for problem in problems
