@@ -239,7 +239,7 @@ def calculate_rankings(competition):
             else:
                 best_submission = submissions.order_by("score", "time").first()
 
-            if best_submission:
+            if best_submission and best_submission.score is not None:
                 best_score = best_submission.score
                 best_time = best_submission.time - competition.start
                 team_data["total_attempt"] += 1
