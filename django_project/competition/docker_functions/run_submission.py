@@ -1,7 +1,9 @@
 import docker
 from pathlib import Path
+from uuid import uuid4
 from competition.utils import make_file, get_problem_dir, create_formatted_name
 from .utils import create_container_volumes
+
 
 languages = {
     ".py": {
@@ -29,7 +31,7 @@ languages = {
             "image": "gcc", 
             "type": "compiled", 
             "compile_cmd": lambda user_submission: f"gcc {user_submission} -o a.out",
-            "run_cmd": lambda user_submission: "./a.out", 
+            "run_cmd": lambda user_submission: f"./a.out", 
             "language": "C"
         },
     
@@ -37,7 +39,7 @@ languages = {
             "image": "gcc", 
             "type": "compiled", 
             "compile_cmd": lambda user_submission: f"g++ {user_submission} -o a.out",
-            "run_cmd": lambda user_submission: "./a.out", 
+            "run_cmd": lambda user_submission: f"./a.out", 
             "language": "C++"
         },
     
@@ -53,13 +55,8 @@ languages = {
 
 def run_submission(code, user, problem, user_submission, user_directories):
     
-
-    # TODO: Have failed programs actually fail and not return huge score to user 
-    # if problem.score_preference:
-    #     timeout_score = -9223372036854775808
-    # else:
-    #     timeout_score = 9223372036854775808
-
+    container_sandbox_user = 1001
+    
       
     submitted_files = [Path(f) for f in user_submission]
     submission_dir = Path(user_directories["submission_dir"])
@@ -78,9 +75,8 @@ def run_submission(code, user, problem, user_submission, user_directories):
     judging_program = problem_dir / "judging_program"
     other_files = problem_dir / "other_files"
     
-    score_file = make_file(output_dir, "score.txt")
-    output_file = make_file(output_dir, "output.txt")
-    
+    score_file = make_file(output_dir, "score.txt", container_sandbox_user)
+    output_file = make_file(output_dir, "output.txt", container_sandbox_user)
     
     judgy_source_file = submitted_files[0]
    
@@ -90,20 +86,20 @@ def run_submission(code, user, problem, user_submission, user_directories):
         "other_files": other_files,
         "user_submission": submission_dir
     }
-    
-    
+        
     docker_client = docker.from_env()
     
     container_image = f"judgy-{language_image}"
     
     email = user.email.split('@')[0]
-    formatted_name = [email, problem_name.replace(" ", "-"), code.lower()]
+    formatted_name = [email, problem_name.replace(" ", "-"), code.lower(), uuid4().hex[:6]]
         
     container_name = create_formatted_name(formatted_name, "-")
     
     container_user_submission = judgy_source_file.name
         
     container_compile_cmd = language.get("compile_cmd")
+    
     if callable(container_compile_cmd):
         container_compile_cmd = container_compile_cmd(container_user_submission)
     else:
@@ -114,29 +110,50 @@ def run_submission(code, user, problem, user_submission, user_directories):
     
     container_command=[
         "/app/judge.sh",
-        problem_name,
+        problem_name.replace(' ', '_'),
         container_compile_cmd,
         container_run_cmd,
         container_user_submission
     ]
-    
+        
     container_volumes = create_container_volumes(host_filepaths)
     
-
     container = None
+
+
     try:
         container = docker_client.containers.run(
             image=container_image,
             name=container_name,
             command=container_command,
             volumes=container_volumes,
+            
+            network_disabled=True,
+            mem_limit="256m",
+            pids_limit=64,
+            nano_cpus=500_000_000,
+
+            cap_drop=["ALL"],
+            read_only=True,
+            
+            tmpfs = {'/sandbox': 'rw,exec,mode=777'},
+            user="runner",
+            security_opt=["no-new-privileges:true"],
+            
             detach=True,
-        )
-        container.wait()  
+        )  
+        
+        container.wait(timeout=60)
+                
+    except Exception as e:
+        print(f"Container execution error: {e}")
+
     finally:
         if container is not None:
-            container.stop()
-            # container.remove()
+            try:
+                container.remove(v=True, force=True)
+            except Exception as e:
+                print(f"Error removing container: {e}")
 
 
     return score_file, output_file, language["language"], judgy_source_file.name
